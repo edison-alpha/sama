@@ -15,9 +15,5 @@ origins (e.g. `http://localhost:3200`) to the allowed domains.
 
 ## Fonts
 
-The UI uses Apple's **SF Pro Rounded**, which Apple's licence does not allow us to redistribute, so the font files are
-not in this repository. Download SF Pro from https://developer.apple.com/fonts/ and place these files in
-`components/font/` before building:
-
-`SF-Pro-Rounded-Light.otf`, `SF-Pro-Rounded-Regular.otf`, `SF-Pro-Rounded-Medium.otf`, `SF-Pro-Rounded-Semibold.otf`,
-`SF-Pro-Rounded-Bold.otf`, `SF-Pro-Rounded-Heavy.otf`
+The UI uses Apple's **SF Pro Rounded** (`components/font/`), loaded through `next/font/local`. It is Apple's font and
+subject to Apple's licence terms (https://developer.apple.com/fonts/).

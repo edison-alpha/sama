@@ -6,5 +6,3 @@ node_modules
 .env.local
 *.tsbuildinfo
 
-# Apple SF Pro Rounded (licence forbids redistribution); add the files locally, see README.
-components/font/*.otf
