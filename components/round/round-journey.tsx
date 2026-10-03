@@ -19,6 +19,7 @@ import { journey, STEP_ORDER, type StepKey, type StepStatus } from "@/lib/journe
 import { cx } from "@/utils/cx";
 import { ActionStatus, AmountRow, Countdown, progressWords, RailStep, TxLink, WalletPromptPreview, who, type Prompt } from "./parts";
 import { ReceiptSummary } from "./receipt";
+import { Stagger } from "@/components/motion";
 
 type Props = { v: RoundView; refresh: () => Promise<void> };
 
@@ -37,7 +38,7 @@ export function RoundJourney({ roundId }: { roundId: string }) {
   const { current, status } = journey(v);
 
   return (
-    <>
+    <Stagger>
       <header className="mb-6">
         <Link href={`/circles/${v.circle.id}`} className="text-sm text-ink-3 hover:text-accent">{v.circle.name}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
@@ -54,7 +55,7 @@ export function RoundJourney({ roundId }: { roundId: string }) {
           </Step>
         ))}
       </ol>
-    </>
+    </Stagger>
   );
 }
 

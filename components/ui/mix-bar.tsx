@@ -1,3 +1,6 @@
+"use client";
+
+import { m } from "motion/react";
 import { cx } from "@/utils/cx";
 
 export type MixPart = { key: string; label: string; value: number; color: string; detail?: string };
@@ -12,11 +15,13 @@ export function MixBar({ parts, label, className }: { parts: MixPart[]; label: s
     <div className={className}>
       <div className="flex h-7 gap-1" role="img" aria-label={`${label}: ${parts.map((p) => `${p.label} ${p.detail ?? p.value}`).join(", ")}`}>
         {parts.filter((p) => p.value > 0).map((p) => (
-          <span
+          <m.span
             key={p.key}
             className="min-w-2 rounded-lg shadow-[inset_0_1px_0_rgb(255_255_255/0.35)]"
+            initial={{ flexGrow: 0 }}
+            animate={{ flexGrow: p.value / total }}
+            transition={{ type: "spring", stiffness: 120, damping: 22 }}
             style={{
-              flexGrow: p.value / total,
               backgroundColor: p.color,
               backgroundImage: "repeating-linear-gradient(135deg, rgb(255 255 255 / 0.16) 0 2px, transparent 2px 6px)",
             }}

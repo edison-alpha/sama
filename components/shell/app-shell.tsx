@@ -1,12 +1,14 @@
 "use client";
 
 import Avatar from "boring-avatars";
+import { m } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BrandLogo, Mark, Wordmark } from "@/components/brand";
+import { BrandLogo, Mark } from "@/components/brand";
 import { IconChevronRight, IconCircles, IconClock, IconHome, IconLayers, IconPie } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { page, spring } from "@/components/motion";
 import { PageSkeleton } from "@/components/ui/states";
 import { useSession } from "@/components/wallet/session";
 import { isTestnet } from "@/lib/chain";
@@ -105,7 +107,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-col">
         <TopBar />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-36 pt-4 sm:px-6 md:pb-12 md:pt-6">{ready && session ? children : <PageSkeleton />}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-36 pt-4 sm:px-6 md:pb-12 md:pt-6">
+          {ready && session ? (
+            // Keyed by route so each screen plays its entrance; cards and tiles inside stagger in (see `rise`).
+            <m.div key={pathname} initial="hidden" animate="show" variants={page}>{children}</m.div>
+          ) : (
+            <PageSkeleton />
+          )}
+        </main>
       </div>
 
       <TabBar active={active} />
@@ -116,9 +125,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 function SideLink({ href, current, icon, children }: { href: string; current: boolean; icon: React.ReactNode; children: string }) {
   return (
-    <Link href={href} title={children} aria-current={current ? "page" : undefined} className={cx("flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-colors collapsed:justify-center collapsed:px-0", current ? "bg-[var(--tabbar-lens)] font-semibold text-ink" : "text-ink-2 hover:bg-[var(--tabbar-lens-edge)] hover:text-ink")}>
-      <span className="shrink-0">{icon}</span>
-      <span className="whitespace-nowrap collapsed:sr-only">{children}</span>
+    <Link href={href} title={children} aria-current={current ? "page" : undefined} className={cx("relative flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] font-medium transition-[color,background-color,transform] active:scale-[0.97] collapsed:justify-center collapsed:px-0", current ? "font-semibold text-ink" : "text-ink-2 hover:bg-[var(--tabbar-lens-edge)] hover:text-ink")}>
+      {/* One shared highlight that slides to whichever link is current. */}
+      {current && <m.span layoutId="sidebar-active" transition={spring} className="absolute inset-0 rounded-xl bg-[var(--tabbar-lens)]" aria-hidden="true" />}
+      <span className="relative shrink-0">{icon}</span>
+      <span className="relative whitespace-nowrap collapsed:sr-only">{children}</span>
     </Link>
   );
 }
@@ -148,13 +159,15 @@ function TabBar({ active }: { active: (href: string) => boolean }) {
   return (
     <nav aria-label="Primary" className="fixed inset-x-4 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 flex items-center gap-2.5 md:hidden">
       <div className="tabbar-glass relative grid h-16 flex-1 grid-cols-4 rounded-full p-1">
-        <span
+        <m.span
           aria-hidden="true"
-          className={cx("tabbar-lens absolute inset-y-1 left-1 w-[calc((100%-8px)/4)] rounded-full", index < 0 && "opacity-0")}
-          style={{ transform: `translateX(${Math.max(0, index) * 100}%)` }}
+          className="tabbar-lens absolute inset-y-1 left-1 w-[calc((100%-8px)/4)] rounded-full"
+          initial={false}
+          animate={{ x: `${Math.max(0, index) * 100}%`, opacity: index < 0 ? 0 : 1 }}
+          transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.9 }}
         />
         {NAV.map(({ href, key, Icon }, i) => (
-          <Link key={href} href={href} aria-current={i === index ? "page" : undefined} className={cx("relative flex flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-semibold transition-colors", i === index ? "text-ink" : "text-ink-3 hover:text-ink-2")}>
+          <Link key={href} href={href} aria-current={i === index ? "page" : undefined} className={cx("relative flex flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-semibold transition-[color,transform] duration-200 active:scale-90", i === index ? "text-ink" : "text-ink-3 hover:text-ink-2")}>
             <Icon size={24} bold={i === index} />
             {d.nav[key]}
           </Link>
@@ -185,7 +198,7 @@ function TopBar() {
         </div>
       )}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_72%,transparent)] px-4 backdrop-blur-xl sm:px-6 md:bg-transparent md:backdrop-blur-none">
-        <div className="md:hidden"><Wordmark href="/home" /></div>
+        <div className="md:hidden"><BrandLogo href="/home" className="h-8" /></div>
         <div className="hidden md:block" />
         <div className="flex items-center gap-1 rounded-full md:border md:border-[var(--glass-edge)] md:bg-[var(--glass-bg)] md:px-1.5 md:py-1 md:shadow-[inset_0_1px_0_var(--glass-hi),var(--elev-sidebar)] md:backdrop-blur-xl">
           <span className="mr-1 hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-ink-2 sm:inline-flex">

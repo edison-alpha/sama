@@ -14,6 +14,7 @@ import type { AssetClass } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
 import { percent, tokens, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
+import { Stagger } from "@/components/motion";
 
 const CLASS_COLOR: Record<AssetClass, string> = { CRYPTO: "#f0b90b", STABLE: "var(--ok)", RWA: "var(--accent)" };
 
@@ -31,7 +32,7 @@ export default function PortfolioPage() {
   const byClass = (c: AssetClass) => positions.filter((p) => bySymbol.get(p.symbol)?.class === c).reduce((sum, p) => sum + p.pct, 0);
 
   return (
-    <>
+    <Stagger>
       <PageHeader title={d.portfolio.title} sub={portfolio.ok ? fmt(d.portfolio.subtitle, { time: new Date(portfolio.readAt).toLocaleTimeString(locale) }) : undefined} />
 
       {portfolio.ok && (
@@ -113,6 +114,6 @@ export default function PortfolioPage() {
           <TargetEditor assets={assets} portfolio={portfolio} target={target} />
         </Card>
       </div>
-    </>
+    </Stagger>
   );
 }

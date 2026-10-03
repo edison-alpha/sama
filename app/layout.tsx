@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import { BOOT_SCRIPT } from "@/components/shell/boot-scripts";
+import { MotionProvider } from "@/components/motion";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { RegisterServiceWorker } from "@/components/register-sw";
 import { getDict } from "@/lib/i18n/server";
@@ -66,7 +67,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <SmoothScroll />
         <RegisterServiceWorker />
-        <I18nProvider locale={locale}>{children}</I18nProvider>
+        <I18nProvider locale={locale}>
+          <MotionProvider>{children}</MotionProvider>
+        </I18nProvider>
       </body>
     </html>
   );

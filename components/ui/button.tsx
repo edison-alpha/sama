@@ -9,7 +9,7 @@ type Size = "lg" | "md" | "sm";
 /** Pill buttons, as in the landing design. */
 /* leading-none: the brand font's default line-height is tall enough to read as off-center inside a pill; this
    keeps the label's cap-height centered top-to-bottom regardless of size. */
-const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium leading-none transition-[background,opacity,box-shadow] disabled:cursor-not-allowed disabled:opacity-50";
+const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium leading-none transition-[background,opacity,box-shadow,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 const sizes: Record<Size, string> = { lg: "h-12 px-7 text-base", md: "h-11 px-5 text-[15px]", sm: "h-9 px-4 text-sm" };
 const variants: Record<Variant, string> = {
   primary: "bg-accent text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_6px_16px_-6px_var(--accent)] hover:bg-accent-strong",

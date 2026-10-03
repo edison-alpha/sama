@@ -14,6 +14,7 @@ import { useAction, useApi } from "@/lib/api/use-api";
 import { cadence, duration } from "@/lib/circle-words";
 import { dateTime, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
+import { Stagger } from "@/components/motion";
 
 export function CircleDetail({ id }: { id: string }) {
   const { d, fmt, locale } = useI18n();
@@ -45,7 +46,7 @@ export function CircleDetail({ id }: { id: string }) {
   const shareText = encodeURIComponent(`${c.name} — Sama`);
 
   return (
-    <>
+    <Stagger>
       <PageHeader title={c.name} sub={c.description} actions={primary} />
       {act.error && <div className="mb-4"><ErrorNote>{act.error}</ErrorNote></div>}
 
@@ -104,7 +105,7 @@ export function CircleDetail({ id }: { id: string }) {
           )}
         </div>
       </div>
-    </>
+    </Stagger>
   );
 }
 

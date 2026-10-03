@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wordmark } from "@/components/brand";
+import { BrandLogo } from "@/components/brand";
 import { LocaleButton, ThemeButton } from "@/components/shell/preferences";
 import { ButtonLink } from "@/components/ui/button";
 import type { Dict } from "@/lib/i18n/dict";
@@ -10,7 +10,7 @@ export function PublicPage({ d, children }: { d: Dict; children: React.ReactNode
   return (
     <div className="bg-bg text-ink">
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-5 sm:px-8">
-        <Wordmark />
+        <BrandLogo className="h-8 sm:h-9" />
         <nav className="hidden items-center gap-1 rounded-full bg-surface-2 p-1 text-sm font-medium sm:flex">
           <Link href="/learn" className="rounded-full px-4 py-2 hover:bg-surface">{d.nav.learn}</Link>
           <Link href="/proof" className="rounded-full px-4 py-2 hover:bg-surface">{d.nav.proof}</Link>

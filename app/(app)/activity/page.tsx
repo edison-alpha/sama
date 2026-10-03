@@ -12,6 +12,7 @@ import { useApi } from "@/lib/api/use-api";
 import { activityGroup } from "@/lib/activity";
 import { dayLabel } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
+import { Stagger } from "@/components/motion";
 
 type Filter = "all" | "rounds" | "circles" | "targets" | "leftovers";
 
@@ -34,7 +35,7 @@ export default function ActivityPage() {
   const time = (iso: string) => new Date(iso).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <>
+    <Stagger>
       <PageHeader title={d.activity.title} />
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -73,6 +74,6 @@ export default function ActivityPage() {
           </div>
         )}
       </Card>
-    </>
+    </Stagger>
   );
 }

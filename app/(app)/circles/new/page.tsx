@@ -11,6 +11,7 @@ import { useAction, useApi } from "@/lib/api/use-api";
 import { cadence, CADENCES, duration, DURATIONS } from "@/lib/circle-words";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
+import { Stagger } from "@/components/motion";
 
 /** Four-step wizard with sensible defaults; a Circle can be created in a handful of taps (PRD §19.4.5). */
 export default function NewCirclePage() {
@@ -36,7 +37,7 @@ export default function NewCirclePage() {
   const choice = (selected: boolean) => cx("rounded-2xl border p-4 text-left transition-colors", selected ? "border-accent bg-accent-soft" : "border-line bg-surface hover:border-line-strong");
 
   return (
-    <>
+    <Stagger>
       <PageHeader title={n.title} />
       <ol className="mb-6 grid grid-cols-4 gap-2" aria-label={n.title}>
         {n.steps.map((label, i) => (
@@ -123,7 +124,7 @@ export default function NewCirclePage() {
           {step < 3 ? <Button onClick={() => setStep(step + 1)} disabled={!canNext}>{d.common.continue}</Button> : <Button onClick={create} busy={act.pending}>{n.create}</Button>}
         </div>
       </Card>
-    </>
+    </Stagger>
   );
 }
 

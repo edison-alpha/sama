@@ -34,7 +34,7 @@ export function PrivySession({ children }: { children: React.ReactNode }) {
       appId={APP_ID}
       clientId={CLIENT_ID}
       config={{
-        appearance: { theme: dark ? "dark" : "light", accentColor: "#e97863", logo: "/sama-brand-logo.svg", walletChainType: "ethereum-only" },
+        appearance: { theme: dark ? "dark" : "light", accentColor: "#e97863", logo: dark ? "/sama-brand-logo-ORI.svg" : "/sama-brand-logo-ORI-light.svg", walletChainType: "ethereum-only" },
         embeddedWallets: { ethereum: { createOnLogin: "users-without-wallets" } },
         defaultChain: samaChain,
         supportedChains: [samaChain],

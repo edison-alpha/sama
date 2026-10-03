@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ActivityRow } from "@/components/activity/activity-row";
 import { NextStepCard } from "@/components/home/next-step-card";
+import { CountUp, Stagger } from "@/components/motion";
 import { IconCalendar, IconChevronRight, IconCircles, IconSwap, IconTarget, IconWallet } from "@/components/icons";
 import { DriftBars } from "@/components/portfolio/drift-bars";
 import { HoldingsRing } from "@/components/portfolio/holdings-ring";
@@ -35,7 +36,7 @@ export default function HomePage() {
   const when = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <>
+    <Stagger>
       <PageHeader
         title={d.home.hello}
         actions={
@@ -47,15 +48,15 @@ export default function HomePage() {
       />
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatTile icon={<IconWallet size={18} />} label={s.value} value={h.portfolio.ok ? usd(h.portfolio.totalUsd, locale) : "—"} />
+        <StatTile icon={<IconWallet size={18} />} label={s.value} value={h.portfolio.ok ? <CountUp value={h.portfolio.totalUsd} format={(n) => usd(n, locale)} /> : "—"} />
         <StatTile
           icon={<IconTarget size={18} />}
           label={s.drift}
-          value={h.target ? percent(h.totalDriftPct, locale) : "—"}
+          value={h.target ? <CountUp value={h.totalDriftPct} format={(n) => percent(n, locale)} /> : "—"}
           chip={h.target ? <Badge tone={offTarget ? "accent" : "ok"}>{offTarget ? s.offTarget : s.onTarget}</Badge> : <Badge>{s.noTarget}</Badge>}
         />
-        <StatTile icon={<IconSwap size={18} />} label={s.rounds} value={h.pending.length} chip={waiting > 0 ? <Badge tone="accent" dot>{fmt(s.needsYou, { n: waiting })}</Badge> : null} />
-        <StatTile icon={<IconCircles size={18} />} label={s.circles} value={h.circles.length} />
+        <StatTile icon={<IconSwap size={18} />} label={s.rounds} value={<CountUp value={h.pending.length} format={(n) => String(Math.round(n))} />} chip={waiting > 0 ? <Badge tone="accent" dot>{fmt(s.needsYou, { n: waiting })}</Badge> : null} />
+        <StatTile icon={<IconCircles size={18} />} label={s.circles} value={<CountUp value={h.circles.length} format={(n) => String(Math.round(n))} />} />
       </div>
 
       <NextStepCard home={h} />
@@ -119,6 +120,6 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
-    </>
+    </Stagger>
   );
 }

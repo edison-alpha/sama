@@ -12,6 +12,7 @@ import type { Settings } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
 import { addressUrl, isTestnet, SAMA_CHAIN_ID } from "@/lib/chain";
 import { useI18n } from "@/lib/i18n/provider";
+import { Stagger } from "@/components/motion";
 
 export default function SettingsPage() {
   const { d } = useI18n();
@@ -26,7 +27,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <>
+    <Stagger>
       <PageHeader title={d.settings.title} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -67,7 +68,7 @@ export default function SettingsPage() {
           {API_MODE === "mock" && <Button variant="ghost" size="sm" className="mt-4" onClick={() => { resetDemo(); window.location.href = "/home"; }}>{d.settings.resetDemo}</Button>}
         </Card>
       </div>
-    </>
+    </Stagger>
   );
 }
 

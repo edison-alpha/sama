@@ -1,5 +1,6 @@
 "use client";
 
+import { m } from "motion/react";
 import type { ReactNode } from "react";
 import type { Position } from "@/lib/api/types";
 import { percent } from "@/lib/format";
@@ -32,8 +33,20 @@ export function HoldingsRing({ positions, center, label, max = 5 }: { positions:
       <figure className="relative grid size-40 shrink-0 place-items-center">
         <svg viewBox="0 0 160 160" className="absolute inset-0 size-full -rotate-90" role="img" aria-label={`${label}: ${sorted.map((p) => `${p.symbol} ${percent(p.pct, locale, 0)}`).join(", ")}`}>
           <circle cx="80" cy="80" r={r} fill="none" stroke="var(--heat-0)" strokeWidth="14" />
-          {arcs.map((a) => (
-            <circle key={a.symbol} cx="80" cy="80" r={r} fill="none" stroke={colorFor(a.symbol, order)} strokeWidth="14" strokeDasharray={`${a.len} ${c}`} strokeDashoffset={-a.offset} />
+          {arcs.map((a, i) => (
+            <m.circle
+              key={a.symbol}
+              cx="80"
+              cy="80"
+              r={r}
+              fill="none"
+              stroke={colorFor(a.symbol, order)}
+              strokeWidth="14"
+              strokeDashoffset={-a.offset}
+              initial={{ strokeDasharray: `0 ${c}` }}
+              animate={{ strokeDasharray: `${a.len} ${c}` }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 + i * 0.08 }}
+            />
           ))}
         </svg>
         <figcaption className="relative text-center">{center}</figcaption>

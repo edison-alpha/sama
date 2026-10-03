@@ -10,6 +10,7 @@ import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { sama } from "@/lib/api";
 import { useApi } from "@/lib/api/use-api";
 import { useI18n } from "@/lib/i18n/provider";
+import { Stagger } from "@/components/motion";
 
 export default function CirclesPage() {
   const { d } = useI18n();
@@ -22,7 +23,7 @@ export default function CirclesPage() {
   const list = tab === "mine" ? mine : explore;
 
   return (
-    <>
+    <Stagger>
       <PageHeader title={d.circles.title} sub={d.circles.lead} actions={<ButtonLink href="/circles/new" icon={<IconPlus size={18} />}>{d.circles.create}</ButtonLink>} />
 
       <Segmented label={d.circles.title} value={tab} onChange={setTab} options={[{ value: "mine", label: `${d.circles.mine} (${mine.length})` }, { value: "explore", label: `${d.circles.explore} (${explore.length})` }]} className="mb-5" />
@@ -31,6 +32,6 @@ export default function CirclesPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">{list.map((c) => <CircleCard key={c.id} circle={c} />)}</div>
       )}
-    </>
+    </Stagger>
   );
 }
