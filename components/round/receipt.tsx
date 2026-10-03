@@ -11,7 +11,10 @@ import { short, tokens } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 import { AmountRow, TxLink, who } from "./parts";
 
-/** Per-user receipt (PRD §19.4.7). `compact` is the last step of the round journey; the full page adds every check. */
+/**
+ * Per-user receipt (PRD §19.4.7). `compact` is the last step of the round journey: the step card already says it is
+ * verified and the hashes live under "Round details", so it shows only the transfers, the leftover decision and actions.
+ */
 export function ReceiptSummary({ v, compact = false }: { v: RoundView; compact?: boolean }) {
   const { d, fmt, locale } = useI18n();
   const [copied, setCopied] = useState(false);
@@ -31,11 +34,13 @@ export function ReceiptSummary({ v, compact = false }: { v: RoundView; compact?:
 
   return (
     <div className="grid gap-5">
-      <div className="flex flex-wrap items-center gap-2">
-        {ver?.status === "PASS" ? <Badge tone="ok"><IconCheck size={14} />{d.receipt.verified}</Badge> : <Badge>{d.states[v.round.state]}</Badge>}
-      </div>
+      {!compact && (
+        <div className="flex flex-wrap items-center gap-2">
+          {ver?.status === "PASS" ? <Badge tone="ok"><IconCheck size={14} />{d.receipt.verified}</Badge> : <Badge>{d.states[v.round.state]}</Badge>}
+        </div>
+      )}
       {v.you.legs.length === 0 ? (
-        <p className="text-sm text-ink-2">{d.receipt.nothing}</p>
+        !compact && <p className="text-sm text-ink-2">{d.receipt.nothing}</p>
       ) : (
         <ul className="grid gap-2">
           {v.you.legs.map((l, i) => (
@@ -44,10 +49,10 @@ export function ReceiptSummary({ v, compact = false }: { v: RoundView; compact?:
         </ul>
       )}
       <dl className="grid gap-2 rounded-2xl bg-surface-2 p-4 text-sm">
-        {v.round.settlementTx && <Fact k={d.receipt.settlement} v={<TxLink hash={v.round.settlementTx} />} />}
-        {ver?.blockNumber && <Fact k={d.receipt.block} v={<a className="num text-accent hover:underline" href={blockUrl(ver.blockNumber)} target="_blank" rel="noreferrer">{ver.blockNumber}</a>} />}
-        {v.round.planHash && <Fact k={d.round.plan} v={<span className="num" title={v.round.planHash}>{short(v.round.planHash, 10, 6)}</span>} />}
-        <Fact k={d.receipt.snapshot} v={<span className="num" title={v.round.snapshotHash}>{short(v.round.snapshotHash, 10, 6)}</span>} />
+        {!compact && v.round.settlementTx && <Fact k={d.receipt.settlement} v={<TxLink hash={v.round.settlementTx} />} />}
+        {!compact && ver?.blockNumber && <Fact k={d.receipt.block} v={<a className="num text-accent hover:underline" href={blockUrl(ver.blockNumber)} target="_blank" rel="noreferrer">{ver.blockNumber}</a>} />}
+        {!compact && v.round.planHash && <Fact k={d.round.plan} v={<span className="num" title={v.round.planHash}>{short(v.round.planHash, 10, 6)}</span>} />}
+        {!compact && <Fact k={d.receipt.snapshot} v={<span className="num" title={v.round.snapshotHash}>{short(v.round.snapshotHash, 10, 6)}</span>} />}
         <Fact k={d.receipt.leftovers} v={decision} />
       </dl>
       <div className="flex flex-wrap gap-2">
