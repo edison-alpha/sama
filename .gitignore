@@ -1,0 +1,10 @@
+node_modules
+.next
+.open-next
+.wrangler
+.env
+.env.local
+*.tsbuildinfo
+
+# Apple SF Pro Rounded (licence forbids redistribution); add the files locally, see README.
+components/font/*.otf

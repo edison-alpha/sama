@@ -1,0 +1,188 @@
+/* ---------------------------------------------------------------------------
+ * Sama design tokens (Tailwind v4)
+ *
+ *   :root / [data-theme]   raw semantic values, light and dark
+ *   @theme inline          exposes them as utilities: bg-surface, text-ink, border-line, bg-accent, text-match …
+ *
+ * Source: the Sama landing design + public/sama-logo.svg.
+ *   accent  coral #E97863 — the logo colour; primary actions, highlights ("Join", main CTA)
+ *   sky     deep BNB-night blue — hero, dark panels, glass navigation
+ *   match   blue  — anything that crossed wallet to wallet
+ *   rest    warm grey — leftovers (residual)
+ *   danger  red  — real errors only
+ * Shapes: very round cards (28–40px), pill buttons, glass pills over imagery.
+ * --------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f4f3;
+  --surface-3: #e6e6e5;
+  --ink: #0d0d0f;
+  --ink-2: #4a4b50;
+  --ink-3: #85868c;
+  --line: #ececeb;
+  --line-strong: #d6d6d4;
+
+  --accent: #e97863;
+  --accent-strong: #d9604a;
+  --accent-soft: #fdece8;
+  --on-accent: #ffffff;
+
+  --sky: #0d2f6e;
+  --sky-2: #1c4fa3;
+  --on-sky: #ffffff;
+  --glass: rgb(255 255 255 / 0.14);
+  --glass-line: rgb(255 255 255 / 0.32);
+
+  --match: #2563d9;
+  --match-soft: #e6effd;
+  --rest: #8a8173;
+  --rest-soft: #f1eee8;
+  --ok: #23955a;
+  --ok-soft: #e2f5ea;
+  --warn: #c27400;
+  --warn-soft: #fff1db;
+  --danger: #d63a4a;
+  --danger-soft: #fde8ea;
+
+  --night: #0a0a0b;
+  --focus: #e97863;
+  --shadow: 0 1px 2px rgb(13 13 15 / 0.04), 0 8px 24px rgb(13 13 15 / 0.06);
+  /* Glass surfaces (BoardUI floating-panel recipe on Sama colours). */
+  --glass-bg: rgb(255 255 255 / 0.62);
+  --glass-bg-strong: rgb(255 255 255 / 0.7);
+  --glass-edge: rgb(255 255 255 / 0.9);
+  --glass-hi: rgb(255 255 255 / 0.7);
+  --elev-sidebar: 0 1px 0 0 rgb(0 0 0 / 0.02), 0 1px 12px 0 rgb(0 0 0 / 0.06), 0 0 1px 0 rgb(0 0 0 / 0.32);
+  --elev-float: 0 0 1px 0 rgb(0 0 0 / 0.28), 0 1px 12px 0 rgb(0 0 0 / 0.05), 0 24px 64px -24px rgb(13 20 48 / 0.22);
+  /* Product shell: ambient backdrop, liquid-glass tab bar, heatmap base. */
+  --app-bg: #f3f3f1;
+  --tabbar-bg: rgb(250 250 249 / 0.62);
+  --tabbar-edge: rgb(255 255 255 / 0.85);
+  --tabbar-hi: rgb(255 255 255 / 0.9);
+  --tabbar-lens: rgb(13 13 15 / 0.07);
+  --tabbar-lens-edge: rgb(13 13 15 / 0.04);
+  --heat-0: rgb(13 13 15 / 0.06);
+}
+
+/* Dark: follows the system unless the user picked light. Kept identical to [data-theme="dark"] below. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0b0b0d;
+    --surface: #151518;
+    --surface-2: #1c1c20;
+    --surface-3: #2a2a2f;
+    --ink: #f4f4f2;
+    --ink-2: #b8b8b4;
+    --ink-3: #84847f;
+    --line: #26262b;
+    --line-strong: #37373d;
+    --accent-soft: #3a1d17;
+    --on-accent: #1a0904;
+    --match: #6b9cff;
+    --match-soft: #14233f;
+    --rest: #a89f90;
+    --rest-soft: #26231e;
+    --ok: #4cc884;
+    --ok-soft: #10291c;
+    --warn: #ffb547;
+    --warn-soft: #3a2a0f;
+    --danger: #ff6b78;
+    --danger-soft: #3a1419;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+    --glass-bg: rgb(28 28 32 / 0.6);
+    --glass-bg-strong: rgb(28 28 32 / 0.72);
+    --glass-edge: rgb(255 255 255 / 0.08);
+    --glass-hi: rgb(255 255 255 / 0.06);
+    --elev-sidebar: 0 1px 0 0 rgb(0 0 0 / 0.1), 0 1px 12px 0 rgb(0 0 0 / 0.16), 0 0 1px 0 rgb(0 0 0 / 0.42);
+    --elev-float: 0 0 1px 0 rgb(0 0 0 / 0.5), 0 1px 12px 0 rgb(0 0 0 / 0.2), 0 24px 64px -24px rgb(0 0 0 / 0.6);
+    --app-bg: #0b0b0d;
+    --tabbar-bg: rgb(58 58 64 / 0.55);
+    --tabbar-edge: rgb(255 255 255 / 0.16);
+    --tabbar-hi: rgb(255 255 255 / 0.18);
+    --tabbar-lens: rgb(255 255 255 / 0.12);
+    --tabbar-lens-edge: rgb(255 255 255 / 0.06);
+    --heat-0: rgb(255 255 255 / 0.07);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b0b0d;
+  --surface: #151518;
+  --surface-2: #1c1c20;
+  --surface-3: #2a2a2f;
+  --ink: #f4f4f2;
+  --ink-2: #b8b8b4;
+  --ink-3: #84847f;
+  --line: #26262b;
+  --line-strong: #37373d;
+  --accent-soft: #3a1d17;
+  --on-accent: #1a0904;
+  --match: #6b9cff;
+  --match-soft: #14233f;
+  --rest: #a89f90;
+  --rest-soft: #26231e;
+  --ok: #4cc884;
+  --ok-soft: #10291c;
+  --warn: #ffb547;
+  --warn-soft: #3a2a0f;
+  --danger: #ff6b78;
+  --danger-soft: #3a1419;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+  --glass-bg: rgb(28 28 32 / 0.6);
+  --glass-bg-strong: rgb(28 28 32 / 0.72);
+  --glass-edge: rgb(255 255 255 / 0.08);
+  --glass-hi: rgb(255 255 255 / 0.06);
+  --elev-sidebar: 0 1px 0 0 rgb(0 0 0 / 0.1), 0 1px 12px 0 rgb(0 0 0 / 0.16), 0 0 1px 0 rgb(0 0 0 / 0.42);
+  --elev-float: 0 0 1px 0 rgb(0 0 0 / 0.5), 0 1px 12px 0 rgb(0 0 0 / 0.2), 0 24px 64px -24px rgb(0 0 0 / 0.6);
+  --app-bg: #0b0b0d;
+  --tabbar-bg: rgb(58 58 64 / 0.55);
+  --tabbar-edge: rgb(255 255 255 / 0.16);
+  --tabbar-hi: rgb(255 255 255 / 0.18);
+  --tabbar-lens: rgb(255 255 255 / 0.12);
+  --tabbar-lens-edge: rgb(255 255 255 / 0.06);
+  --heat-0: rgb(255 255 255 / 0.07);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-sky: var(--sky);
+  --color-sky-2: var(--sky-2);
+  --color-on-sky: var(--on-sky);
+  --color-glass: var(--glass);
+  --color-glass-line: var(--glass-line);
+  --color-match: var(--match);
+  --color-match-soft: var(--match-soft);
+  --color-rest: var(--rest);
+  --color-rest-soft: var(--rest-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-night: var(--night);
+
+  --font-sans: var(--font-sama), ui-rounded, "SF Pro Rounded", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --shadow-card: var(--shadow);
+  --radius-card: 28px;
+  --radius-panel: 40px;
+}

@@ -1,0 +1,403 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* Desktop sidebar collapsed to an icon rail; set on <html> before paint (SIDEBAR_SCRIPT in app-shell.tsx). */
+@custom-variant collapsed (&:where(html[data-sidebar="collapsed"] *));
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100dvh;
+    background: var(--bg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@keyframes sama-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes sama-orbit {
+  to { transform: rotate(360deg); }
+}
+.animate-sama-pulse { animation: sama-pulse 1.6s ease-in-out infinite; }
+.animate-sama-orbit { animation: sama-orbit 6s linear infinite; }
+
+/* Liquid glass (design: white fill 10%, light from top 5°, refraction/dispersion high, frost 25, depth 35):
+   a clear tinted pane that lets the photo show through, a light frost, a bright refracted rim lit from the top
+   and a soft glow along the bottom edge. Meant for white text over imagery. */
+.glass {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.14) 0%, rgb(255 255 255 / 0.04) 55%, rgb(255 255 255 / 0.08) 100%),
+    rgb(255 255 255 / 0.1);
+  -webkit-backdrop-filter: blur(2px) saturate(150%) brightness(1.06);
+  backdrop-filter: blur(2px) saturate(150%) brightness(1.06);
+  box-shadow:
+    inset 0 2px 6px -2px rgb(255 255 255 / 0.35),
+    inset 0 -2px 6px -3px rgb(255 255 255 / 0.18),
+    inset 0 0 18px rgb(255 255 255 / 0.06),
+    0 6px 24px rgb(0 18 60 / 0.16);
+}
+/* Refraction rim: a 1px gradient border, brightest at top (the light) and on the lower edge (the light bending
+   through), faint at the sides; a touch of warm/cool tint stands in for dispersion. */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.42) 0%,
+    rgb(220 235 255 / 0.2) 20%,
+    rgb(255 255 255 / 0.08) 45%,
+    rgb(255 255 255 / 0.06) 60%,
+    rgb(255 232 220 / 0.14) 82%,
+    rgb(255 255 255 / 0.26) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* Scrollbar hidden app-wide; the page stays scrollable (wheel/touch/keys), smoothed by Lenis on marketing pages. */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* Stronger frost for glass panels that carry dense text inside cinematic cards. */
+.glass.glass-frost {
+  -webkit-backdrop-filter: blur(16px) saturate(150%) brightness(1.04);
+  backdrop-filter: blur(16px) saturate(150%) brightness(1.04);
+}
+
+/* ---------- Problem carousel (components/landing/problem-carousel.tsx) ---------- */
+.ps-card {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.ps[data-inview] .ps-card { opacity: 1; transform: none; }
+/* Scenes only animate while the section is on screen. */
+.ps:not([data-inview]) .ps-scene * { animation-play-state: paused !important; }
+
+/* Ambient scene: drifting soft light, film grain, vignette. */
+.ps-blob {
+  position: absolute;
+  width: 85%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.75;
+  animation: ps-drift 16s ease-in-out infinite alternate;
+}
+.ps-blob-sm { width: 55%; opacity: 0.5; }
+.ps-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ps-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 40%, rgb(0 0 0 / 0.55) 100%);
+}
+.ps-scene { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.ps-card:hover .ps-scene { transform: scale(0.985); }
+
+@keyframes ps-drift {
+  to { transform: translate(14%, -10%) scale(1.18); }
+}
+.ps-float { animation: ps-float 6s ease-in-out infinite alternate; }
+@keyframes ps-float {
+  from { transform: translateY(4px); }
+  to { transform: translateY(-6px); }
+}
+
+/* 1. Opposite trades: flow into the pool, fees land on both sides. */
+.ps-flow {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.7);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 5;
+  vector-effect: non-scaling-stroke;
+  animation: ps-flow 0.9s linear infinite;
+}
+@keyframes ps-flow { to { stroke-dashoffset: -16; } }
+.ps-fee { animation: ps-fee 4.2s cubic-bezier(0.3, 1.4, 0.5, 1) infinite; }
+@keyframes ps-fee {
+  0%, 8% { opacity: 0; transform: scale(0.6); }
+  18%, 82% { opacity: 1; transform: scale(1); }
+  92%, 100% { opacity: 0; transform: scale(0.9); }
+}
+
+/* 2. Ring: slow orbit, logos stay upright, arrows draw one after another. */
+.ps-orbit { animation: ps-spin 36s linear infinite; }
+.ps-counter { animation: ps-spin 36s linear infinite reverse; }
+@keyframes ps-spin { to { transform: rotate(360deg); } }
+.ps-draw {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: ps-draw 4s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+@keyframes ps-draw {
+  0% { stroke-dashoffset: 1; opacity: 1; }
+  35%, 80% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+/* 3. Thin pool: an order sweeps into the asks and drains them. */
+.ps-bar { transform-origin: bottom; animation: ps-bar 3.6s ease-in-out infinite; }
+@keyframes ps-bar {
+  0%, 20%, 100% { transform: scaleY(1); }
+  55%, 70% { transform: scaleY(var(--d, 1)); }
+}
+.ps-sweep { left: 50%; animation: ps-sweep 3.6s cubic-bezier(0.5, 0, 0.3, 1) infinite; }
+@keyframes ps-sweep {
+  0%, 15% { left: 50%; opacity: 0; }
+  22% { opacity: 1; }
+  65% { left: 88%; opacity: 1; }
+  85%, 100% { left: 88%; opacity: 0; }
+}
+.ps-impact { display: inline-block; animation: ps-impact 3.6s ease-in-out infinite; }
+@keyframes ps-impact {
+  0%, 40% { opacity: 0.35; transform: none; }
+  60%, 85% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 0.35; }
+}
+
+/* 4. Gas: approve is stuck until Sama sponsors the gas. Resting state = sponsored. */
+.ps-approve { background: var(--accent); color: #fff; animation: ps-approve 6s ease infinite; }
+@keyframes ps-approve {
+  0%, 38% { background: rgb(255 255 255 / 0.1); color: rgb(255 255 255 / 0.4); }
+  48%, 92% { background: var(--accent); color: #fff; }
+  100% { background: rgb(255 255 255 / 0.1); color: rgb(255 255 255 / 0.4); }
+}
+.ps-toast { animation: ps-toast 6s cubic-bezier(0.3, 1.3, 0.5, 1) infinite; }
+@keyframes ps-toast {
+  0%, 30% { opacity: 0; transform: translateY(14px) scale(0.96); }
+  40%, 90% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(6px); }
+}
+
+/* 5. Signing: raw hex turns into readable amounts under a scan line. Resting state = readable. */
+.ps-hex { opacity: 0; animation: ps-hex 6s ease infinite; }
+@keyframes ps-hex {
+  0%, 38% { opacity: 1; filter: none; }
+  50%, 92% { opacity: 0; filter: blur(6px); }
+  100% { opacity: 1; filter: none; }
+}
+.ps-read { animation: ps-read 6s ease infinite; }
+@keyframes ps-read {
+  0%, 42% { opacity: 0; transform: translateY(6px); }
+  54%, 92% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+.ps-scan { top: 100%; animation: ps-scan 6s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
+@keyframes ps-scan {
+  0%, 34% { top: -40%; opacity: 0; }
+  36% { opacity: 1; }
+  52% { top: 100%; opacity: 1; }
+  54%, 100% { top: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-card { opacity: 1; transform: none; transition: none; }
+  .ps-scene *, .ps-scene { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Feature bento (components/landing/feature-bento.tsx) ---------- */
+/* Resting state of every loop below is the finished one, so reduced motion shows the outcome. */
+.ps-caret { animation: ps-caret 1s steps(1) infinite; }
+@keyframes ps-caret { 50% { opacity: 0; } }
+
+/* Rows tick one after another, then reset together. */
+.ps-leg { animation: ps-leg 5s ease infinite; animation-delay: calc(var(--i, 0) * 0.45s); }
+@keyframes ps-leg {
+  0%, 8% { opacity: 0.35; }
+  18%, 88% { opacity: 1; }
+  100% { opacity: 0.35; }
+}
+.ps-leg .ps-check {
+  animation: ps-check 5s cubic-bezier(0.3, 1.5, 0.5, 1) infinite;
+  animation-delay: calc(var(--i, 0) * 0.45s + 0.15s);
+}
+@keyframes ps-check {
+  0%, 10% { opacity: 0; transform: scale(0.3); }
+  20%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+.ps-settled { animation: ps-settled 5s cubic-bezier(0.3, 1.3, 0.5, 1) infinite; }
+@keyframes ps-settled {
+  0%, 46% { opacity: 0; transform: translateY(8px) scale(0.97); }
+  56%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
+/* Approval: "Unlimited" is struck out, the exact amount takes over. */
+.ps-strike { transform-origin: left; animation: ps-strike 5s cubic-bezier(0.6, 0, 0.3, 1) infinite; }
+@keyframes ps-strike {
+  0%, 22% { transform: scaleX(0); }
+  38%, 90% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+.ps-exact { transform-origin: left; animation: ps-exact 5s ease infinite; }
+@keyframes ps-exact {
+  0%, 30% { opacity: 0.35; transform: none; }
+  44% { opacity: 1; transform: scale(1.04); }
+  52%, 90% { opacity: 1; transform: none; }
+  100% { opacity: 0.35; }
+}
+
+/* Verifier shield: a soft radar ping. */
+.ps-ping { opacity: 0; animation: ps-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+@keyframes ps-ping {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+/* ---------- Board UI surfaces (components/ui/board) ---------- */
+/* Floating glass panel: BoardUI's sidebar recipe (hairline light edge + 3-layer elevation) on a frosted surface. */
+.glass-panel {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--elev-sidebar);
+}
+.glass-panel-strong {
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(170%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-hi), var(--elev-float);
+}
+/* BoardUI "Sidebar selected": accent gradient, 1px accent ring, inner top highlight. */
+.board-selected {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, white) 0%, var(--accent-strong) 100%);
+  box-shadow: 0 0 0 1px var(--accent-strong), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  color: #fff;
+}
+
+/* ---------- Onboarding (components/onboarding.tsx) ---------- */
+/* Each step slides in; the hero orbit turns slowly, its logos counter-rotate so they stay upright. */
+.ob-step { animation: ob-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes ob-in {
+  from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.ob-orbit { animation: ps-spin 48s linear infinite; }
+.ob-orbit-rev { animation: ps-spin 64s linear infinite reverse; }
+.ob-upright { animation: ps-spin 48s linear infinite reverse; }
+.ob-orbit-rev .ob-upright { animation: ps-spin 64s linear infinite; }
+.ob-pop { animation: ob-pop 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
+@keyframes ob-pop {
+  from { opacity: 0; transform: scale(0.4); }
+  to { opacity: 1; transform: none; }
+}
+/* Welcome step: a slow still breathe instead of orbiting icons, since there's no portfolio data to show yet. */
+.ob-breathe { animation: ob-breathe 3.6s ease-in-out infinite; }
+@keyframes ob-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.06); opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ob-step, .ob-orbit, .ob-orbit-rev, .ob-upright, .ob-pop, .ob-breathe { animation: none !important; }
+}
+
+/* ---------- Flow steps (components/landing/flow-steps.tsx) ---------- */
+/* Background photos cross-fade with a slight settle; the headline re-enters on every step change. */
+.flow-bg { transition: opacity 0.7s ease, transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.flow-in { animation: flow-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes flow-in {
+  from { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-bg { transition: none; }
+  .flow-in { animation: none; }
+}
+
+/* ---------- App shell (components/shell/app-shell.tsx) ---------- */
+/* Sidebar brand lockup: swaps to the white-text mark in dark mode so it stays legible on the dark glass panel. */
+.brand-logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand-logo-light { display: none; }
+  :root:not([data-theme="light"]) .brand-logo-dark { display: block; }
+}
+:root[data-theme="dark"] .brand-logo-light { display: none; }
+:root[data-theme="dark"] .brand-logo-dark { display: block; }
+
+/* Solid backdrop behind every product screen. Fixed, so it never scrolls or repaints with content. */
+.app-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--app-bg);
+}
+
+/* Liquid-glass tab bar for phones: a frosted pill with a lit top rim, and a sliding lens behind the active tab. */
+.tabbar-glass {
+  background: var(--tabbar-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--tabbar-edge);
+  box-shadow:
+    inset 0 1px 0 var(--tabbar-hi),
+    inset 0 -1px 0 rgb(255 255 255 / 0.06),
+    0 12px 32px -8px rgb(13 20 48 / 0.28),
+    0 2px 6px rgb(13 20 48 / 0.08);
+}
+.tabbar-lens {
+  background: var(--tabbar-lens);
+  box-shadow: inset 0 1px 0 var(--tabbar-hi), inset 0 0 0 1px var(--tabbar-lens-edge);
+  transition: transform 0.45s cubic-bezier(0.3, 1.25, 0.5, 1);
+}
+
+/* Activity heatmap cells: 5 steps of the accent, from empty to busiest day. */
+.heat-0 { background: var(--heat-0); }
+.heat-1 { background: color-mix(in srgb, var(--accent) 28%, var(--heat-0)); }
+.heat-2 { background: color-mix(in srgb, var(--accent) 52%, var(--heat-0)); }
+.heat-3 { background: color-mix(in srgb, var(--accent) 76%, var(--heat-0)); }
+.heat-4 { background: var(--accent-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tabbar-lens { transition: none; }
+}
