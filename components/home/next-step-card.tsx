@@ -1,7 +1,9 @@
 "use client";
 
+import { m } from "motion/react";
 import { useEffect, useState } from "react";
 import { IconArrowRight } from "@/components/icons";
+import { rise } from "@/components/motion";
 import { ButtonLink } from "@/components/ui/button";
 import type { Home } from "@/lib/api/types";
 import { clock, usd } from "@/lib/format";
@@ -37,14 +39,14 @@ export function NextStepCard({ home }: { home: Home }) {
   })();
 
   return (
-    <section aria-labelledby="next-title" className="relative overflow-hidden rounded-[var(--radius-card)] bg-sky p-6 text-on-sky shadow-[inset_0_1px_0_rgb(255_255_255/0.18),var(--elev-float)] sm:p-8">
+    <m.section variants={rise} aria-labelledby="next-title" className="relative overflow-hidden rounded-[var(--radius-card)] bg-sky p-6 text-on-sky shadow-[inset_0_1px_0_rgb(255_255_255/0.18),var(--elev-float)] sm:p-8">
       <div className="absolute -right-16 -top-16 size-56 rounded-full bg-accent/40 blur-3xl" aria-hidden="true" />
       <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-match/30 blur-3xl" aria-hidden="true" />
       <p className="relative text-xs font-semibold uppercase tracking-[0.14em] text-white/70">{d.home.nextStep}</p>
       <h2 id="next-title" className="relative mt-2 max-w-xl text-2xl font-semibold tracking-tight sm:text-3xl">{fmt(copy.title, vars)}</h2>
       <p className="relative mt-2 max-w-xl text-white/80">{fmt(copy.body, vars)}</p>
       <ButtonLink href={href} size="lg" className="relative mt-6" trailing={<IconArrowRight size={18} />}>{copy.cta}</ButtonLink>
-    </section>
+    </m.section>
   );
 }
 
