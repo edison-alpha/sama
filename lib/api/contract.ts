@@ -1,5 +1,5 @@
 import type { Hex, TypedDataDefinition } from "viem";
-import type { Activity, Asset, Circle, Home, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview } from "./types";
+import type { Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview } from "./types";
 
 /** What the UI needs from a wallet. Live mode gets it from Dynamic; mock mode fakes it. */
 export type Signer = {
@@ -29,6 +29,8 @@ export type SamaApi = {
   assets(): Promise<Asset[]>;
   home(): Promise<Home>;
   portfolio(): Promise<{ portfolio: Portfolio; target: Target | null }>;
+  /** Total wallet value over a time window, oldest first; the last point is the current total. */
+  portfolioHistory(range: HistoryRange): Promise<HistoryPoint[]>;
   previewTarget(target: Omit<Target, "savedAt">): Promise<TargetPreview>;
   saveTarget(target: Omit<Target, "savedAt">): Promise<void>;
   circles(): Promise<Circle[]>;

@@ -1,6 +1,6 @@
 import type { SamaApi } from "./contract";
 import { DEMO_ACTIVITY, DEMO_ASSETS, DEMO_CIRCLES, DEMO_HOLDINGS, DEMO_SETTLEMENT, DEMO_TARGET, VERIFIER_CHECKS } from "./demo-data";
-import type { Activity, Circle, Drift, Home, Portfolio, RoundState, RoundView, Settings, Target, TargetPreview } from "./types";
+import type { Activity, Circle, Drift, HistoryPoint, HistoryRange, Home, Portfolio, RoundState, RoundView, Settings, Target, TargetPreview } from "./types";
 
 /**
  * Browser-only demo backend. Round progress is derived from timestamps of the user's own actions, so it survives a
@@ -68,6 +68,44 @@ function portfolioNow(): Portfolio {
   const rows = Object.entries(DEMO_HOLDINGS).map(([symbol, amountTokens]) => ({ symbol, amountTokens, valueUsd: amountTokens * price(symbol) }));
   const totalUsd = rows.reduce((s, r) => s + r.valueUsd, 0);
   return { ok: true, totalUsd, readAt: new Date().toISOString(), positions: rows.map((r) => ({ ...r, pct: (r.valueUsd / totalUsd) * 100 })).sort((a, b) => b.valueUsd - a.valueUsd) };
+}
+
+const HISTORY: Record<HistoryRange, { spanMs: number; points: number; vol: number }> = {
+  "1H": { spanMs: 3_600_000, points: 60, vol: 0.0006 },
+  "1D": { spanMs: 86_400_000, points: 96, vol: 0.0015 },
+  "1W": { spanMs: 7 * 86_400_000, points: 168, vol: 0.003 },
+  "1M": { spanMs: 30 * 86_400_000, points: 120, vol: 0.007 },
+  "1Y": { spanMs: 365 * 86_400_000, points: 183, vol: 0.02 },
+  ALL: { spanMs: 2 * 365 * 86_400_000, points: 240, vol: 0.025 },
+};
+
+/** Seeded PRNG, so the demo chart looks the same on every refresh within the same hour. */
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Demo value history: a random walk run backwards from today's real demo total, so the chart always ends at it. */
+function history(range: HistoryRange): HistoryPoint[] {
+  const { spanMs, points, vol } = HISTORY[range];
+  const p = portfolioNow();
+  const end = p.ok ? p.totalUsd : 0;
+  const now = Date.now();
+  const rand = mulberry32([...range].reduce((s, c) => s * 31 + c.charCodeAt(0), Math.floor(now / 3_600_000)));
+  const step = spanMs / (points - 1);
+  const out: HistoryPoint[] = [{ t: now, usd: end }];
+  let v = end;
+  for (let i = 1; i < points; i++) {
+    const shock = (rand() + rand() + rand() - 1.5) * 2 * vol;
+    v = Math.max(end * 0.2, v * (1 - shock - vol * 0.08));
+    out.push({ t: now - i * step, usd: v });
+  }
+  return out.reverse();
 }
 
 function preview(weights: Record<string, number>): TargetPreview {
@@ -318,6 +356,10 @@ export const mockApi: SamaApi = {
     mutateRound(round.round.id, { decision: "EXECUTE_NOW" });
     log("RESIDUAL_DECIDED", {}, round.round.id);
     persist();
+  },
+  async portfolioHistory(range) {
+    await wait(120);
+    return history(range);
   },
   async activity() {
     await wait(120);

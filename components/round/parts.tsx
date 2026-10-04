@@ -20,16 +20,11 @@ export function useNow() {
   return now;
 }
 
-/** Large countdown; announced politely, not every second. */
-export function Countdown({ until, label }: { until: number; label: string }) {
+/** Time left as "m:ss"; announced politely once a minute, not every second. */
+export function Countdown({ until }: { until: number }) {
   const now = useNow();
   const left = until - now;
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">{label}</p>
-      <p className="num mt-1 text-5xl font-semibold tracking-tight" aria-live={left % 60 === 0 ? "polite" : "off"}>{clock(left)}</p>
-    </div>
-  );
+  return <span aria-live={left % 60 === 0 ? "polite" : "off"}>{clock(left)}</span>;
 }
 
 /** "Member 2" from the API, or a bare number from mock data, rendered in the user's language. */
@@ -68,19 +63,33 @@ export type Prompt = { kind: "sign" | "tx"; label: string };
 export function WalletPromptPreview({ prompts, sponsored }: { prompts: Prompt[]; sponsored: boolean }) {
   const { d, fmt: f } = useI18n();
   if (prompts.length === 0) return null;
+  const cost = (p: Prompt) => (
+    <span className={cx("inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", p.kind === "sign" || sponsored ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn")}>
+      {p.kind === "sign" ? <><IconPen size={12} />{d.common.free}</> : sponsored ? <><IconGas size={12} />{d.common.sponsored}</> : <><IconGas size={12} />{d.common.needsGas}</>}
+    </span>
+  );
+  // One prompt fits on a single line under the button; several get a numbered list.
+  if (prompts.length === 1) {
+    const [p] = prompts as [Prompt];
+    return (
+      <p className="flex flex-wrap items-center gap-2 text-sm text-ink-2">
+        <IconWallet size={16} className="text-ink-3" />
+        {f(d.round.walletPromptOne, { label: p.label })}
+        {cost(p)}
+      </p>
+    );
+  }
   return (
-    <div className="rounded-2xl border border-line p-4">
-      <p className="mb-3 flex items-center gap-2 text-sm font-semibold"><IconWallet size={18} />{f(d.round.walletPrompts, { n: prompts.length })}</p>
-      <ol className="grid gap-2">
+    <div className="rounded-2xl bg-surface-2 p-4">
+      <p className="mb-3 flex items-center gap-2 text-sm font-medium"><IconWallet size={16} className="text-ink-3" />{f(d.round.walletPrompts, { n: prompts.length })}</p>
+      <ol className="grid gap-2.5">
         {prompts.map((p, i) => (
           <li key={i} className="flex items-center justify-between gap-3 text-sm">
-            <span className="flex items-center gap-2">
-              <span className="num grid size-6 place-items-center rounded-full bg-surface-2 text-xs">{i + 1}</span>
+            <span className="flex items-center gap-2 text-ink-2">
+              <span className="num grid size-6 shrink-0 place-items-center rounded-full bg-surface text-xs text-ink">{i + 1}</span>
               {p.label}
             </span>
-            <span className={cx("inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", p.kind === "sign" || sponsored ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn")}>
-              {p.kind === "sign" ? <><IconPen size={12} />{d.common.free}</> : sponsored ? <><IconGas size={12} />{d.common.sponsored}</> : <><IconGas size={12} />{d.common.needsGas}</>}
-            </span>
+            {cost(p)}
           </li>
         ))}
       </ol>
@@ -108,7 +117,7 @@ export function TxLink({ hash }: { hash: string }) {
   );
 }
 
-export function RailStep({ done, active, failed, title, detail }: { done: boolean; active: boolean; failed?: boolean; title: string; detail?: React.ReactNode }) {
+export function RailStep({ done, active, failed, title, detail }: { done: boolean; active: boolean; failed?: boolean; title: React.ReactNode; detail?: React.ReactNode }) {
   return (
     <li className="flex gap-3">
       <span className={cx("mt-0.5 grid size-7 shrink-0 place-items-center rounded-full", failed ? "bg-danger-soft text-danger" : done ? "bg-ok text-white" : active ? "bg-accent-soft text-accent" : "bg-surface-2 text-ink-3")}>
