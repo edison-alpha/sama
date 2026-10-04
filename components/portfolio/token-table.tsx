@@ -42,6 +42,10 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
   const all = rows(positions, drift, assets);
   const list = limit ? all.slice(0, limit) : all;
   const hasTarget = drift !== null;
+  // Compact (Home overview) drops the allocation column (the share goes under the value) and shows balance only on
+  // very wide screens, so the table always fits its column without a horizontal scrollbar.
+  const balanceCls = compact ? "hidden 2xl:table-cell" : "hidden sm:table-cell";
+  const shareUnderValue = compact ? "" : "md:hidden";
   const th = "bg-surface-2 px-3 sm:px-4 py-3 text-right text-sm font-medium text-ink-3 first:rounded-l-2xl first:text-left last:rounded-r-2xl";
 
   /** What reaching the target takes for one row, in words: "Sell $120", "Buy $40" or "On target". */
@@ -73,15 +77,15 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
         );
       })}
     </ul>
-    <div className="-mx-1 hidden overflow-x-auto px-1 sm:block">
+    <div className="hidden overflow-x-auto sm:block">
     <table className="w-full border-separate border-spacing-0">
       <thead>
         <tr>
           <th scope="col" className={th}>{t.token}</th>
           {!compact && <th scope="col" className={cx(th, "hidden md:table-cell")}>{t.price}</th>}
-          <th scope="col" className={cx(th, "hidden sm:table-cell")}>{t.balance}</th>
+          <th scope="col" className={cx(th, balanceCls)}>{t.balance}</th>
           <th scope="col" className={th}>{t.value}</th>
-          <th scope="col" className={cx(th, "hidden md:table-cell")}>{t.allocation}</th>
+          {!compact && <th scope="col" className={cx(th, "hidden md:table-cell")}>{t.allocation}</th>}
           {hasTarget && <th scope="col" className={th}>{t.target}</th>}
         </tr>
       </thead>
@@ -91,31 +95,31 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
           const tradeUsd = Math.abs(gap / 100) * totalUsd;
           return (
             <tr key={r.symbol} className={cx("[&>td]:border-b [&>td]:border-line last:[&>td]:border-0", r.amount === 0 && "opacity-60")}>
-              <td className="px-3 py-4 sm:px-4">
+              <td className="w-full max-w-0 px-3 py-4 sm:px-4">
                 <span className="flex min-w-0 items-center gap-3">
                   <AssetIcon symbol={r.symbol} size={36} />
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-ink">{r.name ?? r.symbol}</span>
-                    {r.name && <span className="block text-sm text-ink-3">{r.symbol}</span>}
+                    {r.name && <span className="block truncate text-sm text-ink-3">{r.symbol}</span>}
                   </span>
                 </span>
               </td>
               {!compact && <td className="tabular-nums hidden px-3 py-4 sm:px-4 text-right text-ink md:table-cell">{r.price === null ? "—" : usd(r.price, locale, r.price < 1 ? 4 : 2)}</td>}
-              <td className="tabular-nums hidden whitespace-nowrap px-3 py-4 sm:px-4 text-right text-ink sm:table-cell">{tokens(r.amount, locale)} <span className="text-ink-3">{r.symbol}</span></td>
-              <td className="px-3 py-4 sm:px-4 text-right">
+              <td className={cx("tabular-nums whitespace-nowrap px-3 py-4 text-right text-ink sm:px-4", balanceCls)}>{tokens(r.amount, locale)} <span className="text-ink-3">{r.symbol}</span></td>
+              <td className="whitespace-nowrap px-3 py-4 text-right sm:px-4">
                 <Money value={r.value} locale={locale} className="tabular-nums whitespace-nowrap font-medium text-ink" />
-                <span className="tabular-nums block text-sm text-ink-3 md:hidden">{percent(r.pct, locale)}</span>
+                <span className={cx("tabular-nums block text-sm text-ink-3", shareUnderValue)}>{percent(r.pct, locale)}</span>
               </td>
-              <td className="hidden px-3 py-4 sm:px-4 md:table-cell">
+              {!compact && <td className="hidden whitespace-nowrap px-3 py-4 sm:px-4 md:table-cell">
                 <span className="flex items-center justify-end gap-3">
                   <span className="tabular-nums w-14 text-right text-ink">{percent(r.pct, locale)}</span>
                   <span className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-3" aria-hidden="true">
                     <span className="block h-full rounded-full bg-ink" style={{ width: `${Math.min(100, r.pct)}%` }} />
                   </span>
                 </span>
-              </td>
+              </td>}
               {hasTarget && (
-                <td className="px-3 py-4 sm:px-4 text-right">
+                <td className="whitespace-nowrap px-3 py-4 text-right sm:px-4">
                   <span className="tabular-nums block text-ink">{percent(r.target ?? 0, locale, 0)}</span>
                   <span className={cx("block whitespace-nowrap text-sm", Math.abs(gap) < ON_TARGET_PCT ? "text-ink-3" : gap < 0 ? "text-danger" : "text-ok")}>
                     {Math.abs(gap) < ON_TARGET_PCT ? t.hold : fmt(gap < 0 ? t.sell : t.buy, { amount: usd(tradeUsd, locale, 0) })}

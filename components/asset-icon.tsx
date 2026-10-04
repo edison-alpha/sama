@@ -49,3 +49,28 @@ export function AssetIcon({ symbol, size = 28, className }: { symbol: string; si
     </span>
   );
 }
+
+/**
+ * Overlapping asset logos ("token stack"): just the logos, no ring, each in an exactly sized box so they overlap
+ * evenly. The leftmost logo sits on top. Logos past `max` fold into a "+N" disc.
+ */
+export function AssetStack({ symbols, size = 32, max = 3, className }: { symbols: string[]; size?: number; max?: number; className?: string }) {
+  const shown = symbols.slice(0, max);
+  const extra = symbols.length - shown.length;
+  const overlap = Math.round(size * 0.28);
+  const disc = (i: number) => ({ width: size, height: size, marginLeft: i === 0 ? 0 : -overlap, zIndex: shown.length + 1 - i });
+  return (
+    <span className={cx("flex shrink-0 items-center", className)} role="img" aria-label={symbols.join(", ")}>
+      {shown.map((s, i) => (
+        <span key={s} className="relative grid shrink-0 place-items-center rounded-full" style={disc(i)}>
+          <AssetIcon symbol={s} size={size} />
+        </span>
+      ))}
+      {extra > 0 && (
+        <span className="relative grid shrink-0 place-items-center rounded-full font-semibold text-ink-2" style={{ ...disc(shown.length), zIndex: 0 }}>
+          <span className="grid size-full place-items-center rounded-full bg-surface-2" style={{ fontSize: Math.max(10, size * 0.32) }}>+{extra}</span>
+        </span>
+      )}
+    </span>
+  );
+}

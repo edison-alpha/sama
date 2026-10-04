@@ -4,7 +4,6 @@ import { useState } from "react";
 import { IconCheck, IconShare, IconX } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card, CardHeader } from "@/components/ui/card";
 import type { RoundView } from "@/lib/api/types";
 import { blockUrl } from "@/lib/chain";
 import { short, tokens } from "@/lib/format";
@@ -42,7 +41,7 @@ export function ReceiptSummary({ v, compact = false }: { v: RoundView; compact?:
       {v.you.legs.length === 0 ? (
         !compact && <p className="text-sm text-ink-2">{d.receipt.nothing}</p>
       ) : (
-        <ul className="grid gap-2">
+        <ul className="grid grid-cols-1 divide-y divide-line">
           {v.you.legs.map((l, i) => (
             <AmountRow key={i} direction={l.direction} amount={l.amountTokens} symbol={l.symbol} usdValue={l.valueUsd} label={fmt(l.direction === "SEND" ? d.receipt.sent : d.receipt.received, { amount: tokens(l.amountTokens, locale), symbol: l.symbol, who: who(l.counterparty, d) })} />
           ))}
@@ -64,35 +63,44 @@ export function ReceiptSummary({ v, compact = false }: { v: RoundView; compact?:
   );
 }
 
+/** Independent checks as a compact panel: a pass count with a progress bar, then one tight row per check. */
 export function VerifierChecks({ v }: { v: RoundView }) {
   const { d, fmt } = useI18n();
   const ver = v.round.verification;
+  const passed = ver ? ver.checks.filter((c) => c.status === "PASS").length : 0;
   return (
-    <Card tone="soft">
-      <CardHeader title={d.receipt.checks} sub={ver ? fmt(d.round.verified, { a: ver.checks.filter((c) => c.status === "PASS").length, b: ver.checks.length }) : undefined} />
+    <section aria-labelledby="checks-title" className="rounded-[24px] border border-line bg-surface p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="checks-title" className="text-lg font-semibold tracking-tight text-ink">{d.receipt.checks}</h2>
+        {ver && <span className="num text-sm font-semibold text-ok">{passed}/{ver.checks.length}</span>}
+      </div>
       {!ver ? (
-        <p className="text-sm text-ink-2">{v.round.state === "NO_CROSS" ? d.receipt.noSettlement : d.receipt.notVerified}</p>
+        <p className="mt-2 text-sm text-ink-2">{v.round.state === "NO_CROSS" ? d.receipt.noSettlement : d.receipt.notVerified}</p>
       ) : (
         <>
-          <ul className="grid gap-3">
+          <p className="mt-0.5 text-sm text-ink-3">{fmt(d.round.verified, { a: passed, b: ver.checks.length })}</p>
+          <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-surface-3" aria-hidden="true">
+            <span className="block h-full rounded-full bg-ok" style={{ width: `${(passed / Math.max(1, ver.checks.length)) * 100}%` }} />
+          </span>
+          <ul className="mt-3 grid grid-cols-1 divide-y divide-line">
             {ver.checks.map((c) => (
-              <li key={c.name} className="flex gap-3 text-sm">
-                <span className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full ${c.status === "PASS" ? "bg-ok text-white" : c.status === "FAIL" ? "bg-danger text-white" : "bg-warn-soft text-warn"}`}>{c.status === "PASS" ? <IconCheck size={12} /> : <IconX size={12} />}</span>
-                <span>
-                  <span className="font-medium">{c.name}</span>
-                  <span className="block text-ink-3">{c.detail}</span>
+              <li key={c.name} className="flex gap-3 py-2.5" title={c.detail}>
+                <span className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded-full ${c.status === "PASS" ? "bg-ok text-white" : c.status === "FAIL" ? "bg-danger text-white" : "bg-warn-soft text-warn"}`}>{c.status === "PASS" ? <IconCheck size={10} /> : <IconX size={10} />}</span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-ink">{c.name}</span>
+                  <span className="block text-xs leading-snug text-ink-3">{c.detail}</span>
                 </span>
               </li>
             ))}
           </ul>
           {ver.providers && (
-            <p className="mt-4 text-xs text-ink-3">
+            <p className="mt-3 border-t border-line pt-3 text-xs text-ink-3">
               {fmt(d.receipt.providers, { executor: ver.providers.executor, verifier: ver.providers.verifier })} {ver.providers.independent && d.receipt.independent}
             </p>
           )}
         </>
       )}
-    </Card>
+    </section>
   );
 }
 

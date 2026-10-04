@@ -42,7 +42,7 @@ export default function HomePage() {
     <Stagger>
       <WalletHeader />
 
-      <m.section variants={rise} className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_340px]">
+      <m.section variants={rise} className="grid gap-6 sm:gap-8 xl:grid-cols-[1fr_340px]">
         {h.portfolio.ok ? (
           <ValueChart
             live={h.portfolio.totalUsd}
@@ -64,11 +64,17 @@ export default function HomePage() {
           <ErrorNote>{d.portfolio.readError} {h.portfolio.detail}</ErrorNote>
         )}
 
-        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-visible sm:px-0 lg:mt-36 lg:grid-cols-2 lg:content-start [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-visible xl:mt-36 xl:grid-cols-2 xl:content-start [&::-webkit-scrollbar]:hidden">
+          {/* Real spacer elements, not container padding: Chromium drops the leading edge of a flex scroll
+              container's own padding, so the first tile sits flush against the screen without one. scroll-px-4
+              keeps snap stops 16px in so the scrolled-to tile lands on the same gutter as the balance. Hidden (and
+              out of flow) once the row stops scrolling, at sm:, where grid columns must stay exactly four. */}
+          <span className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
           <ActionTile href="/portfolio?tab=target" icon={<IconTarget size={22} />}>{a.target}</ActionTile>
           <ActionTile href="/circles" icon={<IconCircles size={22} />}>{a.circles}</ActionTile>
-          <ActionTile href="/circles/new" icon={<IconPlus size={22} />}>{a.create}</ActionTile>
+          <ActionTile href="/circles?create=1" icon={<IconPlus size={22} />}>{a.create}</ActionTile>
           <ActionTile href="/learn" icon={<IconPlay size={22} />}>{a.learn}</ActionTile>
+          <span className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
         </div>
       </m.section>
 
@@ -76,7 +82,7 @@ export default function HomePage() {
         <NextStepCard home={h} />
       </div>
 
-      <div className="mt-8 grid gap-10 sm:mt-10 sm:border-t sm:border-line sm:pt-10 lg:grid-cols-[1fr_340px]">
+      <div className="mt-8 grid gap-10 sm:mt-10 sm:border-t sm:border-line sm:pt-10 xl:grid-cols-[1fr_340px]">
         <m.section variants={rise} aria-labelledby="tokens-title" className="min-w-0">
           <SectionTitle id="tokens-title" title={d.portfolio.tabs.tokens} sub={count} />
           {h.portfolio.ok && (
