@@ -1,6 +1,6 @@
 import { encodeFunctionData, erc20Abi, type Hex, type TypedDataDefinition } from "viem";
 import type { SamaApi } from "./contract";
-import type { Activity, Circle, RoundView } from "./types";
+import type { Activity, Circle, HistoryPoint, RoundView } from "./types";
 
 /**
  * Live client for the Sama API. Routes and payloads are Venue0's (venue0-frontend/components/product/round-stage.tsx),
@@ -57,6 +57,7 @@ export const liveApi: SamaApi = {
   assets: () => call("/api/assets"), // NEW
   home: () => call("/api/me/home"), // NEW: aggregates portfolio, target, drift, circles, pending rounds, activity
   portfolio: () => call("/api/me/portfolio"),
+  portfolioHistory: async (range) => (await call<{ points: HistoryPoint[] }>(`/api/me/portfolio/history?range=${range}`)).points, // NEW
   previewTarget: (target) => call("/api/me/target/preview", { body: target }),
   saveTarget: async (target) => {
     await call("/api/me/target", { body: target });

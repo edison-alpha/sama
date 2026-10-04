@@ -1,6 +1,5 @@
 "use client";
 
-import Avatar from "boring-avatars";
 import { m } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { page, spring } from "@/components/motion";
 import { PageSkeleton } from "@/components/ui/states";
 import { useSession } from "@/components/wallet/session";
+import { UserAvatar } from "@/components/wallet/user-avatar";
 import { isTestnet } from "@/lib/chain";
 import { short } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <TopBar />
+        <TopBar walletPage={WALLET_ROUTES.includes(pathname)} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-36 pt-4 sm:px-6 md:pb-12 md:pt-6">
           {ready && session ? (
             // Keyed by route so each screen plays its entrance; cards and tiles inside stagger in (see `rise`).
@@ -134,17 +134,8 @@ function SideLink({ href, current, icon, children }: { href: string; current: bo
   );
 }
 
-/** Brand colours, so every generated avatar sits in the Sama palette. */
-const AVATAR_COLORS = ["#e97863", "#0d2f6e", "#2563d9", "#f0b90b", "#23955a"];
-
-/** Default user avatar, generated from the wallet address so the same wallet always gets the same picture. */
-function UserAvatar({ name, size }: { name: string; size: number }) {
-  return (
-    <span className="shrink-0 rounded-full" aria-hidden="true">
-      <Avatar name={name.toLowerCase()} variant="beam" size={size} colors={AVATAR_COLORS} className="block" />
-    </span>
-  );
-}
+/** Wallet pages carry their own header (avatar and address), so phones skip the brand bar there. */
+const WALLET_ROUTES = ["/home", "/portfolio", "/activity"];
 
 /**
  * Phone navigation: a frosted pill holding the four main tabs, with a glass lens that slides to the active one, and a
@@ -185,19 +176,18 @@ function TabBar({ active }: { active: (href: string) => boolean }) {
   );
 }
 
-function TopBar() {
+function TopBar({ walletPage }: { walletPage: boolean }) {
   const { d } = useI18n();
-  const { session, wrongNetwork, switchNetwork } = useSession();
+  const { wrongNetwork, switchNetwork } = useSession();
   return (
     <>
-      {session?.demo && <div className="bg-accent-soft/80 px-4 py-2 text-center text-xs font-medium text-ink backdrop-blur sm:text-sm">{d.common.demoBanner}</div>}
       {wrongNetwork && (
         <div role="alert" className="flex flex-wrap items-center justify-center gap-3 bg-warn-soft px-4 py-2 text-sm text-warn">
           {d.network.wrong}
           <Button size="sm" variant="secondary" onClick={() => void switchNetwork()}>{d.network.switch}</Button>
         </div>
       )}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_72%,transparent)] px-4 backdrop-blur-xl sm:px-6 md:bg-transparent md:backdrop-blur-none">
+      <header className={cx("sticky top-0 z-30 flex h-16 items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_72%,transparent)] px-4 backdrop-blur-xl sm:px-6 md:bg-transparent md:backdrop-blur-none", walletPage && "max-md:hidden")}>
         <div className="md:hidden"><BrandLogo href="/home" className="h-8" /></div>
         <div className="hidden md:block" />
         <div className="flex items-center gap-1 rounded-full md:border md:border-[var(--glass-edge)] md:bg-[var(--glass-bg)] md:px-1.5 md:py-1 md:shadow-[inset_0_1px_0_var(--glass-hi),var(--elev-sidebar)] md:backdrop-blur-xl">

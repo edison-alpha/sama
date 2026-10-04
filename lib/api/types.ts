@@ -27,6 +27,12 @@ export type Target = { weights: Record<string, number>; costCapBps: number; resi
 
 export type TargetPreview = { ok: boolean; problems: string[]; trades: Array<{ symbol: string; side: Side; amountTokens: number; valueUsd: number }> };
 
+/** Time windows for the portfolio value chart. */
+export type HistoryRange = "1H" | "1D" | "1W" | "1M" | "1Y" | "ALL";
+
+/** One point of total wallet value: `t` in ms since epoch, `usd` the total at that moment. Oldest first. */
+export type HistoryPoint = { t: number; usd: number };
+
 export type Drift = { symbol: string; currentPct: number; targetPct: number };
 
 export type Visibility = "PUBLIC" | "INVITE_ONLY" | "PRIVATE";

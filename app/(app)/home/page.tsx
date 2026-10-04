@@ -1,100 +1,103 @@
 "use client";
 
+import { m } from "motion/react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ActivityRow } from "@/components/activity/activity-row";
 import { NextStepCard } from "@/components/home/next-step-card";
-import { CountUp, Stagger } from "@/components/motion";
-import { IconCalendar, IconChevronRight, IconCircles, IconSwap, IconTarget, IconWallet } from "@/components/icons";
-import { DriftBars } from "@/components/portfolio/drift-bars";
-import { HoldingsRing } from "@/components/portfolio/holdings-ring";
+import { IconArrowRight, IconCircles, IconPlay, IconPlus, IconSwap, IconTarget } from "@/components/icons";
+import { Stagger, rise } from "@/components/motion";
+import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
+import { ValueChart } from "@/components/portfolio/value-chart";
+import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { Badge, stateTone } from "@/components/ui/badge";
-import { Card, CardHeader, IconChip, PageHeader, StatTile } from "@/components/ui/card";
-import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
+import { IconChip } from "@/components/ui/card";
+import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { sama } from "@/lib/api";
-import type { PendingRound } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
-import { percent, usd } from "@/lib/format";
+import { percent } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 
-/** A round asks something of you when it's collecting and you haven't joined, wants your approval, or has undecided leftovers. */
-function needsYou(r: PendingRound): boolean {
-  if (["OPEN", "COLLECTING"].includes(r.state) && !r.signed) return true;
-  if (["PROPOSED", "APPROVING"].includes(r.state) && r.inPlan && !r.approved) return true;
-  return r.residualUndecidedUsd > 0;
-}
-
+/**
+ * Home is the wallet overview, laid out like a DEX portfolio page: total value and quick actions on top, the one
+ * next step under it, then tokens on the left and rounds + recent activity on the right.
+ */
 export default function HomePage() {
   const { d, fmt, locale } = useI18n();
   const { data: h, error, refresh } = useApi(() => sama.home(), [], { pollMs: 4_000 });
+  const { data: assets } = useApi(() => sama.assets(), []);
 
   if (!h) return error ? <ErrorNote action={<button className="underline" onClick={() => void refresh()}>{d.common.retry}</button>}>{error}</ErrorNote> : <PageSkeleton />;
 
-  const s = d.home.stats;
-  const waiting = h.pending.filter(needsYou).length;
+  const drift = h.target ? h.drift : null;
   const offTarget = h.totalDriftPct > 2;
-  const when = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const weekAgo = Date.now() - 7 * 86_400_000;
+  const lastWeek = h.activity.filter((x) => new Date(x.createdAt).getTime() >= weekAgo).length;
+  const day = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short" });
+  const count = h.portfolio.ok ? fmt(d.home.tokensCount, { n: tokenCount(h.portfolio.positions, drift) }) : undefined;
+  const a = d.home.actions;
 
   return (
     <Stagger>
-      <PageHeader
-        title={d.home.hello}
-        actions={
-          <span className="hidden h-10 items-center gap-2 rounded-full border border-[var(--glass-edge)] bg-[var(--glass-bg)] px-4 text-sm font-medium text-ink-2 backdrop-blur-xl sm:inline-flex">
-            <IconCalendar size={18} />
-            {new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { dateStyle: "long" }).format(new Date())}
-          </span>
-        }
-      />
+      <WalletHeader />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatTile icon={<IconWallet size={18} />} label={s.value} value={h.portfolio.ok ? <CountUp value={h.portfolio.totalUsd} format={(n) => usd(n, locale)} /> : "—"} />
-        <StatTile
-          icon={<IconTarget size={18} />}
-          label={s.drift}
-          value={h.target ? <CountUp value={h.totalDriftPct} format={(n) => percent(n, locale)} /> : "—"}
-          chip={h.target ? <Badge tone={offTarget ? "accent" : "ok"}>{offTarget ? s.offTarget : s.onTarget}</Badge> : <Badge>{s.noTarget}</Badge>}
-        />
-        <StatTile icon={<IconSwap size={18} />} label={s.rounds} value={<CountUp value={h.pending.length} format={(n) => String(Math.round(n))} />} chip={waiting > 0 ? <Badge tone="accent" dot>{fmt(s.needsYou, { n: waiting })}</Badge> : null} />
-        <StatTile icon={<IconCircles size={18} />} label={s.circles} value={<CountUp value={h.circles.length} format={(n) => String(Math.round(n))} />} />
+      <m.section variants={rise} className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_340px]">
+        {h.portfolio.ok ? (
+          <ValueChart
+            live={h.portfolio.totalUsd}
+            below={
+              <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium">
+                {h.target ? (
+                  <span className={offTarget ? "text-accent" : "text-ok"}>
+                    {offTarget ? fmt(d.home.offTarget, { pct: percent(h.totalDriftPct, locale) }) : d.home.onTarget}
+                  </span>
+                ) : (
+                  <span className="text-ink-3">{d.home.stats.noTarget}</span>
+                )}
+                <span className="text-ink-3" aria-hidden="true">•</span>
+                <span className="text-ink-2">{count}</span>
+              </p>
+            }
+          />
+        ) : (
+          <ErrorNote>{d.portfolio.readError} {h.portfolio.detail}</ErrorNote>
+        )}
+
+        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:overflow-visible sm:px-0 lg:mt-36 lg:grid-cols-2 lg:content-start [&::-webkit-scrollbar]:hidden">
+          <ActionTile href="/portfolio?tab=target" icon={<IconTarget size={22} />}>{a.target}</ActionTile>
+          <ActionTile href="/circles" icon={<IconCircles size={22} />}>{a.circles}</ActionTile>
+          <ActionTile href="/circles/new" icon={<IconPlus size={22} />}>{a.create}</ActionTile>
+          <ActionTile href="/learn" icon={<IconPlay size={22} />}>{a.learn}</ActionTile>
+        </div>
+      </m.section>
+
+      <div className="mt-6 sm:mt-8">
+        <NextStepCard home={h} />
       </div>
 
-      <NextStepCard home={h} />
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
-        <Card>
-          <CardHeader title={d.home.allocation} aside={<Link href="/portfolio" className="inline-flex items-center gap-1 text-sm font-medium text-accent">{d.home.openPortfolio}<IconChevronRight size={16} /></Link>} />
-          {h.portfolio.ok ? (
+      <div className="mt-8 grid gap-10 sm:mt-10 sm:border-t sm:border-line sm:pt-10 lg:grid-cols-[1fr_340px]">
+        <m.section variants={rise} aria-labelledby="tokens-title" className="min-w-0">
+          <SectionTitle id="tokens-title" title={d.portfolio.tabs.tokens} sub={count} />
+          {h.portfolio.ok && (
             <>
-              <HoldingsRing
-                positions={h.portfolio.positions}
-                label={d.home.allocation}
-                center={
-                  <>
-                    <span className="num block text-2xl font-semibold tracking-tight text-ink">{h.portfolio.positions.length}</span>
-                    <span className="block text-xs text-ink-3">{d.home.assetsLabel}</span>
-                  </>
-                }
-              />
-              <div className="mt-6 border-t border-line pt-5">
-                {h.target ? <DriftBars drift={h.drift} /> : <EmptyState title={d.home.next.target.title} body={d.home.next.target.body} action={<ButtonLink href="/portfolio" size="sm">{d.home.next.target.cta}</ButtonLink>} />}
-              </div>
+              <TokenTable positions={h.portfolio.positions} totalUsd={h.portfolio.totalUsd} drift={drift} assets={assets ?? undefined} compact limit={6} />
+              <PillLink href="/portfolio">{d.home.viewTokens}</PillLink>
             </>
-          ) : (
-            <ErrorNote>{d.portfolio.readError} {h.portfolio.detail}</ErrorNote>
           )}
-        </Card>
+        </m.section>
 
-        <div className="grid content-start gap-6">
-          <Card>
-            <CardHeader title={d.home.activeRounds} />
+        {/* Phones keep Home to value, actions, next step and tokens; rounds and history live in their own tabs. */}
+        <div className="hidden content-start gap-10 sm:grid">
+          <m.section variants={rise} aria-labelledby="rounds-title">
+            <SectionTitle id="rounds-title" title={d.home.activeRounds} />
             {h.pending.length === 0 ? (
               <EmptyState title={d.home.noActiveRounds} action={<ButtonLink href="/circles" size="sm" variant="secondary">{d.home.next.circle.cta}</ButtonLink>} />
             ) : (
-              <ul className="grid grid-cols-1 gap-1">
+              <ul className="grid gap-1">
                 {h.pending.map((r) => (
                   <li key={r.roundId}>
-                    <Link href={`/rounds/${r.roundId}`} className="-mx-2 flex min-w-0 items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-surface/70">
+                    <Link href={`/rounds/${r.roundId}`} className="-mx-2 flex min-w-0 items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-surface-2">
                       <IconChip className="text-match"><IconSwap size={18} /></IconChip>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium text-ink">{r.circleName}</span>
@@ -106,20 +109,51 @@ export default function HomePage() {
                 ))}
               </ul>
             )}
-          </Card>
-  
-          <Card>
-            <CardHeader title={d.home.recent} aside={<Link href="/activity" className="inline-flex items-center gap-1 text-sm font-medium text-accent">{d.home.allActivity}<IconChevronRight size={16} /></Link>} />
+          </m.section>
+
+          <m.section variants={rise} aria-labelledby="recent-title">
+            <SectionTitle id="recent-title" title={d.home.recent} sub={h.activity.length ? fmt(d.home.recentSub, { n: lastWeek }) : undefined} />
             {h.activity.length === 0 ? (
-              <p className="text-ink-2">{d.home.noActivity}</p>
+              <p className="text-sm text-ink-3">{d.home.noActivity}</p>
             ) : (
-              <div className="grid grid-cols-1 gap-0.5">
-                {h.activity.map((a) => <ActivityRow key={a.id} a={a} time={when.format(new Date(a.createdAt))} />)}
-              </div>
+              <>
+                <div className="grid gap-0.5">
+                  {h.activity.slice(0, 4).map((x) => <ActivityRow key={x.id} a={x} time={day.format(new Date(x.createdAt))} />)}
+                </div>
+                <PillLink href="/activity">{d.home.allActivity}</PillLink>
+              </>
             )}
-          </Card>
+          </m.section>
         </div>
       </div>
     </Stagger>
+  );
+}
+
+function SectionTitle({ id, title, sub }: { id: string; title: string; sub?: string }) {
+  return (
+    <div className="mb-4">
+      <h2 id={id} className="text-xl font-semibold tracking-tight text-ink">{title}</h2>
+      {sub && <p className="mt-0.5 text-sm text-ink-3">{sub}</p>}
+    </div>
+  );
+}
+
+/** Quick action in the brand tint, like the Send/Receive tiles in wallet apps. */
+function ActionTile({ href, icon, children }: { href: string; icon: ReactNode; children: ReactNode }) {
+  return (
+    <Link href={href} className="flex h-24 w-32 shrink-0 snap-start flex-col justify-between rounded-[20px] bg-accent-soft p-4 sm:h-28 sm:w-auto text-accent transition-[filter,transform] hover:brightness-110 active:scale-[0.98]">
+      {icon}
+      <span className="text-base font-semibold">{children}</span>
+    </Link>
+  );
+}
+
+function PillLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link href={href} className="mt-4 inline-flex h-10 items-center gap-2 rounded-full border border-line px-4 text-sm font-medium text-ink transition-colors hover:bg-surface-2">
+      {children}
+      <IconArrowRight size={16} />
+    </Link>
   );
 }
