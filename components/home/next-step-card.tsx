@@ -3,13 +3,25 @@
 import { m } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { IconArrowRight, IconSwap } from "@/components/icons";
+import { IconArrowRight, IconCheckCircle, IconCircles, IconClock, IconPen, IconSwap, IconTarget } from "@/components/icons";
 import { rise } from "@/components/motion";
 import { ButtonLink } from "@/components/ui/button";
 import type { Home } from "@/lib/api/types";
 import { clock, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 import { nextStep } from "@/lib/next-step";
+
+/** One icon per kind of step: a pen to sign, a check when it's done, arrows for a transfer, and so on. */
+const STEP_ICON = {
+  join: IconPen,
+  approve: IconCheckCircle,
+  settle: IconSwap,
+  leftovers: IconSwap,
+  wait: IconClock,
+  target: IconTarget,
+  circle: IconCircles,
+  allGood: IconCheckCircle,
+} as const;
 
 /** The one thing to do now (PRD §19.4.3), as a single slim row. Always present, always one primary action. */
 export function NextStepCard({ home }: { home: Home }) {
@@ -39,13 +51,14 @@ export function NextStepCard({ home }: { home: Home }) {
     }
   })();
 
+  const StepIcon = STEP_ICON[step.kind];
   const countdown = step.kind === "join" ? clock(step.round.freezesAt - now) : null;
 
   return (
     <m.section variants={rise} aria-labelledby="next-title">
       {/* Phones: the whole card is the tap target, like a wallet app's task card; the action reads as a text link. */}
       <Link href={href} className="flex gap-3 rounded-[20px] border border-line bg-surface-2/60 p-4 transition-colors active:bg-surface-2 sm:hidden">
-        <IconSwap size={22} className="mt-0.5 shrink-0 text-accent" />
+        <StepIcon size={22} className="mt-0.5 shrink-0 text-accent" />
         <span className="min-w-0 flex-1">
           <span className="flex items-start justify-between gap-3">
             <span className="text-base font-semibold leading-snug text-ink">{fmt(copy.title, vars)}</span>

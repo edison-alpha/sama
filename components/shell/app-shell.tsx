@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`) || (href === "/circles" && pathname.startsWith("/rounds"));
   // Circle detail and the round journey (plus its receipt) own a fixed primary button at the bottom; the tab
   // bar would float right under it, so phones drop the tab bar there and give that space to the page instead.
-  const noTabBar = (pathname.startsWith("/circles/") && pathname !== "/circles/new") || pathname.startsWith("/rounds/");
+  const noTabBar = (pathname.startsWith("/circles/") && pathname !== "/circles/new") || pathname.startsWith("/rounds/") || pathname === "/settings";
 
   // The collapsed state lives on <html data-sidebar> (applied before paint); this mirror only drives the toggle's labels.
   const [collapsed, setCollapsed] = useState(false);
