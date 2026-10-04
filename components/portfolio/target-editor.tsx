@@ -44,6 +44,14 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   const buyUsd = (preview?.trades ?? []).filter((x) => x.side === "BUY").reduce((s, x) => s + x.valueUsd, 0);
   // Held tokens first (largest first), then the rest in catalogue order. Fixed while editing, so rows never jump.
   const [rows] = useState(() => [...assets].sort((a, b) => (current[b.symbol] ?? 0) - (current[a.symbol] ?? 0)));
+  // With ~90 bStocks the list starts with what matters: held, weighted, tier A and cash (or everything when the API
+  // sends no tiers). The rest is one search away, and stays listed once it gets a weight.
+  const [query, setQuery] = useState("");
+  const [pinned, setPinned] = useState(() => new Set(assets.filter((a) => (current[a.symbol] ?? 0) > 0 || (weights[a.symbol] ?? 0) > 0 || !a.tier || a.tier === "A" || a.class === "CASH").map((a) => a.symbol)));
+  const pin = (symbols: string[]) => setPinned((p) => (symbols.every((s) => p.has(s)) ? p : new Set([...p, ...symbols])));
+  const q = query.trim().toLowerCase();
+  const visible = q ? rows.filter((a) => `${a.symbol} ${a.name}`.toLowerCase().includes(q)) : rows.filter((a) => pinned.has(a.symbol));
+  const caution = (a: Asset) => (a.leveraged ? e.leveraged : a.tier === "C" ? e.fewHolders : null);
 
   // Debounced server check: never one request per keystroke.
   useEffect(() => {
@@ -52,7 +60,10 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
     return () => window.clearTimeout(id);
   }, [weights, costCapBps, residualStyle]);
 
-  const setWeight = (symbol: string, value: number) => setWeights((w) => ({ ...w, [symbol]: Math.max(0, Math.min(100, Math.round(Number.isFinite(value) ? value : 0))) }));
+  const setWeight = (symbol: string, value: number) => {
+    pin([symbol]);
+    setWeights((w) => ({ ...w, [symbol]: Math.max(0, Math.min(100, Math.round(Number.isFinite(value) ? value : 0))) }));
+  };
 
   /** Scales every non-zero weight so the total is exactly 100; rounding drift goes to the largest weight. */
   const autoBalance = () => {
@@ -102,7 +113,10 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                     type="button"
                     title={body}
                     aria-pressed={selected}
-                    onClick={() => setWeights(PRESETS[k])}
+                    onClick={() => {
+                      pin(Object.keys(PRESETS[k]));
+                      setWeights(PRESETS[k]);
+                    }}
                     className={cx("h-9 shrink-0 rounded-full border px-3.5 text-sm font-semibold transition-colors sm:h-10 sm:px-4", selected ? "border-accent bg-accent-soft text-accent" : "border-line text-ink hover:bg-surface-2")}
                   >
                     {name}
@@ -121,9 +135,15 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
             </button>
           </div>
 
+          <label className="mt-4 flex h-11 items-center gap-3 rounded-2xl bg-surface-2 px-4 text-ink-3 focus-within:ring-1 focus-within:ring-line-strong">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input value={query} onChange={(ev) => setQuery(ev.target.value)} placeholder={fmt(e.search, { n: assets.filter((a) => a.class !== "CASH").length })} aria-label={fmt(e.search, { n: assets.filter((a) => a.class !== "CASH").length })} className="h-full w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3" />
+          </label>
+          {q && visible.length === 0 && <p className="mt-3 text-sm text-ink-3">{fmt(e.noMatch, { q: query.trim() })}</p>}
+
           {/* Phones: one row per token (now on the left, the target stepper on the right, the trade underneath). */}
-          <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/60 sm:hidden">
-            {rows.map((a) => {
+          <ul className={cx("mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/60 sm:hidden", visible.length === 0 && "hidden")}>
+            {visible.map((a) => {
               const now = current[a.symbol] ?? 0;
               const want = weights[a.symbol] ?? 0;
               const trade = trades.get(a.symbol);
@@ -134,6 +154,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold text-ink">{a.symbol}</span>
                       <span className="tabular-nums block text-xs text-ink-3">{d.portfolio.now} {percent(now, locale)}</span>
+                      {caution(a) && <span className="block truncate text-xs text-warn">{caution(a)}</span>}
                     </span>
                     <Stepper symbol={a.symbol} value={want} onChange={(v) => setWeight(a.symbol, v)} label={t.target} />
                   </div>
@@ -166,7 +187,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                 </tr>
               </thead>
               <tbody>
-                {rows.map((a) => {
+                {visible.map((a) => {
                   const now = current[a.symbol] ?? 0;
                   const want = weights[a.symbol] ?? 0;
                   const trade = trades.get(a.symbol);
@@ -179,6 +200,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                           <span className="min-w-0">
                             <span className="block truncate font-medium text-ink">{a.symbol}</span>
                             <span className="block truncate text-xs text-ink-3">{d.portfolio.classes[a.class]}</span>
+                            {caution(a) && <span className="block truncate text-xs text-warn">{caution(a)}</span>}
                           </span>
                         </span>
                       </td>

@@ -59,7 +59,7 @@ function Card({ i, tone, className, copy, narrow = false, children }: { i: numbe
 }
 
 /* ---------- Tall: the solver finds rings ---------- */
-const STOCKS = ["tAAPL", "tNVDA", "tTSLA", "tMSFT"];
+const STOCKS = ["AAPLB", "NVDAB", "TSLAB", "MSFTB"];
 const R = 42;
 const at = (deg: number) => [50 + R * Math.cos((deg * Math.PI) / 180), 50 + R * Math.sin((deg * Math.PI) / 180)] as const;
 const arc = (from: number, to: number) => {
@@ -67,7 +67,7 @@ const arc = (from: number, to: number) => {
   const [x2, y2] = at(to);
   return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${R} ${R} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
 };
-const PROMPTS = ["Netting 24 stock rebalances…", "tAAPL → tNVDA → tTSLA → tAAPL", "Found a 3-wallet ring", "Only 6% left for the market"];
+const PROMPTS = ["Netting 24 stock rebalances…", "AAPLB → NVDAB → TSLAB → AAPLB", "Found a 3-wallet ring", "Only 6% left for the market"];
 /** Orb animation per prompt: scanning the round, wiring the ring, solving it, then the settled result. */
 const ORB_STATES: OrbState[] = ["searching", "connecting", "solving", "working"];
 
@@ -114,10 +114,10 @@ function SolverVisual({ running }: { running: boolean }) {
 
 /* ---------- Wide: one transaction, all or nothing ---------- */
 const LEGS: Array<[string, string, string]> = [
-  ["tAAPL", "2.00", "0x7a…41c → 0x19…be2"],
-  ["tNVDA", "2.55", "0x19…be2 → 0xc4…07f"],
-  ["tTSLA", "1.10", "0xc4…07f → 0x7a…41c"],
-  ["tMSFT", "0.80", "0x3e…9d1 → 0x19…be2"],
+  ["AAPLB", "2.00", "0x7a…41c → 0x19…be2"],
+  ["NVDAB", "2.55", "0x19…be2 → 0xc4…07f"],
+  ["TSLAB", "1.10", "0xc4…07f → 0x7a…41c"],
+  ["MSFTB", "0.80", "0x3e…9d1 → 0x19…be2"],
 ];
 
 function SettlementVisual() {
@@ -157,13 +157,13 @@ function ApprovalVisual() {
       <Panel className="ps-float w-full max-w-[300px] p-4">
         <p className="text-[11px] text-white/60">Token allowance</p>
         <div className="mt-3 flex items-center gap-2.5">
-          <AssetIcon symbol="tAAPL" size={30} />
+          <AssetIcon symbol="AAPLB" size={30} />
           <div className="flex-1">
             <p className="relative w-fit text-xs text-white/50">
               Unlimited
               <span className="ps-strike absolute inset-x-0 top-1/2 h-px bg-accent" />
             </p>
-            <p className="ps-exact num text-lg font-medium">Exactly 2.00 tAAPL</p>
+            <p className="ps-exact num text-lg font-medium">Exactly 2.00 AAPLB</p>
           </div>
         </div>
       </Panel>

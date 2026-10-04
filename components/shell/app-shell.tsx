@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BrandLogo, Mark } from "@/components/brand";
-import { IconChevronRight, IconCircles, IconClock, IconHome, IconLayers, IconPie } from "@/components/icons";
+import { IconCircles, IconClock, IconHome, IconLayers, IconPie, IconSidebar } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { page, spring } from "@/components/motion";
 import { PageSkeleton } from "@/components/ui/states";
@@ -65,18 +65,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <aside className="sticky top-0 hidden h-dvh p-3 md:block">
         <div className="glass-panel flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] px-3 py-5">
-          <div className="flex items-center justify-between gap-2 pl-2 collapsed:flex-col collapsed:gap-4 collapsed:pl-0">
+          <div className="flex items-center justify-between gap-2 pl-2 collapsed:justify-center collapsed:pl-0">
             <span className="collapsed:hidden"><BrandLogo href="/home" /></span>
-            <Link href="/home" aria-label="Sama" className="hidden collapsed:block"><Mark size={30} /></Link>
+            {/* Collapsed: the brand mark is the expand control; it swaps to the panel icon on hover or focus. */}
             <button
               type="button"
               onClick={toggleSidebar}
               aria-expanded={!collapsed}
               aria-label={collapsed ? d.nav.expand : d.nav.collapse}
               title={collapsed ? d.nav.expand : d.nav.collapse}
-              className="grid size-9 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-[var(--tabbar-lens-edge)] hover:text-ink"
+              className="group/toggle relative grid size-9 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-[var(--tabbar-lens-edge)] hover:text-ink collapsed:size-11 collapsed:rounded-xl"
             >
-              <IconChevronRight size={18} className="rotate-180 transition-transform duration-300 collapsed:rotate-0" />
+              <IconSidebar size={20} className="collapsed:absolute collapsed:opacity-0 collapsed:transition-opacity collapsed:group-hover/toggle:opacity-100 collapsed:group-focus-visible/toggle:opacity-100" />
+              <span className="hidden transition-opacity collapsed:block collapsed:group-hover/toggle:opacity-0 collapsed:group-focus-visible/toggle:opacity-0"><Mark size={30} /></span>
             </button>
           </div>
           <nav aria-label="Primary" className="mt-8 grid gap-1">

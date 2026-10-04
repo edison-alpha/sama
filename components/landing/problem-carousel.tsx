@@ -20,7 +20,7 @@ const TONES = [T.navy, T.forest, T.amber, T.plum, T.slate];
 function TradeRow({ wallet, action, fee, delay }: { wallet: string; action: string; fee: string; delay: string }) {
   return (
     <Panel className="flex items-center gap-3 px-3.5 py-3">
-      <AssetIcon symbol="tNVDA" size={32} />
+      <AssetIcon symbol="NVDAB" size={32} />
       <div className="min-w-0 flex-1">
         <p className="text-[11px] text-white/60">{wallet}</p>
         <p className="text-sm font-medium">{action}</p>
@@ -33,7 +33,7 @@ function TradeRow({ wallet, action, fee, delay }: { wallet: string; action: stri
 function OppositeScene() {
   return (
     <div className="ps-float w-full max-w-[300px]">
-      <TradeRow wallet="Wallet A" action="Sell 4.0 tNVDA" fee="−$3.10" delay="0s" />
+      <TradeRow wallet="Wallet A" action="Sell 4.0 NVDAB" fee="−$3.10" delay="0s" />
       <div className="relative h-24">
         <svg className="absolute inset-0 size-full" viewBox="0 0 100 96" preserveAspectRatio="none" aria-hidden="true">
           <path className="ps-flow" d="M50 0 V34" />
@@ -46,13 +46,13 @@ function OppositeScene() {
           </div>
         </div>
       </div>
-      <TradeRow wallet="Wallet B" action="Buy 3.8 tNVDA" fee="−$2.96" delay="1.4s" />
+      <TradeRow wallet="Wallet B" action="Buy 3.8 NVDAB" fee="−$2.96" delay="1.4s" />
     </div>
   );
 }
 
 /* ---------- 2. Rings no pair can see ---------- */
-const RING = ["tAAPL", "tTSLA", "tNVDA"];
+const RING = ["AAPLB", "TSLAB", "NVDAB"];
 const R = 44;
 const at = (deg: number) => [50 + R * Math.cos((deg * Math.PI) / 180), 50 + R * Math.sin((deg * Math.PI) / 180)] as const;
 const arc = (from: number, to: number) => {
@@ -100,9 +100,9 @@ function PoolScene() {
   return (
     <Panel className="ps-float w-full max-w-[310px] p-4">
       <div className="flex items-center gap-2.5">
-        <AssetIcon symbol="tNVDA" size={28} />
+        <AssetIcon symbol="NVDAB" size={28} />
         <div className="flex-1">
-          <p className="text-sm font-medium">tNVDA / USDT</p>
+          <p className="text-sm font-medium">NVDAB / USDT</p>
           <p className="text-[11px] text-white/60">Pool depth</p>
         </div>
         <p className="num text-sm">$18.4K</p>
@@ -127,7 +127,7 @@ function PoolScene() {
 
 /* ---------- 4. Gas before you start ---------- */
 function GasScene() {
-  const rows: Array<[string, string, boolean]> = [["tNVDA", "12.40", false], ["tAAPL", "8.00", false], ["BNB", "0.0000", true]];
+  const rows: Array<[string, string, boolean]> = [["NVDAB", "12.40", false], ["AAPLB", "8.00", false], ["BNB", "0.0000", true]];
   return (
     <div className="ps-float relative w-full max-w-[300px]">
       <Panel className="p-4">
@@ -158,7 +158,7 @@ function GasScene() {
 
 /* ---------- 5. Signing blind ---------- */
 function SignScene() {
-  const readable: Array<[string, string, string]> = [["You send", "2.00 tAAPL", "tAAPL"], ["You receive", "2.55 tNVDA", "tNVDA"]];
+  const readable: Array<[string, string, string]> = [["You send", "2.00 AAPLB", "AAPLB"], ["You receive", "2.55 NVDAB", "NVDAB"]];
   return (
     <Panel className="ps-float w-full max-w-[310px] p-4">
       <div className="flex items-center gap-2 text-[11px] text-white/60">

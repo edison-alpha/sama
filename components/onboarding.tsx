@@ -22,7 +22,7 @@ import { cx } from "@/utils/cx";
 
 const STEP_KEY = "sama_onboarding_step";
 const STEPS = 3;
-const WELCOME_ASSETS = ["BTCB", "WBNB", "ETH", "USDT", "tNVDA", "USDC"];
+const WELCOME_ASSETS = ["NVDAB", "AAPLB", "TSLAB", "USDT", "SPYB", "GOOGLB"];
 type PresetKey = keyof typeof PRESETS;
 
 /**

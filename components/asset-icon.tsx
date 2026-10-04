@@ -1,12 +1,14 @@
 "use client";
 
 import { Icon } from "@iconify/react";
+import { BSTOCK_LOGOS } from "@/lib/api/bstocks.generated";
 import { cx } from "@/utils/cx";
 
 /**
- * Asset logos from Iconify. Crypto uses the full-colour `cryptocurrency-color` set; stocks use `simple-icons`
- * marks on a round chip in the brand colour, as in the landing design. Tokenized-stock symbols ("tNVDA") map to
- * their underlying ticker. Unknown symbols fall back to a monogram.
+ * Asset logos. bStocks use the issuer's logo from /assets/<SYMBOL>.png (downloaded by
+ * sama-packages/scripts/assets/build-allowlist.mjs). Otherwise Iconify: crypto uses the full-colour `cryptocurrency-color` set;
+ * stocks use `simple-icons` marks on a round chip in the brand colour, as in the landing design. Tokenized-stock
+ * symbols ("tNVDA", "NVDAB") map to their underlying ticker. Unknown symbols fall back to a monogram.
  */
 type Spec = { icon: string | null; bg?: string; fg?: string; text?: string };
 
@@ -37,10 +39,18 @@ const STOCKS: Record<string, Spec> = {
 
 function specFor(symbol: string): Spec | null {
   const s = symbol.toUpperCase();
-  return CRYPTO[s] ?? STOCKS[s] ?? STOCKS[s.replace(/^T(?=[A-Z]{2,5}$)/, "")] ?? null;
+  return CRYPTO[s] ?? STOCKS[s] ?? STOCKS[s.replace(/^T(?=[A-Z]{2,5}$)/, "")] ?? STOCKS[s.replace(/B$/, "")] ?? null;
 }
 
 export function AssetIcon({ symbol, size = 28, className }: { symbol: string; size?: number; className?: string }) {
+  // Some issuer PNGs have no alpha channel (white corners), so the round clip is required, not decorative.
+  if (BSTOCK_LOGOS.has(symbol)) {
+    return (
+      <span className={cx("inline-block shrink-0 overflow-hidden rounded-full", className)} style={{ width: size, height: size }} aria-hidden="true">
+        <img src={`/assets/${symbol}.png`} width={size} height={size} alt="" className="size-full object-cover" loading="lazy" />
+      </span>
+    );
+  }
   const spec = specFor(symbol);
   if (spec?.icon && !spec.bg) return <Icon icon={spec.icon} width={size} height={size} className={className} aria-hidden="true" />;
   return (
