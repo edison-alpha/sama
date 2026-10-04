@@ -1,7 +1,8 @@
 // Minimal service worker for Sama's PWA shell.
 // Scope: enable installability + a basic offline fallback, without trying to be a
 // full offline-first cache (the app is mostly dynamic/wallet-driven).
-const CACHE = "sama-shell-v1";
+// v2: drops v1 caches that could hold dev-server assets cached under URLs whose content later changed.
+const CACHE = "sama-shell-v2";
 const SHELL_ASSETS = [
   "/manifest.webmanifest",
   "/sama-logo.svg",
