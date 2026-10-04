@@ -4,7 +4,7 @@ import { m } from "motion/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { spring } from "@/components/motion";
 import { Money } from "@/components/ui/money";
-import { sama } from "@/lib/api";
+import { API_MODE, sama } from "@/lib/api";
 import type { HistoryPoint, HistoryRange } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
 import { percent, usd } from "@/lib/format";
@@ -60,10 +60,12 @@ export function ValueChart({ live, below }: { live: number; below?: ReactNode })
 
       {/* Phones show just the number and its change, as wallet apps do; the plot starts at tablet width. */}
       <div className="mt-6 hidden sm:block">
-        {error ? (
-          <p className="grid place-items-center rounded-2xl border border-dashed border-line text-sm text-ink-3" style={{ height: H + AXIS_H }}>{c.empty}</p>
-        ) : (
-          <Plot points={points} up={up} hover={hover} onHover={setHover} range={range} label={`${c.label}, ${c.period[range]}`} />
+        {/* No history endpoint yet means no plot, not a placeholder. In demo mode the history is generated, so say so. */}
+        {!error && (
+          <>
+            <Plot points={points} up={up} hover={hover} onHover={setHover} range={range} label={`${c.label}, ${c.period[range]}`} />
+            {API_MODE === "mock" && <p className="mt-2 text-xs text-ink-3">{c.demoNote}</p>}
+          </>
         )}
       </div>
 

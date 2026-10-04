@@ -91,6 +91,15 @@ html {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+/* Phones: no visible scrollbars anywhere. Scrolling itself is untouched. */
+@media (max-width: 767px) {
+  * {
+    scrollbar-width: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
 html::-webkit-scrollbar {
   display: none;
 }
