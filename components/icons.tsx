@@ -1,13 +1,14 @@
 "use client";
 
 import { addCollection, Icon } from "@iconify/react";
-import { SOLAR } from "./icon-data";
+import { CARBON, SOLAR } from "./icon-data";
 
 /**
  * UI icons: the Solar set from Iconify — rounded strokes that sit well with SF Pro Rounded. Linear by default; `bold`
  * gives the filled form (used for the active tab). Icon data is bundled in icon-data.ts, so nothing is fetched at runtime.
  */
 addCollection(SOLAR);
+addCollection(CARBON);
 
 type P = { size?: number; className?: string; bold?: boolean };
 
@@ -26,7 +27,8 @@ export const IconSettings = solar("settings");
 export const IconArrowRight = solar("arrow-right");
 export const IconArrowLeft = solar("arrow-left");
 export const IconChevronRight = solar("alt-arrow-right");
-export const IconCheck = solar("check");
+export const IconSidebar = ({ size = 20, className }: P) => <Icon icon="carbon:open-panel-filled-right" width={size} height={size} className={className} aria-hidden="true" />;
+export const IconCheck =solar("check");
 export const IconX = solar("close-circle");
 export const IconAlert = solar("danger-triangle");
 export const IconExternal = solar("square-arrow-right-up");

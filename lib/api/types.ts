@@ -3,7 +3,13 @@
  * migrated backend can serve this frontend without changing its routes (PRD §18.2, Appendix C).
  */
 
-export type AssetClass = "CRYPTO" | "STABLE" | "RWA";
+export type AssetClass = "STOCK" | "ETF" | "CASH";
+
+/**
+ * A: PancakeSwap pool + TWAP, price cross-checked on-chain, leftovers can be swapped.
+ * B: Binance price only, leftovers carry forward. C: same as B, but a counterparty is unlikely (few holders or leveraged).
+ */
+export type AssetTier = "A" | "B" | "C";
 
 export type Asset = {
   /** `${chainId}:${checksumAddress}` — the symbol is display only (PRD §7.1). */
@@ -15,6 +21,11 @@ export type Asset = {
   class: AssetClass;
   priceUsd: number;
   disclosure?: string;
+  tier?: AssetTier;
+  /** Leveraged or inverse ETF: decays when held, so the UI warns before it goes into a target. */
+  leveraged?: boolean;
+  /** BEP-8056 UI multiplier: shares per raw token. Wallets show raw balance × multiplier. */
+  uiMultiplier?: number;
 };
 
 export type Position = { symbol: string; amountTokens: number; valueUsd: number; pct: number };

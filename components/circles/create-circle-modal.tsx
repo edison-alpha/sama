@@ -213,6 +213,7 @@ function AssetPicker({ assets, selected, onChange }: { assets: Asset[]; selected
                     <span className="rounded-md bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-ink-3">{d.portfolio.classes[a.class]}</span>
                   </span>
                   <span className="block truncate text-sm text-ink-3">{a.name}</span>
+                  {(a.leveraged || a.tier === "C") && <span className="block truncate text-xs text-warn">{a.leveraged ? d.portfolio.editor.leveraged : d.portfolio.editor.fewHolders}</span>}
                 </span>
                 <span className={cx("grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors", on ? "border-accent bg-accent text-on-accent" : "border-line-strong text-transparent")} aria-hidden="true">
                   <IconCheck size={14} />

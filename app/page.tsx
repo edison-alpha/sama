@@ -15,8 +15,8 @@ import { getDict } from "@/lib/i18n/server";
  * No wallet SDK loads here (PRD §19.4.1).
  */
 
-/** Underlying stocks and BNB Chain crypto shown in the strip; icons come from Iconify (components/asset-icon.tsx). */
-const ASSETS = ["NVDA", "NFLX", "AMZN", "TSLA", "AAPL", "X", "AMD", "TSM", "META", "BNB", "BTCB", "ETH", "USDT"];
+/** bStocks shown in the strip, plus USDT as cash; logos come from components/asset-icon.tsx. */
+const ASSETS = ["NVDAB", "AAPLB", "TSLAB", "MSFTB", "GOOGLB", "AMZNB", "METAB", "NFLXB", "AMDB", "TSMB", "SPYB", "QQQB", "USDT"];
 
 /** One background per flow item; replace the files in public/landing/ to change the photos. */
 const FLOW_IMAGES = ["/landing/flow-1.webp", "/landing/flow-2.webp", "/landing/flow-3.webp", "/landing/flow-4.webp"];

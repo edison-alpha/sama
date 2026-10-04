@@ -17,7 +17,8 @@ type Store = {
   rounds: Record<string, { opensAt: number; signedAt?: number; approvedAt?: number; settledAt?: number; decision?: "CARRY_FORWARD" | "EXECUTE_NOW" | "CANCEL" }>;
 };
 
-const KEY = "sama_demo_store_v1";
+// v2: assets moved from crypto/demo tokens to bStocks; a v1 store would show circles with symbols that no longer exist.
+const KEY = "sama_demo_store_v2";
 const ROUND_WINDOW_SEC = 12 * 60;
 
 function fresh(): Store {
@@ -61,7 +62,14 @@ export function resetDemo() {
 }
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const asset = (symbol: string) => {
+  const a = DEMO_ASSETS.find((x) => x.symbol === symbol);
+  if (!a) throw new Error(`Demo asset ${symbol} is not in the allowlist`);
+  return a;
+};
 const price = (symbol: string) => DEMO_ASSETS.find((a) => a.symbol === symbol)?.priceUsd ?? 0;
+/** Raw token amount (18 decimals) worth `usd` at the demo price. */
+const raw = (symbol: string, usd: number) => BigInt(Math.round((usd / price(symbol)) * 1e6)) * 10n ** BigInt(asset(symbol).decimals - 6);
 const fakeHash = (seed: string) => `0x${Array.from({ length: 64 }, (_, i) => ((seed.charCodeAt(i % seed.length) + i * 7) % 16).toString(16)).join("")}` as `0x${string}`;
 
 function portfolioNow(): Portfolio {
@@ -187,31 +195,31 @@ function roundView(id: string): RoundView {
     you: {
       signed: Boolean(record.signedAt),
       intent: [
-        { side: "SELL", ...amount("BTCB", 722) },
-        { side: "SELL", ...amount("WBNB", 295) },
-        { side: "BUY", ...amount("ETH", 1_239) },
+        { side: "SELL", ...amount("NVDAB", 722) },
+        { side: "SELL", ...amount("AAPLB", 295) },
+        { side: "BUY", ...amount("MSFTB", 865) },
         { side: "BUY", ...amount("USDT", 152) },
       ],
-      outsideCircle: ["tNVDA"],
+      outsideCircle: ["TSLAB"],
       legs: matched
         ? [
-            { direction: "SEND", counterparty: "2", ...amount("BTCB", 544) },
-            { direction: "SEND", counterparty: "3", ...amount("WBNB", 295) },
-            { direction: "RECEIVE", counterparty: "2", ...amount("ETH", 839) },
+            { direction: "SEND", counterparty: "2", ...amount("NVDAB", 544) },
+            { direction: "SEND", counterparty: "3", ...amount("AAPLB", 295) },
+            { direction: "RECEIVE", counterparty: "2", ...amount("MSFTB", 839) },
           ]
         : [],
       inPlan: matched,
       approved: Boolean(record.approvedAt),
       allowances: matched
         ? [
-            { token: DEMO_ASSETS[1]!.address, symbol: "BTCB", amountRaw: 8_500_000_000_000_000n, amountTokens: 544 / price("BTCB"), sufficient: Boolean(record.approvedAt), funded: true },
-            { token: DEMO_ASSETS[0]!.address, symbol: "WBNB", amountRaw: 500_000_000_000_000_000n, amountTokens: 295 / price("WBNB"), sufficient: Boolean(record.approvedAt), funded: true },
+            { token: asset("NVDAB").address, symbol: "NVDAB", amountRaw: raw("NVDAB", 544), amountTokens: 544 / price("NVDAB"), sufficient: Boolean(record.approvedAt), funded: true },
+            { token: asset("AAPLB").address, symbol: "AAPLB", amountRaw: raw("AAPLB", 295), amountTokens: 295 / price("AAPLB"), sufficient: Boolean(record.approvedAt), funded: true },
           ]
         : [],
       residual: done
         ? [
-            { side: "SELL", dust: false, ...amount("BTCB", 178) },
-            { side: "BUY", dust: false, ...amount("ETH", 400) },
+            { side: "SELL", dust: false, ...amount("NVDAB", 178) },
+            { side: "BUY", dust: false, ...amount("MSFTB", 26) },
             { side: "BUY", dust: false, ...amount("USDT", 152) },
           ]
         : [],

@@ -1,28 +1,22 @@
+import { BSTOCKS, CASH } from "./bstocks.generated";
 import type { Activity, Asset, Circle, Target } from "./types";
 
 /**
- * Sample data for mock mode. Addresses are placeholders on BSC Testnet, NOT real token contracts: the live asset list
- * comes from the curated allowlist served by /api/assets (PRD §7). "tNVDA" and "tSPY" stand in for tokenized stocks.
+ * Sample data for mock mode. The asset list is the real bStocks allowlist on BSC mainnet (sama-packages/assets/
+ * allowlist/56.json, exported by sama-packages/scripts/assets/export-frontend.mjs) plus USDT as cash. Prices are the snapshot
+ * taken when the list was generated; the demo wallet, balances and rounds are made up.
  */
 const placeholder = (n: number) => `0x${n.toString(16).padStart(40, "0")}` as `0x${string}`;
 
 export const DEMO_ADDRESS = "0x5a3a00000000000000000000000000000000dE30" as const;
 export const DEMO_SETTLEMENT = placeholder(0x5a3a);
 
-export const DEMO_ASSETS: Asset[] = [
-  { uid: `97:${placeholder(1)}`, address: placeholder(1), symbol: "WBNB", name: "Wrapped BNB", decimals: 18, class: "CRYPTO", priceUsd: 590 },
-  { uid: `97:${placeholder(2)}`, address: placeholder(2), symbol: "BTCB", name: "Bitcoin BEP20", decimals: 18, class: "CRYPTO", priceUsd: 64_000 },
-  { uid: `97:${placeholder(3)}`, address: placeholder(3), symbol: "ETH", name: "Ethereum (BEP20)", decimals: 18, class: "CRYPTO", priceUsd: 2_500 },
-  { uid: `97:${placeholder(4)}`, address: placeholder(4), symbol: "USDT", name: "Tether USD (BEP20)", decimals: 18, class: "STABLE", priceUsd: 1 },
-  { uid: `97:${placeholder(5)}`, address: placeholder(5), symbol: "USDC", name: "USD Coin (BEP20)", decimals: 18, class: "STABLE", priceUsd: 1 },
-  { uid: `97:${placeholder(6)}`, address: placeholder(6), symbol: "tNVDA", name: "Demo tokenized NVIDIA", decimals: 18, class: "RWA", priceUsd: 120, disclosure: "Demo asset. Real tokenized stocks carry their issuer's disclosure and jurisdiction limits here." },
-  { uid: `97:${placeholder(7)}`, address: placeholder(7), symbol: "tSPY", name: "Demo tokenized S&P 500 ETF", decimals: 18, class: "RWA", priceUsd: 560, disclosure: "Demo asset. Real tokenized stocks carry their issuer's disclosure and jurisdiction limits here." },
-];
+export const DEMO_ASSETS: Asset[] = [CASH, ...BSTOCKS];
 
-export const DEMO_HOLDINGS: Record<string, number> = { BTCB: 0.05, WBNB: 4, USDT: 1_500, tNVDA: 10 };
+export const DEMO_HOLDINGS: Record<string, number> = { NVDAB: 6, AAPLB: 4, TSLAB: 3, GOOGLB: 3, USDT: 1_500 };
 
 export const DEMO_TARGET: Target = {
-  weights: { BTCB: 30, WBNB: 25, ETH: 15, USDT: 20, tNVDA: 10 },
+  weights: { NVDAB: 25, AAPLB: 20, GOOGLB: 15, SPYB: 15, TSLAB: 10, USDT: 15 },
   costCapBps: 100,
   residualStyle: "ECONOMIC",
   savedAt: "2026-09-28T08:10:00.000Z",
@@ -30,9 +24,9 @@ export const DEMO_TARGET: Target = {
 
 /** Presets only fill weights; the user still sees and saves explicit numbers (PRD §9). */
 export const PRESETS: Record<"balanced" | "conservative" | "growth", Record<string, number>> = {
-  balanced: { BTCB: 30, WBNB: 25, ETH: 15, USDT: 20, tNVDA: 10 },
-  conservative: { BTCB: 20, WBNB: 10, ETH: 10, USDT: 45, USDC: 15 },
-  growth: { BTCB: 35, WBNB: 25, ETH: 20, tNVDA: 15, USDT: 5 },
+  balanced: { SPYB: 30, QQQB: 20, NVDAB: 15, AAPLB: 10, MSFTB: 10, USDT: 15 },
+  conservative: { SPYB: 40, QQQB: 10, USDT: 50 },
+  growth: { NVDAB: 25, TSLAB: 20, GOOGLB: 15, MSFTB: 15, TSMB: 15, USDT: 10 },
 };
 
 const hour = 3_600;
@@ -40,10 +34,10 @@ const hour = 3_600;
 export const DEMO_CIRCLES: Circle[] = [
   {
     id: "c-bluechips",
-    name: "BNB Blue Chips Weekly",
-    description: "Weekly rebalance for the big four on BNB Chain.",
+    name: "US Big Tech Weekly",
+    description: "Weekly rebalance for big US tech stocks as bStocks on BNB Chain.",
     visibility: "PUBLIC",
-    assetSymbols: ["WBNB", "BTCB", "ETH", "USDT"],
+    assetSymbols: ["NVDAB", "AAPLB", "GOOGLB", "MSFTB", "USDT"],
     cadenceSec: 604_800,
     durationSec: hour,
     minParticipants: 3,
@@ -60,9 +54,9 @@ export const DEMO_CIRCLES: Circle[] = [
   {
     id: "c-jakarta",
     name: "Komunitas Jakarta DCA",
-    description: "Monthly stablecoin-heavy rebalance for a community group.",
+    description: "Monthly index-and-cash rebalance for a community group.",
     visibility: "INVITE_ONLY",
-    assetSymbols: ["BTCB", "USDT", "USDC", "WBNB"],
+    assetSymbols: ["SPYB", "QQQB", "USDT"],
     cadenceSec: 2_592_000,
     durationSec: 4 * hour,
     minParticipants: 2,
@@ -75,10 +69,10 @@ export const DEMO_CIRCLES: Circle[] = [
   },
   {
     id: "c-rwa",
-    name: "RWA Daily",
-    description: "Daily crossing for tokenized stocks and stablecoins.",
+    name: "Stocks Daily",
+    description: "Daily crossing for the most traded bStocks and USDT.",
     visibility: "PUBLIC",
-    assetSymbols: ["tNVDA", "tSPY", "USDT"],
+    assetSymbols: ["NVDAB", "TSLAB", "SPYB", "USDT"],
     cadenceSec: 86_400,
     durationSec: 15 * 60,
     minParticipants: 2,
@@ -94,9 +88,9 @@ export const DEMO_CIRCLES: Circle[] = [
 export const DEMO_ACTIVITY: Activity[] = [
   { id: "a5", kind: "SETTLED", detail: {}, roundId: "r-41", createdAt: "2026-09-28T10:02:00.000Z" },
   { id: "a4", kind: "PLAN_APPROVED", detail: {}, roundId: "r-41", createdAt: "2026-09-28T09:58:00.000Z" },
-  { id: "a3", kind: "INTENT_SIGNED", detail: { sequence: 41, circle: "BNB Blue Chips Weekly" }, roundId: "r-41", createdAt: "2026-09-28T09:12:00.000Z" },
+  { id: "a3", kind: "INTENT_SIGNED", detail: { sequence: 41, circle: "US Big Tech Weekly" }, roundId: "r-41", createdAt: "2026-09-28T09:12:00.000Z" },
   { id: "a2", kind: "TARGET_SAVED", detail: {}, roundId: null, createdAt: "2026-09-28T08:10:00.000Z" },
-  { id: "a1", kind: "CIRCLE_JOINED", detail: { name: "BNB Blue Chips Weekly" }, roundId: null, createdAt: "2026-09-27T15:40:00.000Z" },
+  { id: "a1", kind: "CIRCLE_JOINED", detail: { name: "US Big Tech Weekly" }, roundId: null, createdAt: "2026-09-27T15:40:00.000Z" },
 ];
 
 export const VERIFIER_CHECKS = [
