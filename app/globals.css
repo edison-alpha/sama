@@ -91,13 +91,23 @@ html {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-/* Phones: no visible scrollbars anywhere. Scrolling itself is untouched. */
-@media (max-width: 767px) {
+/* Phones, touch screens and the installed app (PWA): no visible scrollbars anywhere, on the page or inside any
+   scrolling panel. Scrolling itself is untouched (touch, wheel, keyboard). Width/height 0 covers older iOS Safari,
+   which ignores display:none on some scrollers. */
+@media (max-width: 767px), (pointer: coarse), (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+  html,
+  body,
   * {
     scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
   *::-webkit-scrollbar {
     display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 }
 html::-webkit-scrollbar {
