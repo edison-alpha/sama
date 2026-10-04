@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { AssetIcon, AssetStack } from "@/components/asset-icon";
 import { IconAlert, IconArrowLeft, IconCheck, IconChevronRight, IconClock, IconPen, IconSpinner } from "@/components/icons";
 import { Stagger } from "@/components/motion";
 import { Badge, stateTone } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { Term } from "@/components/ui/term";
 import { useSession } from "@/components/wallet/session";
@@ -25,12 +26,14 @@ import { ReceiptSummary } from "./receipt";
 type Props = { v: RoundView; refresh: () => Promise<void> };
 
 /**
- * The whole round on one page (PRD §19.4.6). A five-phase progress strip says where the round is; below it one card
- * says, in plain words, what is happening now and offers at most one primary action. Prices, contract and hashes sit
- * in a collapsed "Round details" section for the curious.
+ * The whole round on one page (PRD §19.4.6), laid out like a token page on a DEX: breadcrumb and title, a five-phase
+ * stepper, then what is happening now on the left and an action panel on the right where a swap box would sit (on
+ * phones the panel follows the content and its one button is pinned above the tab bar). Prices, contract and hashes
+ * sit in a folded "Round details" row at the bottom.
  */
 export function RoundJourney({ roundId }: { roundId: string }) {
   const { d, fmt } = useI18n();
+  const router = useRouter();
   const { data: v, error, refresh } = useApi(() => sama.round(roundId), [roundId], {
     pollMs: API_MODE === "mock" ? 1_000 : 4_000,
     stopWhen: (r) => r.round.terminal && (r.you.decision !== null || !r.you.residual.some((x) => !x.dust)),
@@ -38,27 +41,42 @@ export function RoundJourney({ roundId }: { roundId: string }) {
 
   if (!v) return error ? <ErrorNote action={<button className="underline" onClick={() => void refresh()}>{d.common.retry}</button>}>{error}</ErrorNote> : <PageSkeleton />;
   const { current, status } = journey(v);
+  const title = fmt(d.round.crumb, { seq: v.round.sequence });
 
   return (
     <Stagger>
-      <div className="mx-auto grid max-w-3xl gap-4">
-        <header className="mb-2 grid gap-6">
-          <div>
-            <Link href={`/circles/${v.circle.id}`} className="inline-flex items-center gap-1.5 text-sm text-ink-3 transition-colors hover:text-ink">
-              <IconArrowLeft size={16} />
-              {v.circle.name}
-            </Link>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">{fmt(d.round.crumb, { seq: v.round.sequence })}</h1>
-              <Badge tone={stateTone(v.round.state)} dot={!v.round.terminal}>{d.states[v.round.state]}</Badge>
-            </div>
-          </div>
-          <Progress current={current} status={status} />
-        </header>
-        {error && <p className="text-sm text-warn">{error}</p>}
-        <StepBody k={current} v={v} refresh={refresh} />
-        <RoundDetails v={v} />
+      {/* Phones: an app-style back button. Web: a breadcrumb. */}
+      <div className="mb-4 md:hidden">
+        <button type="button" onClick={() => router.push(`/circles/${v.circle.id}`)} aria-label={v.circle.name} className="glass-panel grid size-11 place-items-center rounded-full text-ink transition-[filter] hover:brightness-95"><IconArrowLeft size={22} /></button>
       </div>
+      <nav aria-label="Breadcrumb" className="mb-6 hidden min-w-0 items-center gap-1 text-[15px] md:flex">
+        <Link href="/circles" className="shrink-0 text-ink-3 hover:text-ink">{d.circles.title}</Link>
+        <IconChevronRight size={16} className="shrink-0 text-ink-3" />
+        <Link href={`/circles/${v.circle.id}`} className="truncate text-ink-3 hover:text-ink">{v.circle.name}</Link>
+        <IconChevronRight size={16} className="shrink-0 text-ink-3" />
+        <span className="shrink-0 font-medium text-ink">{title}</span>
+      </nav>
+
+      <header className="flex items-center gap-4">
+        <AssetStack symbols={v.circle.assetSymbols} size={40} max={3} />
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">{title}</h1>
+            <Badge tone={stateTone(v.round.state)} dot={!v.round.terminal}>{d.states[v.round.state]}</Badge>
+          </div>
+          <p className="truncate text-sm text-ink-3 md:text-base">{v.circle.name}</p>
+        </div>
+      </header>
+
+      <div className="mt-6 border-b border-line pb-6 md:mt-8">
+        <Stepper current={current} status={status} />
+      </div>
+
+      {error && <p className="mt-4 text-sm text-warn">{error}</p>}
+      <div className="mt-8">
+        <StepBody k={current} v={v} refresh={refresh} />
+      </div>
+      <RoundDetails v={v} />
     </Stagger>
   );
 }
@@ -84,19 +102,26 @@ function phaseStatus(steps: StepKey[], current: StepKey, status: Record<StepKey,
   return all.includes("done") ? "done" : "upcoming";
 }
 
-function Progress({ current, status }: { current: StepKey; status: Record<StepKey, StepStatus> }) {
+/** Numbered phases joined by a line: green check when done, accent when now, quiet when ahead. */
+function Stepper({ current, status }: { current: StepKey; status: Record<StepKey, StepStatus> }) {
   const { d } = useI18n();
   return (
-    <ol className="grid grid-cols-5 gap-1.5 sm:gap-2">
-      {PHASES.map(([phase, steps]) => {
+    <ol className="grid grid-cols-5">
+      {PHASES.map(([phase, steps], i) => {
         const s = phaseStatus(steps, current, status);
         return (
-          <li key={phase} aria-current={s === "active" ? "step" : undefined} className="grid min-w-0 gap-2">
-            <span className={cx("h-1 rounded-full", s === "done" ? "bg-ok" : s === "active" ? "bg-accent" : s === "failed" ? "bg-danger" : "bg-surface-3")} />
-            <span className={cx("flex min-w-0 items-center gap-1 text-xs font-medium sm:text-sm", s === "active" || s === "failed" ? "text-ink" : s === "done" ? "text-ink-2" : "text-ink-3", s === "skipped" && "line-through")}>
-              {s === "done" && <IconCheck size={14} className="shrink-0 text-ok" />}
-              <span className="truncate">{d.round.phases[phase]}</span>
+          <li key={phase} aria-current={s === "active" ? "step" : undefined} className="relative grid min-w-0 justify-items-center gap-2 text-center">
+            {/* Connector from the previous circle to this one, stopping short of both so it never crosses a number. */}
+            {i > 0 && <span className={cx("absolute left-[calc(-50%+22px)] right-[calc(50%+22px)] top-3.5 h-0.5 -translate-y-1/2 rounded-full", s === "done" || s === "active" ? "bg-ok/60" : "bg-surface-3")} aria-hidden="true" />}
+            <span
+              className={cx(
+                "relative z-10 grid size-7 place-items-center rounded-full text-[13px] font-semibold",
+                s === "done" ? "bg-ok text-white" : s === "active" ? "bg-accent text-on-accent shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_25%,transparent)]" : s === "failed" ? "bg-danger text-white" : "bg-surface-2 text-ink-3",
+              )}
+            >
+              {s === "done" ? <IconCheck size={16} /> : s === "failed" ? <IconAlert size={16} /> : i + 1}
             </span>
+            <span className={cx("w-full truncate text-xs font-medium md:text-sm", s === "active" || s === "failed" ? "text-ink" : s === "done" ? "text-ink-2" : "text-ink-3", s === "skipped" && "line-through")}>{d.round.phases[phase]}</span>
           </li>
         );
       })}
@@ -128,50 +153,92 @@ const MOOD_CHIP: Record<Mood, string> = {
   stop: "bg-danger-soft text-danger",
 };
 
-/** The one card that says what is happening now. */
-function Hero({ mood, title, body, children }: { mood: Mood; title: ReactNode; body?: ReactNode; children?: ReactNode }) {
+function MoodIcon({ mood, size = 44 }: { mood: Mood; size?: number }) {
   return (
-    <Card className="grid gap-6 sm:p-8">
-      <div className="flex items-start gap-4">
-        <span className={cx("grid size-11 shrink-0 place-items-center rounded-full", MOOD_CHIP[mood])} aria-hidden="true">
-          {mood === "todo" ? <IconPen size={20} /> : mood === "wait" ? <IconClock size={20} /> : mood === "busy" ? <IconSpinner size={20} /> : mood === "done" ? <IconCheck size={22} /> : <IconAlert size={20} />}
-        </span>
-        <div className="min-w-0 pt-0.5">
-          <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h2>
-          {body && <p className="mt-1.5 text-ink-2">{body}</p>}
-        </div>
-      </div>
-      {children}
-    </Card>
+    <span className={cx("grid shrink-0 place-items-center rounded-full", MOOD_CHIP[mood])} style={{ width: size, height: size }} aria-hidden="true">
+      {mood === "todo" ? <IconPen size={20} /> : mood === "wait" ? <IconClock size={20} /> : mood === "busy" ? <IconSpinner size={20} /> : mood === "done" ? <IconCheck size={22} /> : <IconAlert size={20} />}
+    </span>
   );
 }
 
-function Stat({ label, value, note, tone }: { label: ReactNode; value: ReactNode; note?: ReactNode; tone?: "match" | "rest" }) {
+/**
+ * One phase: what is happening (title + plain-words body + content) on the left, the action panel on the right.
+ * The panel always opens with the mood and the round state so it reads the same in every phase.
+ */
+function Step({ v, mood, title, body, children, panel }: { v: RoundView; mood: Mood; title: ReactNode; body?: ReactNode; children?: ReactNode; panel?: ReactNode }) {
+  const { d } = useI18n();
   return (
-    <div className={cx("min-w-0 rounded-2xl px-4 py-3", tone === "match" ? "bg-match-soft" : tone === "rest" ? "bg-rest-soft" : "bg-surface-2")}>
-      <dt className="text-sm text-ink-2">{label}</dt>
-      <dd className={cx("num mt-0.5 truncate text-2xl font-semibold tracking-tight", tone === "match" && "text-match", tone === "rest" && "text-rest")}>{value}</dd>
-      {note && <dd className="mt-0.5 text-xs text-ink-3">{note}</dd>}
+    <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-start lg:gap-10">
+      <section className="grid min-w-0 gap-8">
+        <div className="flex items-start gap-4">
+          <MoodIcon mood={mood} />
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold tracking-tight text-ink md:text-2xl">{title}</h2>
+            {body && <p className="mt-1.5 text-[15px] leading-relaxed text-ink-2 md:text-base">{body}</p>}
+          </div>
+        </div>
+        {children}
+      </section>
+      {/* Without an action the panel only repeats the status, so phones (where it would sit under the content) skip it. */}
+      <aside className={cx("grid gap-4 rounded-[24px] border border-line bg-surface p-5 lg:sticky lg:top-6", !panel && "max-lg:hidden")}>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-medium text-ink-3">{mood === "todo" ? d.home.nextStep : d.round.statusLabel}</span>
+          <Badge tone={stateTone(v.round.state)} dot={!v.round.terminal}>{d.states[v.round.state]}</Badge>
+        </div>
+        {panel}
+      </aside>
     </div>
   );
 }
 
-/** Small "tell me more" fold inside a card. */
+/** Big-number stats, like the Stats block on a token page. */
+function Stats({ children }: { children: ReactNode }) {
+  return <dl className="grid grid-cols-2 gap-x-6 gap-y-6">{children}</dl>;
+}
+
+function Stat({ label, value, note, tone }: { label: ReactNode; value: ReactNode; note?: ReactNode; tone?: "match" | "rest" }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-sm text-ink-3">{label}</dt>
+      <dd className={cx("num mt-1 truncate text-[28px] font-semibold leading-tight tracking-tight md:text-3xl", tone === "match" ? "text-match" : tone === "rest" ? "text-rest" : "text-ink")}>{value}</dd>
+      {note && <dd className="mt-0.5 text-sm text-ink-3">{note}</dd>}
+    </div>
+  );
+}
+
+/** A titled token list (no boxes): rows are separated by hairlines, as in a wallet. */
+function TokenList({ title, children, note }: { title: ReactNode; children: ReactNode; note?: ReactNode }) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold tracking-tight text-ink">{title}</h3>
+      <ul className="mt-1 grid grid-cols-1 divide-y divide-line">{children}</ul>
+      {note && <p className="mt-2 text-sm text-ink-3">{note}</p>}
+    </div>
+  );
+}
+
+/** Small "tell me more" fold, styled as a list row with a chevron. */
 function More({ summary, children }: { summary: ReactNode; children: ReactNode }) {
   return (
-    <details className="group rounded-2xl border border-line">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+    <details className="group border-y border-line">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 py-3 text-base font-medium text-ink [&::-webkit-details-marker]:hidden">
         {summary}
-        <IconChevronRight size={16} className="shrink-0 text-ink-3 transition-transform group-open:rotate-90" />
+        <IconChevronRight size={18} className="shrink-0 text-ink-3 transition-transform group-open:rotate-90" />
       </summary>
-      <div className="px-4 pb-4 text-sm leading-relaxed text-ink-2">{children}</div>
+      <div className="pb-4 text-[15px] leading-relaxed text-ink-2">{children}</div>
     </details>
   );
 }
 
-/** Sticky on phones so the one action is always reachable (PRD §19.4.6). */
-function CtaBar({ children }: { children: ReactNode }) {
-  return <div className="sticky bottom-[76px] z-20 -mx-2 flex flex-wrap items-center gap-3 rounded-2xl bg-surface/95 p-2 backdrop-blur md:static md:mx-0 md:bg-transparent md:p-0 md:backdrop-blur-none">{children}</div>;
+/** The panel's one primary button. On phones it is pinned above the tab bar so it is always reachable (PRD §19.4.6). */
+function Cta({ children }: { children: ReactNode }) {
+  return (
+    <>
+      {/* No tab bar sits under this route (see app-shell.tsx), so the button rests on the safe area itself. */}
+      <div className="fixed inset-x-4 bottom-[max(16px,env(safe-area-inset-bottom))] z-30 md:static [&>button]:h-14 [&>button]:w-full [&>button]:text-base md:[&>button]:h-12">{children}</div>
+      <div className="h-24 md:hidden" aria-hidden="true" />
+    </>
+  );
 }
 
 const deadlineOf = (v: RoundView, locale: Locale) => (v.round.planValidUntil ? new Date(v.round.planValidUntil * 1000).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" }) : "—");
@@ -181,11 +248,11 @@ function CollectingStats({ v }: { v: RoundView }) {
   const { signed } = v.aggregate;
   const { memberCount, minParticipants } = v.circle;
   return (
-    <dl className="grid grid-cols-2 gap-3">
+    <Stats>
       <Stat label={d.round.closesIn} value={<Countdown until={v.round.freezesAt} />} />
       {/* The member count can lag behind signatures (e.g. a brand-new Circle), so never show "5 of 1". */}
       <Stat label={d.round.joinedLabel} value={memberCount >= signed ? fmt(d.common.of, { a: signed, b: memberCount }) : signed} note={signed >= minParticipants ? d.round.enough : fmt(d.round.needed, { n: minParticipants })} />
-    </dl>
+    </Stats>
   );
 }
 
@@ -195,7 +262,7 @@ function CloseNow({ v, refresh, variant }: Props & { variant: "secondary" | "gho
   if (!v.circle.isOrganizer) return null;
   return (
     <>
-      <Button variant={variant} busy={act.pending} disabled={v.aggregate.signed === 0} onClick={() => act.run(async () => { await sama.closeCollection(v.round.id); await refresh(); })}>{d.round.closeNow}</Button>
+      <Button variant={variant} block busy={act.pending} disabled={v.aggregate.signed === 0} onClick={() => act.run(async () => { await sama.closeCollection(v.round.id); await refresh(); })}>{d.round.closeNow}</Button>
       {act.error && <ErrorNote>{act.error}</ErrorNote>}
     </>
   );
@@ -205,34 +272,33 @@ function CloseNow({ v, refresh, variant }: Props & { variant: "secondary" | "gho
 function PlanRows({ v }: { v: RoundView }) {
   const { d, fmt } = useI18n();
   return (
-    <div className="grid gap-2">
-      <ul className="grid gap-2">
-        {v.you.intent.map((r) => <AmountRow key={r.symbol + r.side} direction={r.side} amount={r.amountTokens} symbol={r.symbol} usdValue={r.valueUsd} label={r.side === "SELL" ? d.round.sellUpTo : d.round.buyUpTo} />)}
-      </ul>
-      {v.you.outsideCircle.length > 0 && <p className="text-xs text-ink-3">{fmt(d.round.outside, { list: v.you.outsideCircle.join(", ") })}</p>}
-    </div>
+    <TokenList title={d.round.yourPlan} note={v.you.outsideCircle.length > 0 ? fmt(d.round.outside, { list: v.you.outsideCircle.join(", ") }) : undefined}>
+      {v.you.intent.map((r) => <AmountRow key={r.symbol + r.side} direction={r.side} amount={r.amountTokens} symbol={r.symbol} usdValue={r.valueUsd} label={r.side === "SELL" ? d.round.sellUpTo : d.round.buyUpTo} />)}
+    </TokenList>
   );
 }
 
-/** Once signed, the plan is background: one line with the totals, rows on demand. */
+/** Once signed, the plan is background: one row with the totals, token rows on demand. */
 function PlanFold({ v }: { v: RoundView }) {
   const { d, fmt, locale } = useI18n();
   const sum = (side: "SELL" | "BUY") => usd(v.you.intent.filter((r) => r.side === side).reduce((s, r) => s + r.valueUsd, 0), locale, 0);
   return (
-    <More summary={<span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">{d.round.yourPlan}<span className="num text-xs font-normal text-ink-3">{fmt(d.round.planSummary, { sell: sum("SELL"), buy: sum("BUY") })}</span></span>}>
-      <PlanRows v={v} />
+    <More summary={<span className="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3">{d.round.yourPlan}<span className="num text-sm font-normal text-ink-3">{fmt(d.round.planSummary, { sell: sum("SELL"), buy: sum("BUY") })}</span></span>}>
+      <ul className="grid grid-cols-1 divide-y divide-line">
+        {v.you.intent.map((r) => <AmountRow key={r.symbol + r.side} direction={r.side} amount={r.amountTokens} symbol={r.symbol} usdValue={r.valueUsd} label={r.side === "SELL" ? d.round.sellUpTo : d.round.buyUpTo} />)}
+      </ul>
     </More>
   );
 }
 
-function YourLegs({ v }: { v: RoundView }) {
+function LegRows({ v }: { v: RoundView }) {
   const { d, fmt, locale } = useI18n();
   return (
-    <ul className="grid gap-2">
+    <>
       {v.you.legs.map((l, i) => (
         <AmountRow key={i} direction={l.direction} amount={l.amountTokens} symbol={l.symbol} usdValue={l.valueUsd} label={fmt(l.direction === "SEND" ? d.round.youSend : d.round.youReceive, { amount: tokens(l.amountTokens, locale), symbol: l.symbol, who: who(l.counterparty, d) })} />
       ))}
-    </ul>
+    </>
   );
 }
 
@@ -241,22 +307,26 @@ function JoinStep({ v, refresh }: Props) {
   const { signer } = useSession();
   const act = useAction();
   return (
-    <Hero mood="todo" title={d.round.joinTitle} body={d.round.joinBody}>
-      <CollectingStats v={v} />
-      <div className="grid gap-3">
-        <h3 className="text-sm font-semibold">{d.round.yourPlan}</h3>
-        <PlanRows v={v} />
-      </div>
-      <div className="grid gap-3">
-        <ActionStatus status={act.status} />
-        {act.error && <ErrorNote>{act.error}</ErrorNote>}
-        <CtaBar>
-          <Button size="lg" busy={act.pending} onClick={() => act.run(async (say) => { await sama.signIntent(v, signer, say, progressWords(d)); await refresh(); })}>{d.round.signJoin}</Button>
+    <Step
+      v={v}
+      mood="todo"
+      title={d.round.joinTitle}
+      body={d.round.joinBody}
+      panel={
+        <>
+          <WalletPromptPreview prompts={[{ kind: "sign", label: d.glossary.freeSignature[0] }]} sponsored={v.gasSponsored} />
+          <ActionStatus status={act.status} />
+          {act.error && <ErrorNote>{act.error}</ErrorNote>}
+          <Cta>
+            <Button size="lg" busy={act.pending} onClick={() => act.run(async (say) => { await sama.signIntent(v, signer, say, progressWords(d)); await refresh(); })}>{d.round.signJoin}</Button>
+          </Cta>
           <CloseNow v={v} refresh={refresh} variant="ghost" />
-        </CtaBar>
-        <WalletPromptPreview prompts={[{ kind: "sign", label: d.glossary.freeSignature[0] }]} sponsored={v.gasSponsored} />
-      </div>
-    </Hero>
+        </>
+      }
+    >
+      <CollectingStats v={v} />
+      <PlanRows v={v} />
+    </Step>
   );
 }
 
@@ -264,15 +334,14 @@ function MatchStep({ v, refresh }: Props) {
   const { d } = useI18n();
   const collecting = ["OPEN", "COLLECTING"].includes(v.round.state);
   return collecting ? (
-    <Hero mood="wait" title={d.round.waitingTitle} body={d.round.waitingBody}>
+    <Step v={v} mood="wait" title={d.round.waitingTitle} body={d.round.waitingBody} panel={v.circle.isOrganizer ? <CloseNow v={v} refresh={refresh} variant="secondary" /> : undefined}>
       <CollectingStats v={v} />
       <PlanFold v={v} />
-      {v.circle.isOrganizer && <div className="flex flex-wrap gap-3"><CloseNow v={v} refresh={refresh} variant="secondary" /></div>}
-    </Hero>
+    </Step>
   ) : (
-    <Hero mood="busy" title={d.round.matchingTitle} body={d.round.matchingBody}>
+    <Step v={v} mood="busy" title={d.round.matchingTitle} body={d.round.matchingBody} >
       <PlanFold v={v} />
-    </Hero>
+    </Step>
   );
 }
 
@@ -287,11 +356,7 @@ function ResultStep({ v }: Props) {
     : s === "PLAN_STALE" ? [d.round.staleTitle, d.round.staleBody]
     : s === "PLAN_REJECTED" || s === "CANCELLED" ? [d.round.rejectedTitle, d.round.rejectedBody]
     : [d.round.noCrossTitle, d.round.noCrossBody];
-  return (
-    <Hero mood="info" title={title} body={body}>
-      <div><ButtonLink href={`/circles/${v.circle.id}`} variant="secondary">{d.round.backToCircle}</ButtonLink></div>
-    </Hero>
-  );
+  return <Step v={v} mood="info" title={title} body={body} panel={<ButtonLink href={`/circles/${v.circle.id}`} variant="secondary" block>{d.round.backToCircle}</ButtonLink>} />;
 }
 
 function ApproveStep({ v, refresh }: Props) {
@@ -309,26 +374,30 @@ function ApproveStep({ v, refresh }: Props) {
   const deadline = deadlineOf(v, locale);
 
   return (
-    <Hero mood="todo" title={d.round.approveTitle} body={fmt(d.round.approveBody, { time: deadline })}>
-      <dl className="grid grid-cols-2 gap-3">
+    <Step
+      v={v}
+      mood="todo"
+      title={d.round.approveTitle}
+      body={fmt(d.round.approveBody, { time: deadline })}
+      panel={
+        <>
+          {unfunded.length > 0 && <ErrorNote>{fmt(d.round.unfunded, { list: unfunded.map((a) => a.symbol).join(", ") })}</ErrorNote>}
+          <WalletPromptPreview prompts={prompts} sponsored={v.gasSponsored} />
+          <ActionStatus status={act.status} />
+          {act.error && <ErrorNote>{act.error}</ErrorNote>}
+          <Cta>
+            <Button size="lg" busy={act.pending} disabled={unfunded.length > 0} onClick={() => act.run(async (say) => { await sama.approveAndAllow(v, signer, say, progressWords(d)); await refresh(); })}>{d.round.approveAllow}</Button>
+          </Cta>
+        </>
+      }
+    >
+      <Stats>
         <Stat label={d.round.matchedShare} value={requested > 0 ? percent((sentUsd / requested) * 100, locale, 0) : "—"} tone="match" />
         <Stat label={d.round.leftover} value={usd(Math.max(0, requested - sentUsd), locale, 0)} tone="rest" />
-      </dl>
-      <div className="grid gap-3">
-        <h3 className="text-sm font-semibold">{d.round.yourTransfers}</h3>
-        <YourLegs v={v} />
-      </div>
+      </Stats>
+      <TokenList title={d.round.yourTransfers}><LegRows v={v} /></TokenList>
       <More summary={d.round.authorizing}>{fmt(d.round.authorizingBody, { time: deadline })}</More>
-      {unfunded.length > 0 && <ErrorNote>{fmt(d.round.unfunded, { list: unfunded.map((a) => a.symbol).join(", ") })}</ErrorNote>}
-      <div className="grid gap-3">
-        <WalletPromptPreview prompts={prompts} sponsored={v.gasSponsored} />
-        <ActionStatus status={act.status} />
-        {act.error && <ErrorNote>{act.error}</ErrorNote>}
-        <CtaBar>
-          <Button size="lg" busy={act.pending} disabled={unfunded.length > 0} onClick={() => act.run(async (say) => { await sama.approveAndAllow(v, signer, say, progressWords(d)); await refresh(); })}>{d.round.approveAllow}</Button>
-        </CtaBar>
-      </div>
-    </Hero>
+    </Step>
   );
 }
 
@@ -349,26 +418,39 @@ function SettleStep({ v, refresh }: Props) {
     : !allApproved || s === "PROPOSED" || s === "APPROVING" ? ["wait", d.round.waitOthersTitle, fmt(d.round.approvedWaiting, { a: v.aggregate.approvals, b: v.aggregate.participants })]
     : ["busy", d.round.settlingTitle, d.round.settlingBody];
 
+  const rail = (
+    <ol className="grid gap-5">
+      <RailStep done={allApproved} active={!allApproved} title={d.round.rail.approvals} detail={fmt(d.common.of, { a: v.aggregate.approvals, b: v.aggregate.participants })} />
+      <RailStep done={v.you.approved && v.you.allowances.every((a) => a.sufficient)} active={false} title={d.round.rail.allowance} />
+      <RailStep done={sent} active={allApproved && !sent && !ready} failed={s === "SETTLEMENT_REVERTED"} title={d.round.rail.tx} detail={v.round.settlementTx ? <TxLink hash={v.round.settlementTx} /> : null} />
+      <RailStep done={v9?.status === "PASS"} active={sent && !v9} failed={s === "VERIFICATION_FAILED"} title={<Term k="verifier">{d.round.rail.verify}</Term>} detail={v9 ? fmt(d.round.verified, { a: v9.checks.filter((c) => c.status === "PASS").length, b: v9.checks.length }) : null} />
+    </ol>
+  );
+
   return (
-    <Hero mood={mood} title={title} body={body}>
-      <ol className="grid gap-4 rounded-2xl bg-surface-2 p-4">
-        <RailStep done={allApproved} active={!allApproved} title={d.round.rail.approvals} detail={fmt(d.common.of, { a: v.aggregate.approvals, b: v.aggregate.participants })} />
-        <RailStep done={v.you.approved && v.you.allowances.every((a) => a.sufficient)} active={false} title={d.round.rail.allowance} />
-        <RailStep done={sent} active={allApproved && !sent && !ready} failed={s === "SETTLEMENT_REVERTED"} title={d.round.rail.tx} detail={v.round.settlementTx ? <TxLink hash={v.round.settlementTx} /> : null} />
-        <RailStep done={v9?.status === "PASS"} active={sent && !v9} failed={s === "VERIFICATION_FAILED"} title={<Term k="verifier">{d.round.rail.verify}</Term>} detail={v9 ? fmt(d.round.verified, { a: v9.checks.filter((c) => c.status === "PASS").length, b: v9.checks.length }) : null} />
-      </ol>
-      {ready && (
-        <div className="grid gap-3">
-          <ActionStatus status={act.status} />
-          {act.error && <ErrorNote>{act.error}</ErrorNote>}
-          <CtaBar>
-            <Button size="lg" busy={act.pending} onClick={() => act.run(async (say) => { await sama.settle(v, signer, say, progressWords(d)); await refresh(); })}>{d.round.sendSettlement}</Button>
-          </CtaBar>
-          <WalletPromptPreview prompts={[{ kind: "tx", label: d.round.promptSettle }]} sponsored={v.gasSponsored} />
-        </div>
-      )}
-      <More summary={d.round.yourTransfers}><YourLegs v={v} /></More>
-    </Hero>
+    <Step
+      v={v}
+      mood={mood}
+      title={title}
+      body={body}
+      panel={
+        ready ? (
+          <>
+            <WalletPromptPreview prompts={[{ kind: "tx", label: d.round.promptSettle }]} sponsored={v.gasSponsored} />
+            <ActionStatus status={act.status} />
+            {act.error && <ErrorNote>{act.error}</ErrorNote>}
+            <Cta>
+              <Button size="lg" busy={act.pending} onClick={() => act.run(async (say) => { await sama.settle(v, signer, say, progressWords(d)); await refresh(); })}>{d.round.sendSettlement}</Button>
+            </Cta>
+          </>
+        ) : (
+          rail
+        )
+      }
+    >
+      {ready && rail}
+      <More summary={d.round.yourTransfers}><ul className="grid grid-cols-1 divide-y divide-line"><LegRows v={v} /></ul></More>
+    </Step>
   );
 }
 
@@ -385,7 +467,7 @@ function LeftoversStep({ v, refresh }: Props) {
   const [picked, setPicked] = useState<Choice>(recommended);
   const noCross = v.round.state === "NO_CROSS";
 
-  if (real.length === 0) return <Hero mood={noCross ? "info" : "done"} title={noCross ? d.round.noCrossTitle : d.round.doneTitle} body={v.you.residual.length ? d.round.dustOnly : d.round.nothingLeft} />;
+  if (real.length === 0) return <Step v={v} mood={noCross ? "info" : "done"} title={noCross ? d.round.noCrossTitle : d.round.doneTitle} body={v.you.residual.length ? d.round.dustOnly : d.round.nothingLeft} panel={<ButtonLink href={`/circles/${v.circle.id}`} variant="secondary" block>{d.round.backToCircle}</ButtonLink>} />;
 
   const choices: Choice[] = rec?.canExecute ? ["carry", "swap", "drop"] : ["carry", "drop"];
   const confirm = () =>
@@ -396,39 +478,53 @@ function LeftoversStep({ v, refresh }: Props) {
     });
 
   return (
-    <Hero mood="todo" title={noCross ? d.round.noCrossTitle : d.round.leftoverTitle} body={fmt(d.round.leftoverBody, { amount: usd(real.reduce((s, r) => s + r.valueUsd, 0), locale, 0) })}>
-      <ul className="grid gap-2">
+    <Step
+      v={v}
+      mood="todo"
+      title={noCross ? d.round.noCrossTitle : d.round.leftoverTitle}
+      body={fmt(d.round.leftoverBody, { amount: usd(real.reduce((s, r) => s + r.valueUsd, 0), locale, 0) })}
+      panel={
+        <>
+          {/* One compact list: radio dot · title (+ small "Recommended") · one line of what it means. The reason for the
+              recommendation sits once under the list instead of inside a card. */}
+          <fieldset className="grid grid-cols-1 divide-y divide-line overflow-hidden rounded-2xl border border-line">
+            <legend className="sr-only">{d.round.leftoverTitle}</legend>
+            {choices.map((key) => {
+              const [title, body] = d.round.choices[key];
+              const on = picked === key;
+              return (
+                <label key={key} className={cx("flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors", on ? "bg-accent-soft/60" : "hover:bg-surface-2", act.pending && "pointer-events-none opacity-60")}>
+                  <input type="radio" name="leftover" value={key} checked={on} onChange={() => setPicked(key)} className="sr-only" />
+                  <span className={cx("grid size-5 shrink-0 place-items-center rounded-full border-2 transition-colors", on ? "border-accent" : "border-line-strong")} aria-hidden="true">
+                    <span className={cx("size-2.5 rounded-full bg-accent transition-transform", on ? "scale-100" : "scale-0")} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate text-[15px] font-semibold text-ink">{title}</span>
+                      {key === recommended && <span className="shrink-0 rounded-md bg-accent/15 px-1.5 py-0.5 text-[11px] font-semibold text-accent">{d.round.recommended}</span>}
+                    </span>
+                    <span className="block text-sm leading-snug text-ink-3">
+                      {body}
+                      {key === "swap" && rec?.costPct != null && <span className="num"> · ≈ {percent(rec.costPct, locale)}</span>}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </fieldset>
+          {rec && rec.reasons.length > 0 && <p className="text-xs leading-relaxed text-ink-3">{rec.reasons.join(" ")}</p>}
+          <ActionStatus status={act.status} />
+          {act.error && <ErrorNote>{act.error}</ErrorNote>}
+          <Cta>
+            <Button size="lg" busy={act.pending} onClick={confirm}>{d.round.confirmChoice}</Button>
+          </Cta>
+        </>
+      }
+    >
+      <TokenList title={d.round.leftover}>
         {real.map((r) => <AmountRow key={r.symbol + r.side} direction={r.side} amount={r.amountTokens} symbol={r.symbol} usdValue={r.valueUsd} label={r.side === "SELL" ? d.round.stillSell : d.round.stillBuy} />)}
-      </ul>
-      <fieldset className="grid gap-2">
-        <legend className="sr-only">{d.round.leftoverTitle}</legend>
-        {choices.map((key) => {
-          const [title, body] = d.round.choices[key];
-          const on = picked === key;
-          return (
-            <label key={key} className={cx("flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-colors", on ? "border-accent bg-accent-soft" : "border-line hover:border-line-strong", act.pending && "pointer-events-none opacity-60")}>
-              <input type="radio" name="leftover" value={key} checked={on} onChange={() => setPicked(key)} className="mt-1 size-4 shrink-0 accent-[var(--accent)]" />
-              <span className="min-w-0 flex-1">
-                <span className="flex flex-wrap items-center gap-2 font-semibold">
-                  {title}
-                  {key === recommended && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-on-accent">{d.round.recommended}</span>}
-                </span>
-                <span className="mt-0.5 block text-sm text-ink-2">{body}</span>
-                {key === recommended && rec && rec.reasons.length > 0 && <span className="mt-2 block text-xs text-ink-3">{rec.reasons.join(" ")}</span>}
-                {key === "swap" && rec?.costPct != null && <span className="num mt-1 block text-xs text-ink-3">PancakeSwap ≈ {percent(rec.costPct, locale)}</span>}
-              </span>
-            </label>
-          );
-        })}
-      </fieldset>
-      <div className="grid gap-3">
-        <ActionStatus status={act.status} />
-        {act.error && <ErrorNote>{act.error}</ErrorNote>}
-        <CtaBar>
-          <Button size="lg" busy={act.pending} onClick={confirm}>{d.round.confirmChoice}</Button>
-        </CtaBar>
-      </div>
-    </Hero>
+      </TokenList>
+    </Step>
   );
 }
 
@@ -436,51 +532,68 @@ function DoneStep({ v }: { v: RoundView }) {
   const { d, fmt, locale } = useI18n();
   const total = (dir: "SEND" | "RECEIVE") => usd(v.you.legs.filter((l) => l.direction === dir).reduce((s, l) => s + l.valueUsd, 0), locale);
   return (
-    <Hero mood="done" title={d.round.doneTitle} body={v.you.legs.length ? fmt(d.round.doneBody, { sent: total("SEND"), received: total("RECEIVE") }) : d.receipt.nothing}>
-      <ReceiptSummary v={v} compact />
-    </Hero>
+    <Step
+      v={v}
+      mood="done"
+      title={d.round.doneTitle}
+      body={v.you.legs.length ? fmt(d.round.doneBody, { sent: total("SEND"), received: total("RECEIVE") }) : d.receipt.nothing}
+      panel={<ReceiptSummary v={v} compact />}
+    >
+      {v.you.legs.length > 0 && (
+        <>
+          <Stats>
+            <Stat label={d.round.totalSent} value={total("SEND")} tone="rest" />
+            <Stat label={d.round.totalReceived} value={total("RECEIVE")} tone="match" />
+          </Stats>
+          <TokenList title={d.round.yourTransfers}><LegRows v={v} /></TokenList>
+        </>
+      )}
+    </Step>
   );
 }
 
-/** Everything a member might want to double-check, folded away by default. */
+/** Everything a member might want to double-check, folded into one row at the bottom of the page. */
 function RoundDetails({ v }: { v: RoundView }) {
   const { d, fmt, locale } = useI18n();
   const ver = v.round.verification;
   const hash = (h: string) => <span className="num" title={h}>{short(h, 10, 6)}</span>;
   return (
-    <Card className="p-0 sm:p-0">
-      <details className="group">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 font-medium sm:px-6 [&::-webkit-details-marker]:hidden">
-          {d.round.details}
-          <IconChevronRight size={18} className="shrink-0 text-ink-3 transition-transform group-open:rotate-90" />
-        </summary>
-        <div className="grid gap-6 px-5 pb-5 text-sm sm:grid-cols-2 sm:px-6 sm:pb-6">
-          <div>
-            <p className="mb-2 text-ink-3">{d.round.prices}</p>
-            <ul className="grid gap-1.5">
-              {v.round.prices.map((p) => <li key={p.symbol} className="flex justify-between gap-3"><span>{p.symbol}</span><span className="num">{usd(p.priceUsd, locale)}</span></li>)}
-            </ul>
-          </div>
-          <dl className="grid content-start gap-1.5">
-            {v.aggregate.participants > 0 && <Fact k={d.round.approvals} v={fmt(d.common.of, { a: v.aggregate.approvals, b: v.aggregate.participants })} />}
-            {v.round.planValidUntil && <Fact k={d.round.deadline} v={deadlineOf(v, locale)} />}
-            <Fact k={<Term k="atomic">{d.round.contract}</Term>} v={<a className="num text-accent hover:underline" href={addressUrl(v.round.settlementContract)} target="_blank" rel="noreferrer">{short(v.round.settlementContract, 8, 6)}</a>} />
-            {v.round.planHash && <Fact k={d.round.plan} v={hash(v.round.planHash)} />}
-            <Fact k={d.receipt.snapshot} v={hash(v.round.snapshotHash)} />
-            {v.round.settlementTx && <Fact k={d.receipt.settlement} v={<TxLink hash={v.round.settlementTx} />} />}
-            {ver?.blockNumber && <Fact k={d.receipt.block} v={<a className="num text-accent hover:underline" href={blockUrl(ver.blockNumber)} target="_blank" rel="noreferrer">{ver.blockNumber}</a>} />}
-          </dl>
+    <details className="group mt-10 border-t border-line">
+      <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 py-4 text-lg font-semibold tracking-tight text-ink [&::-webkit-details-marker]:hidden">
+        {d.round.details}
+        <IconChevronRight size={20} className="shrink-0 text-ink-3 transition-transform group-open:rotate-90" />
+      </summary>
+      <div className="grid gap-8 pb-6 md:grid-cols-2">
+        <div>
+          <p className="mb-2 text-sm font-medium text-ink-3">{d.round.prices}</p>
+          <ul className="grid grid-cols-1 divide-y divide-line">
+            {v.round.prices.map((p) => (
+              <li key={p.symbol} className="flex items-center justify-between gap-3 py-3">
+                <span className="flex items-center gap-3 font-medium text-ink"><AssetIcon symbol={p.symbol} size={28} />{p.symbol}</span>
+                <span className="num font-medium text-ink">{usd(p.priceUsd, locale)}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </details>
-    </Card>
+        <dl className="grid content-start grid-cols-1 divide-y divide-line">
+          {v.aggregate.participants > 0 && <Fact k={d.round.approvals} v={fmt(d.common.of, { a: v.aggregate.approvals, b: v.aggregate.participants })} />}
+          {v.round.planValidUntil && <Fact k={d.round.deadline} v={deadlineOf(v, locale)} />}
+          <Fact k={<Term k="atomic">{d.round.contract}</Term>} v={<a className="num text-accent hover:underline" href={addressUrl(v.round.settlementContract)} target="_blank" rel="noreferrer">{short(v.round.settlementContract, 8, 6)}</a>} />
+          {v.round.planHash && <Fact k={d.round.plan} v={hash(v.round.planHash)} />}
+          <Fact k={d.receipt.snapshot} v={hash(v.round.snapshotHash)} />
+          {v.round.settlementTx && <Fact k={d.receipt.settlement} v={<TxLink hash={v.round.settlementTx} />} />}
+          {ver?.blockNumber && <Fact k={d.receipt.block} v={<a className="num text-accent hover:underline" href={blockUrl(ver.blockNumber)} target="_blank" rel="noreferrer">{ver.blockNumber}</a>} />}
+        </dl>
+      </div>
+    </details>
   );
 }
 
 function Fact({ k, v }: { k: ReactNode; v: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-3 py-3 text-[15px]">
       <dt className="text-ink-3">{k}</dt>
-      <dd className="text-right font-medium">{v}</dd>
+      <dd className="text-right font-medium text-ink">{v}</dd>
     </div>
   );
 }

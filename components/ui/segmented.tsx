@@ -9,7 +9,7 @@ import { cx } from "@/utils/cx";
 export function Segmented<T extends string>({ value, options, onChange, label, className }: { value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void; label: string; className?: string }) {
   const pill = useId();
   return (
-    <div role="radiogroup" aria-label={label} className={cx("inline-flex rounded-xl border border-[var(--glass-edge)] bg-[color-mix(in_srgb,var(--surface-2)_70%,transparent)] p-1 backdrop-blur-xl", className)}>
+    <div role="radiogroup" aria-label={label} className={cx("inline-flex rounded-full border border-[var(--glass-edge)] bg-[color-mix(in_srgb,var(--surface-2)_70%,transparent)] p-1 backdrop-blur-xl", className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -23,9 +23,9 @@ export function Segmented<T extends string>({ value, options, onChange, label, c
             if (e.key === "ArrowRight" || e.key === "ArrowDown") onChange(options[(i + 1) % options.length]!.value);
             if (e.key === "ArrowLeft" || e.key === "ArrowUp") onChange(options[(i - 1 + options.length) % options.length]!.value);
           }}
-          className={cx("relative min-h-9 rounded-lg px-3 text-sm font-medium transition-colors", o.value === value ? "text-ink" : "text-ink-3 hover:text-ink")}
+          className={cx("relative min-h-9 rounded-full px-3 text-sm font-medium transition-colors", o.value === value ? "text-ink" : "text-ink-3 hover:text-ink")}
         >
-          {o.value === value && <m.span layoutId={pill} transition={spring} className="absolute inset-0 rounded-lg bg-surface shadow-card" aria-hidden="true" />}
+          {o.value === value && <m.span layoutId={pill} transition={spring} className="absolute inset-0 rounded-full bg-[var(--pill)] shadow-card" aria-hidden="true" />}
           <span className="relative">{o.label}</span>
         </button>
       ))}

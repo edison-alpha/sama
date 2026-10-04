@@ -87,7 +87,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                 title={body}
                 aria-pressed={selected}
                 onClick={() => setWeights(PRESETS[k])}
-                className={cx("h-10 rounded-full border px-4 text-sm font-semibold transition-colors", selected ? "border-accent bg-accent-soft text-accent" : "border-line text-ink hover:bg-surface-2")}
+                className={cx("h-10 rounded-full border px-4 text-sm font-semibold backdrop-blur-xl transition-colors", selected ? "border-accent bg-accent-soft text-accent" : "border-[var(--glass-edge)] bg-[color-mix(in_srgb,var(--surface-2)_70%,transparent)] text-ink hover:bg-surface-2")}
               >
                 {name}
               </button>

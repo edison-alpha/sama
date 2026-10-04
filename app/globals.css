@@ -21,8 +21,8 @@
     outline-offset: 2px;
     border-radius: 6px;
   }
+  /* Tabular figures in the app font, so amounts line up without switching to a monospace face. */
   .num {
-    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
   @media (prefers-reduced-motion: reduce) {

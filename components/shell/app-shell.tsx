@@ -40,6 +40,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [ready, session, router, pathname]);
 
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`) || (href === "/circles" && pathname.startsWith("/rounds"));
+  // Circle detail and the round journey (plus its receipt) own a fixed primary button at the bottom; the tab
+  // bar would float right under it, so phones drop the tab bar there and give that space to the page instead.
+  const noTabBar = (pathname.startsWith("/circles/") && pathname !== "/circles/new") || pathname.startsWith("/rounds/");
 
   // The collapsed state lives on <html data-sidebar> (applied before paint); this mirror only drives the toggle's labels.
   const [collapsed, setCollapsed] = useState(false);
@@ -106,8 +109,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <TopBar walletPage={WALLET_ROUTES.includes(pathname)} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-36 pt-4 sm:px-6 md:pb-12 md:pt-6">
+        <TopBar />
+        <main className={cx("mx-auto w-full max-w-6xl flex-1 px-4 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:pb-12 md:pt-6", noTabBar ? "pb-6" : "pb-36")}>
           {ready && session ? (
             // Keyed by route so each screen plays its entrance; cards and tiles inside stagger in (see `rise`).
             <m.div key={pathname} initial="hidden" animate="show" variants={page}>{children}</m.div>
@@ -117,7 +120,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      <TabBar active={active} />
+      {!noTabBar && <TabBar active={active} />}
       {isTestnet && <span className="sr-only">{d.common.testnet}</span>}
     </div>
   );
@@ -133,9 +136,6 @@ function SideLink({ href, current, icon, children }: { href: string; current: bo
     </Link>
   );
 }
-
-/** Wallet pages carry their own header (avatar and address), so phones skip the brand bar there. */
-const WALLET_ROUTES = ["/home", "/portfolio", "/activity"];
 
 /**
  * Phone navigation: a frosted pill holding the four main tabs, with a glass lens that slides to the active one, and a
@@ -176,7 +176,8 @@ function TabBar({ active }: { active: (href: string) => boolean }) {
   );
 }
 
-function TopBar({ walletPage }: { walletPage: boolean }) {
+/** Desktop top bar (network, language, theme). Phones skip it: each screen has its own app-style header, and Settings holds language and theme. */
+function TopBar() {
   const { d } = useI18n();
   const { wrongNetwork, switchNetwork } = useSession();
   return (
@@ -187,7 +188,7 @@ function TopBar({ walletPage }: { walletPage: boolean }) {
           <Button size="sm" variant="secondary" onClick={() => void switchNetwork()}>{d.network.switch}</Button>
         </div>
       )}
-      <header className={cx("sticky top-0 z-30 flex h-16 items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_72%,transparent)] px-4 backdrop-blur-xl sm:px-6 md:bg-transparent md:backdrop-blur-none", walletPage && "max-md:hidden")}>
+      <header className={cx("sticky top-0 z-30 flex h-16 items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--app-bg)_72%,transparent)] px-4 backdrop-blur-xl sm:px-6 md:bg-transparent md:backdrop-blur-none max-md:hidden")}>
         <div className="md:hidden"><BrandLogo href="/home" className="h-8" /></div>
         <div className="hidden md:block" />
         <div className="flex items-center gap-1 rounded-full md:border md:border-[var(--glass-edge)] md:bg-[var(--glass-bg)] md:px-1.5 md:py-1 md:shadow-[inset_0_1px_0_var(--glass-hi),var(--elev-sidebar)] md:backdrop-blur-xl">

@@ -67,8 +67,6 @@ export default function PortfolioPage() {
                 </p>
                 <p className="mt-2 text-sm font-medium text-ink-2">
                   {fmt(d.home.tokensCount, { n: tokenCount(portfolio.positions, drift) })}
-                  <span className="mx-2 text-ink-3" aria-hidden="true">•</span>
-                  <span className="text-ink-3">{fmt(d.portfolio.subtitle, { time: new Date(portfolio.readAt).toLocaleTimeString(locale) })}</span>
                 </p>
               </div>
               <TokenTable positions={portfolio.positions} totalUsd={portfolio.totalUsd} drift={drift} assets={assets} />

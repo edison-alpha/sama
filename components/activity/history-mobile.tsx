@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { IconArrowLeft, IconChevronRight, IconExternal } from "@/components/icons";
 import { LocaleButton } from "@/components/shell/preferences";
+import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
 import type { Activity, RoundView } from "@/lib/api/types";
 import { activityGroup, activityLine } from "@/lib/activity";
 import { EXPLORER, isTestnet } from "@/lib/chain";
@@ -32,20 +33,34 @@ export function MobileHistory({ data, rows, filter, onFilter, range, onRange }: 
       </header>
 
       <div className="mt-5 flex items-center gap-2">
-        <label className="relative inline-flex h-10 items-center gap-1.5 rounded-full bg-surface-2 pl-4 pr-9 text-sm font-semibold text-ink">
-          {filter === "all" ? ad.filters.all : ad.filters[filter]}
-          <Chevron />
-          <select value={filter} onChange={(e) => onFilter(e.target.value as Filter)} aria-label={ad.allTypes} className="absolute inset-0 opacity-0">
-            {(["all", "rounds", "circles", "targets", "leftovers"] as const).map((k) => <option key={k} value={k}>{k === "all" ? ad.allTypes : ad.filters[k]}</option>)}
-          </select>
-        </label>
-        <label className="relative grid size-10 place-items-center rounded-full bg-surface-2 text-ink-2" title={ad.range[range]}>
-          <SlidersIcon />
-          {range !== "all" && <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" aria-hidden="true" />}
-          <select value={range} onChange={(e) => onRange(e.target.value as Range)} aria-label={ad.range.all} className="absolute inset-0 opacity-0">
-            {(["all", "week", "month"] as const).map((k) => <option key={k} value={k}>{ad.range[k]}</option>)}
-          </select>
-        </label>
+        <Dropdown
+          value={filter}
+          onChange={onFilter}
+          label={ad.allTypes}
+          options={(["all", "rounds", "circles", "targets", "leftovers"] as const).map((k) => ({ value: k, label: k === "all" ? ad.allTypes : ad.filters[k] }))}
+          triggerClassName="inline-flex h-10 items-center gap-1.5 rounded-full bg-surface-2 pl-4 pr-3 text-sm font-semibold text-ink"
+        >
+          {(selected, open) => (
+            <>
+              {filter === "all" ? ad.filters.all : selected?.label}
+              <DropdownChevron open={open} className="text-ink-2" />
+            </>
+          )}
+        </Dropdown>
+        <Dropdown
+          value={range}
+          onChange={onRange}
+          label={ad.range.all}
+          options={(["all", "week", "month"] as const).map((k) => ({ value: k, label: ad.range[k] }))}
+          triggerClassName="relative grid size-10 place-items-center rounded-full bg-surface-2 text-ink-2"
+        >
+          {() => (
+            <>
+              <SlidersIcon />
+              {range !== "all" && <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" aria-hidden="true" />}
+            </>
+          )}
+        </Dropdown>
       </div>
 
       <section aria-labelledby="history-title" className="mt-6">
@@ -183,14 +198,6 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
       <dt className="text-ink-3">{label}</dt>
       <dd className="text-right font-semibold text-ink">{children}</dd>
     </div>
-  );
-}
-
-function Chevron() {
-  return (
-    <svg className="pointer-events-none absolute right-3.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m6 9 6 6 6-6" />
-    </svg>
   );
 }
 

@@ -46,6 +46,7 @@ export const IconPulse = solar("pulse");
 export const IconCalendar = solar("calendar");
 export const IconLayers = solar("layers-minimalistic");
 export const IconSwap = solar("transfer-horizontal");
+export const IconRound = solar("refresh-circle");
 export const IconMail = solar("letter");
 export const IconPlay = solar("play-circle");
 export const IconCheckCircle = solar("check-circle");

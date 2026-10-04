@@ -12,7 +12,8 @@ type Size = "lg" | "md" | "sm";
 const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium leading-none transition-[background,opacity,box-shadow,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100";
 const sizes: Record<Size, string> = { lg: "h-12 px-7 text-base", md: "h-11 px-5 text-[15px]", sm: "h-9 px-4 text-sm" };
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_6px_16px_-6px_var(--accent)] hover:bg-accent-strong",
+  // Frosted, not glowing: a translucent accent fill with a top sheen and backdrop blur, no halo underneath.
+  primary: "bg-accent/92 text-on-accent shadow-[inset_0_1px_0_rgb(255_255_255/0.25)] backdrop-blur-md hover:bg-accent-strong/92",
   secondary: "border border-line-strong bg-surface text-ink hover:bg-surface-2",
   ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
   danger: "bg-danger text-white hover:opacity-90",

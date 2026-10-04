@@ -33,22 +33,26 @@ export function who(counterparty: string, d: Dict) {
   return n ? fmt(d.common.member, { n }) : counterparty;
 }
 
-/** One line per token amount: direction, token amount, USD. Icons plus words so colour is never the only cue. */
+/**
+ * One token row, laid out like a wallet's token list: logo, symbol with what happens to it (arrow + words, so colour is
+ * never the only cue), and the amount with its USD value on the right.
+ */
 export function AmountRow({ direction, amount, symbol, usdValue, label }: { direction: "SEND" | "RECEIVE" | "SELL" | "BUY"; amount: number; symbol: string; usdValue: number; label: string }) {
   const { locale } = useI18n();
   const out = direction === "SEND" || direction === "SELL";
   return (
-    <li className="flex items-center justify-between gap-3 rounded-2xl bg-surface-2 px-4 py-3">
-      <span className="flex items-center gap-3">
-        <span className={cx("grid size-8 shrink-0 place-items-center rounded-full text-sm font-bold", out ? "bg-rest-soft text-rest" : "bg-match-soft text-match")} aria-hidden="true">{out ? "↑" : "↓"}</span>
-        <span className="text-sm">{label}</span>
-      </span>
-      <span className="flex items-center gap-2.5 text-right">
-        <span>
-          <span className="num block text-sm font-medium">{tokens(amount, locale)} {symbol}</span>
-          <span className="num text-xs text-ink-3">{usd(usdValue, locale)}</span>
+    <li className="flex items-center gap-3 py-3.5">
+      <AssetIcon symbol={symbol} size={40} />
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold text-ink">{symbol}</span>
+        <span className={cx("block truncate text-sm", out ? "text-danger" : "text-ok")}>
+          <span aria-hidden="true">{out ? "↑ " : "↓ "}</span>
+          {label}
         </span>
-        <AssetIcon symbol={symbol} size={28} />
+      </span>
+      <span className="shrink-0 text-right">
+        <span className="num block font-semibold text-ink">{out ? "−" : "+"}{tokens(amount, locale)} {symbol}</span>
+        <span className="num block text-sm text-ink-3">{usd(usdValue, locale)}</span>
       </span>
     </li>
   );
