@@ -184,20 +184,42 @@ function RoundDemo() {
     { key: "settle", icon: "swap", label: tr("Settle", "Settle"), states: "READY_TO_SETTLE · SETTLING", body: tr("One transaction moves every matched transfer, then an independent check runs.", "Satu transaksi memindahkan semua transfer yang berpasangan, lalu cek independen berjalan."), cta: tr("Submit settlement", "Kirim settlement") },
     { key: "finish", icon: "book", label: tr("Finish", "Selesai"), states: "COMPLETE", body: tr("Decide what happens to leftovers and open your verified receipt.", "Putuskan nasib sisa dan buka struk terverifikasi."), cta: tr("View receipt", "Lihat struk") },
   ];
-  const [i, setI] = useState(2);
+  // Start at the first phase and walk through the journey automatically.
+  const [i, setI] = useState(0);
+  const reduce = useReducedMotion();
   const p = phases[i]!;
+
+  useEffect(() => {
+    if (reduce || i >= phases.length - 1) return;
+    const id = window.setTimeout(() => setI((current) => Math.min(current + 1, phases.length - 1)), 1200);
+    return () => window.clearTimeout(id);
+  }, [i, reduce, phases.length]);
+
   return (
-    <div className="w-full max-w-[460px]">
-      <Panel className="grid grid-cols-5 gap-1 p-1.5">
+    <div className="w-full max-w-[420px]">
+      <Panel className="relative grid grid-cols-5 gap-0 overflow-hidden p-1">
+        {/* The rail sits behind the phase controls, just like the round journey in the app. */}
+        <div className="pointer-events-none absolute inset-x-[10%] top-[17px] h-px bg-white/25" aria-hidden="true" />
+        <div
+          className="pointer-events-none absolute left-[10%] top-[17px] h-px bg-[#7ee2a8] transition-[width] duration-300"
+          style={{ width: `${(i / (phases.length - 1)) * 80}%` }}
+          aria-hidden="true"
+        />
         {phases.map((ph, j) => (
           <button
             key={ph.key}
             type="button"
             onClick={() => setI(j)}
             aria-current={i === j ? "step" : undefined}
-            className={cx("flex flex-col items-center gap-1 rounded-[14px] py-2 text-[11px] font-medium transition-colors", i === j ? "bg-white text-black" : j < i ? "text-white" : "text-white/55 hover:text-white")}
+            className={cx(
+              "relative z-10 flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-[10px] px-0.5 py-1 text-[9px] font-semibold transition-[background-color,color,transform] duration-200",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80",
+              i === j ? "text-white" : j < i ? "text-white" : "text-white/55 hover:bg-white/[0.06] hover:text-white",
+            )}
           >
-            <DocIcon name={j < i ? "checkFill" : ph.icon} size={18} className={j < i && i !== j ? "text-[#7ee2a8]" : undefined} />
+            <span className={cx("grid size-5 place-items-center rounded-full", i === j && ph.key !== "finish" ? "bg-black text-white" : j < i ? "text-[#7ee2a8]" : "text-current")}>
+              <DocIcon name={j < i ? "checkFill" : ph.icon} size={14} />
+            </span>
             {ph.label}
           </button>
         ))}

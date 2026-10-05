@@ -4,8 +4,6 @@ import { CodeBlock } from "@/components/docs/code-block";
 import { DocIcon, type DocIconName } from "@/components/docs/icon";
 import { Inline } from "@/components/docs/inline";
 import { PreviewCard } from "@/components/docs/preview-card";
-import { Scene } from "@/components/landing/scene";
-import { TONES, type Tone } from "@/components/landing/scene-tones";
 import type { Block, CardIcon } from "@/lib/docs/types";
 import type { Locale } from "@/lib/i18n/dict";
 import { cx } from "@/utils/cx";
@@ -22,9 +20,6 @@ const CARD_ICON: Record<CardIcon, DocIconName> = {
   book: "idea",
   pulse: "quickstart",
 };
-
-/** Card scenes cycle through the landing palette so a grid never repeats a colour side by side. */
-const CARD_TONES: Tone[] = [TONES.navy, TONES.amber, TONES.ocean, TONES.forest, TONES.plum, TONES.slate];
 
 const CALLOUT: Record<"note" | "tip" | "warn", { icon: DocIconName; orb: string }> = {
   note: { icon: "note", orb: "bg-match-soft text-match" },
@@ -137,23 +132,26 @@ function DocBlock({ b, locale }: { b: Block; locale: Locale }) {
       return (
         <div className="mt-7 grid gap-3 sm:grid-cols-2">
           {b.items.map((c, i) => (
-            <Link key={c.href} href={c.href} className="docs-card group block rounded-[28px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]" style={{ "--i": i } as CSSProperties}>
-              <Scene tone={CARD_TONES[i % CARD_TONES.length]!} flat className="h-[220px]">
-                <div className="flex h-full flex-col justify-between p-5">
-                  <div className="flex items-start justify-between">
-                    <span className="glass glass-frost grid size-12 place-items-center rounded-2xl text-white">
-                      <DocIcon name={c.icon ? CARD_ICON[c.icon] : "book"} size={24} />
-                    </span>
-                    <span className="glass glass-frost grid size-9 place-items-center rounded-full text-white transition-transform duration-300 group-hover:-rotate-45">
-                      <DocIcon name="arrowRight" size={15} />
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xl font-normal tracking-[-0.02em] text-white">{c.title[locale]}</p>
-                    <p className="mt-1 text-pretty text-sm leading-relaxed text-white/70">{c.text[locale]}</p>
-                  </div>
+            <Link
+              key={c.href}
+              href={c.href}
+              className="docs-card group block min-h-[220px] rounded-[28px] border border-[#2b2b2b] bg-[#181818] p-5 text-[#f4f4f2] shadow-[inset_0_1px_0_rgb(255_255_255/0.03)] transition-[background,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-[#414141] hover:bg-[#1d1d1d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)]"
+              style={{ "--i": i } as CSSProperties}
+            >
+              <div className="flex h-full flex-col justify-between gap-10">
+                <div className="flex items-start justify-between">
+                  <span className="grid size-12 place-items-center rounded-2xl border border-[#353535] bg-[#222] text-[#f4f4f2]">
+                    <DocIcon name={c.icon ? CARD_ICON[c.icon] : "book"} size={24} />
+                  </span>
+                  <span className="grid size-9 place-items-center rounded-full border border-[#353535] bg-[#222] text-[#d6d6d6] transition-transform duration-300 group-hover:-rotate-45">
+                    <DocIcon name="arrowRight" size={15} />
+                  </span>
                 </div>
-              </Scene>
+                <div>
+                  <p className="text-xl font-medium tracking-[-0.02em] text-[#f4f4f2]">{c.title[locale]}</p>
+                  <p className="mt-1 text-pretty text-sm leading-relaxed text-[#858585]">{c.text[locale]}</p>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
