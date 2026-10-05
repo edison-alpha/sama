@@ -7,7 +7,13 @@ import { percent, tokens, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
 
-type Row = { symbol: string; name: string | null; amount: number; value: number; price: number | null; pct: number; target: number | null };
+type Row = { symbol: string; name: string | null; amount: number; value: number; price: number | null; pct: number; target: number | null; logo: string | null; priced: boolean };
+
+/** Registry tokens get Sama's logo; any other held token shows the PancakeSwap logo it came with. */
+function RowIcon({ row, size }: { row: Row; size: number }) {
+  if (row.logo) return <img src={row.logo} width={size} height={size} alt="" className="shrink-0 rounded-full" loading="lazy" />;
+  return <AssetIcon symbol={row.symbol} size={size} />;
+}
 
 /** Under one point of difference counts as on target, so rounding noise never asks you to trade. */
 const ON_TARGET_PCT = 1;
@@ -24,10 +30,12 @@ function rows(positions: Position[], drift: Drift[] | null, assets: Asset[] | un
     price: bySymbol.get(p.symbol)?.priceUsd ?? (p.amountTokens > 0 ? p.valueUsd / p.amountTokens : null),
     pct: p.pct,
     target: drift ? (targetOf.get(p.symbol) ?? 0) : null,
+    logo: p.logo?.startsWith("https://") ? p.logo : null,
+    priced: p.priced !== false,
   }));
   const missing = (drift ?? [])
     .filter((r) => r.targetPct > 0 && !positions.some((p) => p.symbol === r.symbol))
-    .map((r) => ({ symbol: r.symbol, name: bySymbol.get(r.symbol)?.name ?? null, amount: 0, value: 0, price: bySymbol.get(r.symbol)?.priceUsd ?? null, pct: 0, target: r.targetPct }));
+    .map((r) => ({ symbol: r.symbol, name: bySymbol.get(r.symbol)?.name ?? null, amount: 0, value: 0, price: bySymbol.get(r.symbol)?.priceUsd ?? null, pct: 0, target: r.targetPct, logo: null, priced: true }));
   return [...held, ...missing].sort((a, b) => b.value - a.value);
 }
 
@@ -64,13 +72,13 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
         const action = todo(r);
         return (
           <li key={r.symbol} className={cx("flex items-center gap-3 py-3", r.amount === 0 && "opacity-60")}>
-            <AssetIcon symbol={r.symbol} size={44} />
+            <RowIcon row={r} size={44} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-base font-semibold text-ink">{r.name ?? r.symbol}</span>
               <span className="tabular-nums block truncate text-sm text-ink-3">{tokens(r.amount, locale)} {r.symbol} · {percent(r.pct, locale)}</span>
             </span>
             <span className="shrink-0 text-right">
-              <Money value={r.value} locale={locale} className="tabular-nums block text-base font-semibold text-ink" />
+              {r.priced ? <Money value={r.value} locale={locale} className="tabular-nums block text-base font-semibold text-ink" /> : <span className="block text-sm text-ink-3">No price</span>}
               {action ? <span className={cx("block text-sm font-medium", action.tone)}>{action.text}</span> : null}
             </span>
           </li>
@@ -97,7 +105,7 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
             <tr key={r.symbol} className={cx("[&>td]:border-b [&>td]:border-line last:[&>td]:border-0", r.amount === 0 && "opacity-60")}>
               <td className="w-full max-w-0 px-3 py-4 sm:px-4">
                 <span className="flex min-w-0 items-center gap-3">
-                  <AssetIcon symbol={r.symbol} size={36} />
+                  <RowIcon row={r} size={36} />
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-ink">{r.name ?? r.symbol}</span>
                     {r.name && <span className="block truncate text-sm text-ink-3">{r.symbol}</span>}
@@ -107,7 +115,7 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
               {!compact && <td className="tabular-nums hidden px-3 py-4 sm:px-4 text-right text-ink md:table-cell">{r.price === null ? "—" : usd(r.price, locale, r.price < 1 ? 4 : 2)}</td>}
               <td className={cx("tabular-nums whitespace-nowrap px-3 py-4 text-right text-ink sm:px-4", balanceCls)}>{tokens(r.amount, locale)} <span className="text-ink-3">{r.symbol}</span></td>
               <td className="whitespace-nowrap px-3 py-4 text-right sm:px-4">
-                <Money value={r.value} locale={locale} className="tabular-nums whitespace-nowrap font-medium text-ink" />
+                {r.priced ? <Money value={r.value} locale={locale} className="tabular-nums whitespace-nowrap font-medium text-ink" /> : <span className="text-sm text-ink-3">No price</span>}
                 <span className={cx("tabular-nums block text-sm text-ink-3", shareUnderValue)}>{percent(r.pct, locale)}</span>
               </td>
               {!compact && <td className="hidden whitespace-nowrap px-3 py-4 sm:px-4 md:table-cell">

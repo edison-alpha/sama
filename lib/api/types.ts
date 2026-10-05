@@ -33,7 +33,7 @@ export type Asset = {
   logoUrl?: string;
 };
 
-export type Position = { symbol: string; amountTokens: number; valueUsd: number; pct: number };
+export type Position = { symbol: string; amountTokens: number; valueUsd: number; pct: number; logo?: string; priced?: boolean };
 
 export type Portfolio = { ok: true; totalUsd: number; readAt: string; positions: Position[] } | { ok: false; detail: string };
 
