@@ -29,7 +29,7 @@ export default function CirclesPage() {
   if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
 
   const mine = data.filter((c) => c.role);
-  const explore = data.filter((c) => !c.role && c.visibility !== "PRIVATE");
+  const explore = data.filter((c) => !c.role);
   const list = tab === "mine" ? mine : explore;
   const createButton = <Button icon={<Icon icon="fa7-solid:add" width={16} height={16} aria-hidden="true" />} onClick={() => setCreating(true)}>{d.circles.create}</Button>;
 
