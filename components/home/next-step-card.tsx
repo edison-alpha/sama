@@ -33,7 +33,7 @@ export function NextStepCard({ home }: { home: Home }) {
   const { copy, href, vars } = ((): { copy: { title: string; body: string; cta: string }; href: string; vars: Record<string, string | number> } => {
     switch (step.kind) {
       case "join":
-        return { copy: n.join, href: `/rounds/${step.round.roundId}`, vars: { seq: step.round.roundId.replace(/\D/g, ""), circle: step.round.circleName, time: clock(step.round.freezesAt - now) } };
+        return { copy: n.join, href: `/rounds/${step.round.roundId}`, vars: { seq: step.round.sequence, circle: step.round.circleName, time: clock(step.round.freezesAt - now) } };
       case "approve":
         return { copy: n.approve, href: `/rounds/${step.round.roundId}`, vars: { circle: step.round.circleName } };
       case "settle":
@@ -41,7 +41,7 @@ export function NextStepCard({ home }: { home: Home }) {
       case "leftovers":
         return { copy: n.leftovers, href: `/rounds/${step.round.roundId}`, vars: { circle: step.round.circleName, amount: usd(step.round.residualUndecidedUsd, locale) } };
       case "wait":
-        return { copy: n.wait, href: `/rounds/${step.round.roundId}`, vars: { circle: step.round.circleName, seq: step.round.roundId.replace(/\D/g, "") } };
+        return { copy: n.wait, href: `/rounds/${step.round.roundId}`, vars: { circle: step.round.circleName, seq: step.round.sequence } };
       case "target":
         return { copy: n.target, href: "/portfolio?tab=target", vars: {} };
       case "circle":

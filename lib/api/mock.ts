@@ -255,7 +255,7 @@ export const mockApi: SamaApi = {
       .map((c) => {
         const v = roundView(c.liveRound!.id);
         const undecided = v.you.decision ? 0 : v.you.residual.filter((r) => !r.dust).reduce((s, r) => s + r.valueUsd, 0);
-        return { roundId: v.round.id, circleName: c.name, state: v.round.state, freezesAt: v.round.freezesAt, signed: v.you.signed, approved: v.you.approved, inPlan: v.you.inPlan, residualUndecidedUsd: undecided };
+        return { roundId: v.round.id, sequence: v.round.sequence, circleName: c.name, state: v.round.state, freezesAt: v.round.freezesAt, signed: v.you.signed, approved: v.you.approved, inPlan: v.you.inPlan, residualUndecidedUsd: undecided };
       });
     return { portfolio: portfolioNow(), target: store.target, drift: d.drift, totalDriftPct: d.total, circles: store.circles.filter((c) => c.role), activity: store.activity.slice(0, 5), pending };
   },

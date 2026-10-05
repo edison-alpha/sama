@@ -107,7 +107,7 @@ export default function HomePage() {
                       <IconChip className="text-match"><IconSwap size={18} /></IconChip>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium text-ink">{r.circleName}</span>
-                        <span className="block text-xs text-ink-3">{fmt(d.round.crumb, { seq: r.roundId.replace(/\D/g, "") })}</span>
+                        <span className="block text-xs text-ink-3">{fmt(d.round.crumb, { seq: r.sequence })}</span>
                       </span>
                       <Badge tone={stateTone(r.state)} dot={!["COMPLETE", "NO_CROSS", "EXPIRED"].includes(r.state)}>{d.states[r.state]}</Badge>
                     </Link>

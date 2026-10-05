@@ -140,6 +140,7 @@ export type Activity = { id: string; kind: string; detail: Record<string, string
 
 export type PendingRound = {
   roundId: string;
+  sequence: number;
   circleName: string;
   state: RoundState;
   freezesAt: number;
