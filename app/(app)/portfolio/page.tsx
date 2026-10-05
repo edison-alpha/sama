@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { Stagger, rise, spring } from "@/components/motion";
 import { TargetEditor } from "@/components/portfolio/target-editor";
 import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
+import { ReceiveModal } from "@/components/wallet/receive-modal";
+import { SendTokenModal } from "@/components/wallet/send-token";
 import { WalletHeader } from "@/components/portfolio/wallet-header";
+import { Button } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
 import { ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { sama } from "@/lib/api";
@@ -19,6 +22,12 @@ type Tab = "tokens" | "target";
 /** Portfolio in the style of a DEX wallet page: total on top, then a plain token table; the target lives in its own tab. */
 export default function PortfolioPage() {
   const { d, fmt, locale } = useI18n();
+  const [sending, setSending] = useState(false);
+  const [receiving, setReceiving] = useState(false);
+  // The home tile links here as /portfolio?send=1, so the Send dialog opens straight away.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("send") === "1") setSending(true);
+  }, []);
   const { data, error, refresh } = useApi(() => Promise.all([sama.portfolio(), sama.assets()]), []);
   const [tab, setTab] = useState<Tab>("tokens");
 
@@ -61,15 +70,23 @@ export default function PortfolioPage() {
             <ErrorNote>{d.portfolio.readError} {portfolio.detail}</ErrorNote>
           ) : (
             <>
-              <div className="mb-6">
+              <div className="mb-6 flex items-end justify-between gap-4">
+                <div className="min-w-0">
                 <p className="text-5xl font-semibold tracking-[-0.03em] text-ink">
                   <Money value={portfolio.totalUsd} locale={locale} className="tabular-nums" />
                 </p>
                 <p className="mt-2 text-sm font-medium text-ink-2">
                   {fmt(d.home.tokensCount, { n: tokenCount(portfolio.positions, drift) })}
                 </p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button size="lg" variant="ghost" onClick={() => setReceiving(true)}>{d.send.receive.open}</Button>
+                  <Button size="lg" onClick={() => setSending(true)}>{d.send.open}</Button>
+                </div>
               </div>
               <TokenTable positions={portfolio.positions} totalUsd={portfolio.totalUsd} drift={drift} assets={assets} />
+              {sending && <SendTokenModal assets={assets} positions={portfolio.positions} onClose={() => setSending(false)} onSent={() => void refresh()} />}
+              {receiving && <ReceiveModal onClose={() => setReceiving(false)} />}
               {assets.some((a) => a.disclosure && portfolio.positions.some((p) => p.symbol === a.symbol)) && (
                 <p className="mt-4 text-xs text-ink-3">{assets.find((a) => a.disclosure && portfolio.positions.some((p) => p.symbol === a.symbol))?.disclosure}</p>
               )}

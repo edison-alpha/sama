@@ -27,7 +27,7 @@ export function Countdown({ until }: { until: number }) {
   return <span aria-live={left % 60 === 0 ? "polite" : "off"}>{clock(left)}</span>;
 }
 
-/** "Member 2" from the API, or a bare number from mock data, rendered in the user's language. */
+/** A pseudonymous member label from the API, or a bare number from mock data, rendered in the user's language. */
 export function who(counterparty: string, d: Dict) {
   const n = counterparty.match(/\d+/)?.[0];
   return n ? fmt(d.common.member, { n }) : counterparty;

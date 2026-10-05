@@ -5,6 +5,7 @@ import { AssetIcon } from "@/components/asset-icon";
 import { IconCheck, IconSettings } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/list";
 import { Sheet } from "@/components/ui/sheet";
 import { ErrorNote } from "@/components/ui/states";
 import { Term } from "@/components/ui/term";
@@ -14,6 +15,7 @@ import type { Asset, Portfolio, ResidualStyle, Target, TargetPreview } from "@/l
 import { useAction } from "@/lib/api/use-api";
 import { percent, tokens, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
+import { useTokenVisibility } from "@/lib/token-visibility";
 import { cx } from "@/utils/cx";
 
 type PresetKey = keyof typeof PRESETS;
@@ -34,6 +36,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   const [preview, setPreview] = useState<TargetPreview | null>(null);
   const [saved, setSaved] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
   const act = useAction();
 
   const total = Object.values(weights).reduce((s, w) => s + w, 0);
@@ -49,8 +52,15 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   const [query, setQuery] = useState("");
   const [pinned, setPinned] = useState(() => new Set(assets.filter((a) => (current[a.symbol] ?? 0) > 0 || (weights[a.symbol] ?? 0) > 0 || !a.tier || a.tier === "A" || a.class === "CASH").map((a) => a.symbol)));
   const pin = (symbols: string[]) => setPinned((p) => (symbols.every((s) => p.has(s)) ? p : new Set([...p, ...symbols])));
+  // The user's own show/hide choices sit over the default list. A held or weighted token is always listed: hiding it
+  // would count as a 0% target and the next round would sell it.
+  const { visibility, setShown, reset: resetVisibility } = useTokenVisibility();
+  const locked = (a: Asset) => (current[a.symbol] ?? 0) > 0 || (weights[a.symbol] ?? 0) > 0;
+  const hiddenByUser = (a: Asset) => visibility[a.symbol] === false && !locked(a);
+  const listedByDefault = (a: Asset) => locked(a) || visibility[a.symbol] === true || pinned.has(a.symbol);
   const q = query.trim().toLowerCase();
-  const visible = q ? rows.filter((a) => `${a.symbol} ${a.name}`.toLowerCase().includes(q)) : rows.filter((a) => pinned.has(a.symbol));
+  // The page search covers only the tokens listed here; adding others is done in Manage tokens.
+  const visible = rows.filter((a) => !hiddenByUser(a) && listedByDefault(a) && (!q || `${a.symbol} ${a.name}`.toLowerCase().includes(q)));
   const caution = (a: Asset) => (a.leveraged ? e.leveraged : a.tier === "C" ? e.fewHolders : null);
 
   // Debounced server check: never one request per keystroke.
@@ -136,10 +146,21 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
             </button>
           </div>
 
-          <label className="mt-4 flex h-11 items-center gap-3 rounded-2xl bg-surface-2 px-4 text-ink-3 focus-within:ring-1 focus-within:ring-line-strong">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-            <input value={query} onChange={(ev) => setQuery(ev.target.value)} placeholder={fmt(e.search, { n: assets.filter((a) => a.class !== "CASH").length })} aria-label={fmt(e.search, { n: assets.filter((a) => a.class !== "CASH").length })} className="h-full w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3" />
-          </label>
+          <div className="mt-4 flex items-center gap-2">
+            <label className="flex h-11 min-w-0 flex-1 items-center gap-3 rounded-2xl bg-surface-2 px-4 text-ink-3 focus-within:ring-1 focus-within:ring-line-strong">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <input value={query} onChange={(ev) => setQuery(ev.target.value)} placeholder={e.searchShown} aria-label={e.searchShown} className="h-full w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3" />
+            </label>
+            <button
+              type="button"
+              onClick={() => setManageOpen(true)}
+              aria-label={e.manage}
+              title={e.manage}
+              className="inline-flex h-11 shrink-0 items-center rounded-2xl bg-surface-2 px-3.5 text-sm font-semibold text-ink-2 transition-colors hover:text-ink"
+            >
+              {e.manage}
+            </button>
+          </div>
           {q && visible.length === 0 && <p className="mt-3 text-sm text-ink-3">{fmt(e.noMatch, { q: query.trim() })}</p>}
 
           {/* Phones: one row per token (now on the left, the target stepper on the right, the trade underneath). */}
@@ -267,6 +288,47 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
           <Button onClick={save} busy={act.pending} disabled={!canSave} icon={saved && !act.pending ? <IconCheck size={16} /> : undefined} className="shrink-0">{saveLabel}</Button>
         </div>
       </div>
+
+      <Sheet
+        open={manageOpen}
+        onClose={() => setManageOpen(false)}
+        title={e.manageTitle}
+        wide
+        footer={<Button size="lg" block onClick={() => setManageOpen(false)}>{d.common.done}</Button>}
+        top={
+          // Fixed above the scrolling list, so the search and the help line never scroll away.
+          <div className="pb-3">
+            <label className="flex h-11 items-center gap-3 rounded-2xl bg-surface-2 px-4 text-ink-3 focus-within:ring-1 focus-within:ring-line-strong">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <input value={query} onChange={(ev) => setQuery(ev.target.value)} placeholder={fmt(e.search, { n: assets.filter((a) => a.class !== "CASH").length })} aria-label={fmt(e.search, { n: assets.filter((a) => a.class !== "CASH").length })} className="h-full w-full bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3" />
+            </label>
+            <p className="mt-3 text-xs leading-relaxed text-ink-3">{e.manageHelp}</p>
+          </div>
+        }
+      >
+        <ul className="mt-3 grid w-full min-w-0 grid-cols-1 overflow-x-hidden">
+          {rows.filter((a) => !q || `${a.symbol} ${a.name}`.toLowerCase().includes(q)).map((a) => {
+            const isLocked = locked(a);
+            const on = !hiddenByUser(a) && (isLocked || listedByDefault(a));
+            return (
+              <li key={a.symbol} className="flex min-w-0 items-center gap-3 py-3">
+                <AssetIcon symbol={a.symbol} size={40} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-base font-semibold text-ink">{a.name ?? a.symbol}</span>
+                  <span className="tabular-nums block truncate text-sm text-ink-3">
+                    {a.symbol} · {d.portfolio.now} {percent(current[a.symbol] ?? 0, locale)}
+                    {isLocked && <span> · {e.locked}</span>}
+                  </span>
+                </span>
+                <span className={cx("shrink-0", isLocked && "pointer-events-none opacity-50")}>
+                  <Toggle checked={on} label={`${a.symbol} ${e.manageTitle}`} onChange={(next) => setShown(a.symbol, next === pinned.has(a.symbol) ? null : next)} />
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <button type="button" onClick={resetVisibility} className="mt-4 h-11 w-full rounded-2xl bg-surface-2 text-sm font-semibold text-ink-2 hover:text-ink">{e.resetVisible}</button>
+      </Sheet>
 
       <Sheet open={advancedOpen} onClose={() => setAdvancedOpen(false)} title={d.portfolio.advanced} footer={<Button size="lg" block onClick={() => setAdvancedOpen(false)}>{d.common.done}</Button>}>
         <div className="grid gap-7">

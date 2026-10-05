@@ -8,7 +8,8 @@ export function activityLine(a: Activity, d: Dict): string {
   return fmt(template, a.detail);
 }
 
-export function activityGroup(kind: string): "rounds" | "circles" | "targets" | "leftovers" {
+export function activityGroup(kind: string): "rounds" | "circles" | "targets" | "leftovers" | "transfers" {
+  if (kind === "TRANSFER_IN" || kind === "TRANSFER_OUT") return "transfers";
   if (kind.startsWith("CIRCLE")) return "circles";
   if (kind === "TARGET_SAVED" || kind === "ONBOARDED") return "targets";
   if (kind === "RESIDUAL_DECIDED") return "leftovers";

@@ -1,6 +1,6 @@
 # Sama frontend
 
-Next.js app for Sama: rebalance together on BNB Chain, trade only the difference.
+Next.js app for Sama: pairs share-token rebalances between wallets on BNB Chain.
 
 ## Setup
 

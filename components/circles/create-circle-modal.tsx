@@ -4,6 +4,7 @@ import { AnimatePresence, m } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { AssetIcon } from "@/components/asset-icon";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { IconArrowLeft, IconCheck, IconX } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { ErrorNote } from "@/components/ui/states";
@@ -85,7 +86,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
           <p className="mt-2 text-xs font-medium text-ink-3">{fmt(d.start.stepOf, { n: step + 1, total: n.steps.length })} · <span className="text-ink-2">{n.steps[step]}</span></p>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-5">
+        <ScrollArea className="min-h-0 flex-1 px-5 pb-4 pt-5">
           {step === 0 && (
             <div className="grid gap-5">
               <Field label={n.name}>
@@ -150,7 +151,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
               </dl>
             </div>
           )}
-        </div>
+        </ScrollArea>
 
         <footer className="shrink-0 border-t border-line px-5 py-4">
           {act.error && <div className="mb-3"><ErrorNote>{act.error}</ErrorNote></div>}
@@ -210,8 +211,7 @@ function AssetPicker({ assets, selected, onChange }: { assets: Asset[]; selected
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
                     <span className="font-semibold text-ink">{a.symbol}</span>
-                    <span className="rounded-md bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-ink-3">{d.portfolio.classes[a.class]}</span>
-                  </span>
+                    <span className="rounded-md bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-ink-3">{d.portfolio.classes[a.class]}</span>                  </span>
                   <span className="block truncate text-sm text-ink-3">{a.name}</span>
                   {(a.leveraged || a.tier === "C") && <span className="block truncate text-xs text-warn">{a.leveraged ? d.portfolio.editor.leveraged : d.portfolio.editor.fewHolders}</span>}
                 </span>

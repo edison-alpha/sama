@@ -4,7 +4,8 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Icon } from "@iconify/react";
 import { ThinkingOrb, type OrbState } from "thinking-orbs";
 import { AssetIcon } from "@/components/asset-icon";
-import { Panel, Scene, TONES, useInView, type Tone } from "@/components/landing/scene";
+import { Panel, Scene, useInView } from "@/components/landing/scene";
+import { TONES, type Tone } from "@/components/landing/scene-tones";
 
 /**
  * Feature bento: heading + lead, then a tall card, a wide card and two small ones. Each card is a cinematic scene

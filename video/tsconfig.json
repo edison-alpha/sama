@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "lib": [
+      "es2023",
+      "dom",
+      "dom.iterable"
+    ],
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@/*": [
+        "../*"
+      ],
+      "motion/react": [
+        "./src/real/stubs/motion.tsx"
+      ],
+      "next/link": [
+        "./src/real/stubs/next-link.tsx"
+      ],
+      "next/navigation": [
+        "./src/real/stubs/next-navigation.ts"
+      ]
+    }
+  },
+  "exclude": [
+    "remotion.config.ts"
+  ]
+}

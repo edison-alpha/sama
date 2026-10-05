@@ -10,7 +10,7 @@ import { useEffect } from "react";
  * fights browser scroll anchoring and Next.js route scrolls; app pages re-render live data constantly, so they keep
  * native scrolling. A fresh instance per route avoids carrying old inertia or page height across navigations.
  */
-const SMOOTH_ROUTES = new Set(["/", "/learn", "/proof", "/demo"]);
+const SMOOTH_ROUTES = new Set(["/", "/proof", "/demo"]);
 
 let current: Lenis | null = null;
 

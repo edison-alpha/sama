@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { TONES, type Tone } from "./scene-tones";
+
+export { TONES } from "./scene-tones";
+export type { Tone } from "./scene-tones";
 
 /**
  * Shared pieces for the cinematic landing cards: a dark ambient scene (drifting light blobs, grain, vignette), a
@@ -8,26 +12,28 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
  * globals.css under "Problem carousel".
  */
 
-export type Tone = [base: string, a: string, b: string, c: string];
-
-export const TONES = {
-  navy: ["#0a1430", "#1f4fa8", "#e97863", "#0d2f6e"],
-  forest: ["#07150f", "#1d5a45", "#3c7d5a", "#a9c47a"],
-  amber: ["#160d07", "#8a4a1f", "#e0a35a", "#3b1f10"],
-  plum: ["#140a10", "#7a2c3a", "#e97863", "#2a1430"],
-  slate: ["#0b0f17", "#2b3d5c", "#6a87b8", "#1b2333"],
-  ocean: ["#06121d", "#14537a", "#5fb3d9", "#0c2a44"],
-} satisfies Record<string, Tone>;
-
-export function Scene({ tone, className = "aspect-[437/460]", children }: { tone: Tone; className?: string; children: ReactNode }) {
+export function Scene({
+  tone,
+  className = "aspect-[437/460]",
+  children,
+  flat = false,
+}: {
+  tone: Tone;
+  className?: string;
+  children: ReactNode;
+  /** Use one of the tone colors without the ambient blobs, grain, or vignette. */
+  flat?: boolean;
+}) {
   const [base, a, b, c] = tone;
   return (
-    <div className={`ps-scene relative overflow-hidden rounded-[28px] text-white ${className}`} style={{ background: base }}>
-      <span className="ps-blob" style={{ background: a, left: "-20%", top: "-15%" }} />
-      <span className="ps-blob" style={{ background: b, right: "-25%", bottom: "-20%", animationDelay: "-6s" }} />
-      <span className="ps-blob ps-blob-sm" style={{ background: c, left: "30%", top: "40%", animationDelay: "-11s" }} />
-      <span className="ps-grain" />
-      <span className="ps-vignette" />
+    <div className={`ps-scene relative overflow-hidden rounded-[28px] text-white ${className}`} style={{ background: flat ? a : base }}>
+      {!flat && <>
+        <span className="ps-blob" style={{ background: a, left: "-20%", top: "-15%" }} />
+        <span className="ps-blob" style={{ background: b, right: "-25%", bottom: "-20%", animationDelay: "-6s" }} />
+        <span className="ps-blob ps-blob-sm" style={{ background: c, left: "30%", top: "40%", animationDelay: "-11s" }} />
+        <span className="ps-grain" />
+        <span className="ps-vignette" />
+      </>}
       <div className="absolute inset-0">{children}</div>
     </div>
   );

@@ -3,18 +3,17 @@
 import { m } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
-import { AssetIcon } from "@/components/asset-icon";
-import { GROUP, RANGE_DAYS, circleOf, flow, loadActivity, txOf, type Amount, type Filter, type Range } from "@/components/activity/history-data";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { circleOf, flow, iconOf, loadActivityPage, txOf, type ActivityData, type Amount, type Filter, type Range } from "@/components/activity/history-data";
 import { MobileHistory } from "@/components/activity/history-mobile";
 import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
 import { IconArrowRight, IconCalendar, IconExternal } from "@/components/icons";
 import { Stagger, rise } from "@/components/motion";
 import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
-import { useApi } from "@/lib/api/use-api";
-import { activityGroup, activityLine } from "@/lib/activity";
-import { EXPLORER } from "@/lib/chain";
+import { activityLine } from "@/lib/activity";
+import { EXPLORER, addressUrl, txUrl } from "@/lib/chain";
+import { AssetIcon } from "@/components/asset-icon";
 import { short, tokens, usd } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
@@ -24,20 +23,57 @@ import { cx } from "@/utils/cx";
 export default function ActivityPage() {
   const { d, locale } = useI18n();
   const router = useRouter();
-  const { data, error } = useApi(loadActivity, []);
   const [filter, setFilter] = useState<Filter>("all");
   const [range, setRange] = useState<Range>("all");
   const [query, setQuery] = useState("");
+  // Pages loaded so far for the current filter, the cursor for the next one, and the request that is allowed to land.
+  const [data, setData] = useState<ActivityData | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const latest = useRef(0);
+  const sentinel = useRef<HTMLDivElement>(null);
+  const group = filter === "all" ? null : filter;
+
+  // A new filter starts again from the newest page; answers to the old filter are dropped.
+  useEffect(() => {
+    const id = ++latest.current;
+    setData(null);
+    setNextCursor(null);
+    setError(null);
+    setLoading(true);
+    loadActivityPage({ cursor: null, group, range }, null).then(
+      (page) => id === latest.current && (setData(page), setNextCursor(page.nextCursor)),
+      (e: unknown) => id === latest.current && setError(e instanceof Error ? e.message : String(e)),
+    ).finally(() => id === latest.current && setLoading(false));
+  }, [group, range]);
+
+  const loadMore = useCallback(() => {
+    if (!data || !nextCursor || loading) return;
+    const id = ++latest.current;
+    setLoading(true);
+    loadActivityPage({ cursor: nextCursor, group, range }, data).then(
+      (page) => id === latest.current && (setData(page), setNextCursor(page.nextCursor)),
+      (e: unknown) => id === latest.current && setError(e instanceof Error ? e.message : String(e)),
+    ).finally(() => id === latest.current && setLoading(false));
+  }, [data, nextCursor, loading, group, range]);
+
+  // The sentinel under the list asks for the next page as it scrolls into view (a little before the end).
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && loadMore(), { rootMargin: "240px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [loadMore]);
+
   if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
 
   const ad = d.activity;
   const types = ad.types as Record<string, string>;
-  const days = RANGE_DAYS[range];
-  const since = days ? Date.now() - days * 86_400_000 : 0;
   const q = query.trim().toLowerCase();
+  // The filter and range are on the server; the search only looks through the pages already loaded.
   const rows = data.list.filter((a) => {
-    if (filter !== "all" && activityGroup(a.kind) !== filter) return false;
-    if (new Date(a.createdAt).getTime() < since) return false;
     if (!q) return true;
     const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
     const f = flow(a, r);
@@ -64,7 +100,7 @@ export default function ActivityPage() {
             label={ad.allTypes}
             value={filter}
             onChange={(v) => setFilter(v as Filter)}
-            options={[{ value: "all", label: ad.allTypes }, ...(["rounds", "circles", "targets", "leftovers"] as const).map((k) => ({ value: k, label: ad.filters[k] }))]}
+            options={[{ value: "all", label: ad.allTypes }, ...(["rounds", "circles", "targets", "leftovers", "transfers"] as const).map((k) => ({ value: k, label: ad.filters[k] }))]}
           />
           <PillSelect icon={<IconCalendar size={18} />} label={ad.range.all} value={range} onChange={(v) => setRange(v as Range)} options={(["all", "week", "month"] as const).map((k) => ({ value: k, label: ad.range[k] }))} />
         </div>
@@ -90,8 +126,7 @@ export default function ActivityPage() {
               </thead>
               <tbody>
                 {rows.map((a) => {
-                  const group = activityGroup(a.kind);
-                  const { Icon, tone } = GROUP[group];
+                  const { Icon, tone } = iconOf(a.kind);
                   const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
                   const f = flow(a, r);
                   const at = new Date(a.createdAt);
@@ -115,11 +150,29 @@ export default function ActivityPage() {
                             <TokenAmounts items={f.in} locale={locale} />
                           </span>
                         ) : (
-                          <span className="text-sm text-ink-2">{activityLine(a, d)}</span>
+                          a.kind.startsWith("TRANSFER_") ? (
+                            <span className="flex items-center gap-2.5 text-sm text-ink-2">
+                              {String(a.detail.logo ?? "").startsWith("https://") ? <img src={String(a.detail.logo)} width={24} height={24} alt="" className="shrink-0 rounded-full" loading="lazy" /> : <AssetIcon symbol={String(a.detail.symbol ?? "")} size={24} />}
+                              {activityLine(a, d)}
+                            </span>
+                          ) : (
+                            <span className="text-sm text-ink-2">{activityLine(a, d)}</span>
+                          )
                         )}
                       </td>
                       <td className="px-4 py-4">
-                        {tx ? (
+                        {a.kind.startsWith("TRANSFER_") ? (
+                          <>
+                            <span className="block text-xs text-ink-3">{a.kind === "TRANSFER_IN" ? ad.addr.from : ad.addr.to}</span>
+                            <a href={addressUrl(String(a.detail.counterparty))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline">
+                              {short(String(a.detail.counterparty))}
+                              <IconExternal size={14} className="text-ink-3" />
+                            </a>
+                            <a href={txUrl(String(a.detail.tx))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums block text-xs text-ink-3 hover:underline">
+                              {ad.addr.tx} {short(String(a.detail.tx))}
+                            </a>
+                          </>
+                        ) : tx ? (
                           <>
                             <span className="block text-xs text-ink-3">{ad.addr.tx}</span>
                             <a href={`${EXPLORER}/tx/${tx}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline">
@@ -149,6 +202,10 @@ export default function ActivityPage() {
         )}
       </m.section>
       </div>
+
+      <div ref={sentinel} className="h-px" aria-hidden="true" />
+      {loading && <p className="py-4 text-center text-sm text-ink-3">{ad.loadingMore}</p>}
+      {error && <ErrorNote>{error}</ErrorNote>}
     </Stagger>
   );
 

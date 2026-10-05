@@ -33,6 +33,7 @@ export function CircleDetail({ id }: { id: string }) {
   const act = useAction();
   const [invite, setInvite] = useState<string | null>(null);
   const [copied, setCopied] = useState<"invite" | "link" | null>(null);
+  const [typedCode, setTypedCode] = useState("");
   const now = useNow();
 
   if (!c) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
@@ -47,7 +48,7 @@ export function CircleDetail({ id }: { id: string }) {
   // Invite-only circles need the code from the invite link (kept in the URL or, across sign-in, in session storage).
   const join = () =>
     act.run(async () => {
-      const code = pendingInvite(c.id, new URLSearchParams(window.location.search).get("invite"));
+      const code = typedCode.trim() || pendingInvite(c.id, new URLSearchParams(window.location.search).get("invite"));
       if (c.visibility !== "PUBLIC" && !code) throw new Error(d.invite.needed);
       await sama.joinCircle(c.id, code);
       forgetInvite(c.id);
@@ -99,7 +100,7 @@ export function CircleDetail({ id }: { id: string }) {
         </>
       )}
       <button type="button" onClick={copyLink} className={pill}><IconCopy size={18} />{copied === "link" ? cd.copied : cd.copyLink}</button>
-      <Link href="/learn" className={pill}><IconPlay size={18} />{d.nav.learn}</Link>
+      <Link href="/docs" className={pill}><IconPlay size={18} />{d.nav.learn}</Link>
     </div>
   );
 
@@ -225,6 +226,12 @@ export function CircleDetail({ id }: { id: string }) {
                 {c.assetSymbols.map((s) => <span key={s} className="inline-flex items-center gap-1.5 text-sm font-medium text-ink"><AssetIcon symbol={s} size={20} />{s}</span>)}
               </div>
             </div>
+            {!c.role && c.visibility !== "PUBLIC" && (
+              <label className="grid gap-1.5">
+                <span className="text-sm text-ink-3">{d.invite.codeLabel}</span>
+                <input value={typedCode} onChange={(e) => setTypedCode(e.target.value)} placeholder={d.invite.codePlaceholder} autoComplete="off" className="h-12 w-full rounded-2xl bg-surface-2 px-4 text-ink outline-none placeholder:text-ink-3" />
+              </label>
+            )}
             {primary && <Button size="lg" block busy={act.pending} trailing={live ? <IconArrowRight size={18} /> : undefined} onClick={primary.run}>{primary.label}</Button>}
             <p className="text-center text-xs text-ink-3">{fmt(d.circles.minPeople, { n: c.minParticipants })}</p>
           </div>

@@ -3,17 +3,19 @@
 import { AnimatePresence, m } from "motion/react";
 import { useEffect, useId, type ReactNode } from "react";
 import { IconX } from "@/components/icons";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useI18n } from "@/lib/i18n/provider";
 
 /**
  * A modal that slides up from the bottom on phones, like a native sheet, and sits centred on larger screens.
  * Escape or a tap on the backdrop closes it; the page underneath doesn't scroll while it is open.
  */
-export function Sheet({ open, onClose, title, children, footer }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode }) {
-  return <AnimatePresence>{open && <Panel onClose={onClose} title={title} footer={footer}>{children}</Panel>}</AnimatePresence>;
+/** `top` stays fixed above the scrolling body (a search field, say), so it never scrolls away. */
+export function Sheet({ open, onClose, title, children, footer, top, wide = false }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode; top?: ReactNode; wide?: boolean }) {
+  return <AnimatePresence>{open && <Panel onClose={onClose} title={title} footer={footer} top={top} wide={wide}>{children}</Panel>}</AnimatePresence>;
 }
 
-function Panel({ onClose, title, children, footer }: { onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode }) {
+function Panel({ onClose, title, children, footer, top, wide }: { onClose: () => void; title: ReactNode; children: ReactNode; footer?: ReactNode; top?: ReactNode; wide: boolean }) {
   const { d } = useI18n();
   const titleId = useId();
 
@@ -39,7 +41,7 @@ function Panel({ onClose, title, children, footer }: { onClose: () => void; titl
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: "spring", stiffness: 360, damping: 36 }}
-        className="relative flex max-h-[88dvh] w-full flex-col rounded-t-[28px] border border-line bg-[var(--app-bg)] pb-[env(safe-area-inset-bottom)] shadow-[var(--elev-float)] md:max-h-[86dvh] md:max-w-md md:rounded-[28px] md:pb-0"
+        className={`relative flex max-h-[88dvh] w-full flex-col rounded-t-[28px] border border-line bg-[var(--app-bg)] pb-[env(safe-area-inset-bottom)] shadow-[var(--elev-float)]md:max-h-[86dvh] ${wide ? "md:max-w-lg" : "md:max-w-md"} md:rounded-[28px] md:pb-0`}
       >
         <span className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-surface-3 md:hidden" aria-hidden="true" />
         <header className="grid shrink-0 grid-cols-[40px_1fr_40px] items-center px-4 pt-3 md:px-5 md:pt-5">
@@ -47,7 +49,8 @@ function Panel({ onClose, title, children, footer }: { onClose: () => void; titl
           <h2 id={titleId} className="text-center text-lg font-semibold tracking-tight text-ink">{title}</h2>
           <button type="button" onClick={onClose} aria-label={d.common.close} className="grid size-10 place-items-center justify-self-end rounded-full text-ink-2 hover:bg-surface-2 hover:text-ink"><IconX size={20} /></button>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-4">{children}</div>
+        {top && <div className="shrink-0 px-5 pt-4">{top}</div>}
+        <ScrollArea className="min-h-0 flex-1 px-5 pb-5 pt-4">{children}</ScrollArea>
         {footer && <footer className="shrink-0 border-t border-line px-5 py-4">{footer}</footer>}
       </m.div>
     </div>

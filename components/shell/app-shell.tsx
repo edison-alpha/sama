@@ -38,6 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Keep the query (e.g. ?invite=… on a circle) so the page opens exactly as linked after sign-in.
     if (ready && !session) router.replace(`/start?next=${encodeURIComponent(pathname + window.location.search)}`);
+    if (ready && session && !session.onboardingDone) router.replace(`/start?next=${encodeURIComponent(pathname + window.location.search)}`);
   }, [ready, session, router, pathname]);
 
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`) || (href === "/circles" && pathname.startsWith("/rounds"));
@@ -87,7 +88,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
           <div className="mt-auto grid gap-1">
-            <Link href="/learn" title={d.nav.learn} className="flex h-9 items-center rounded-lg px-3 text-sm text-ink-3 hover:text-ink collapsed:justify-center collapsed:px-0">
+            <Link href="/docs" title={d.nav.learn} className="flex h-9 items-center rounded-lg px-3 text-sm text-ink-3 hover:text-ink collapsed:justify-center collapsed:px-0">
               <IconLayers size={20} className="hidden collapsed:block" />
               <span className="whitespace-nowrap collapsed:sr-only">{d.nav.learn}</span>
             </Link>
@@ -113,7 +114,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-col">
         <TopBar />
         <main className={cx("mx-auto w-full max-w-6xl flex-1 px-4 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:pb-12 md:pt-6", noTabBar ? "pb-6" : "pb-36")}>
-          {ready && session ? (
+          {ready && session && session.onboardingDone ? (
             // Keyed by route so each screen plays its entrance; cards and tiles inside stagger in (see `rise`).
             <m.div key={pathname} initial="hidden" animate="show" variants={page}>{children}</m.div>
           ) : (

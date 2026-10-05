@@ -18,9 +18,9 @@ import { FAUCET_URL, isTestnet } from "@/lib/chain";
 import { percent, short, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 import type { Locale } from "@/lib/i18n/dict";
+import { markOnboardingDone, ONBOARDING_STEP_KEY } from "@/lib/onboarding";
 import { cx } from "@/utils/cx";
 
-const STEP_KEY = "sama_onboarding_step";
 const STEPS = 3;
 const WELCOME_ASSETS = ["NVDAB", "AAPLB", "TSLAB", "USDT", "SPYB", "GOOGLB"];
 type PresetKey = keyof typeof PRESETS;
@@ -49,9 +49,13 @@ export function Onboarding() {
 
   useEffect(() => {
     if (!session) return;
+    if (session.onboardingDone) {
+      router.replace(next);
+      return;
+    }
     let saved = 1;
     try {
-      saved = Number(window.sessionStorage.getItem(STEP_KEY) ?? 1) || 1;
+      saved = Number(window.sessionStorage.getItem(ONBOARDING_STEP_KEY) ?? 1) || 1;
     } catch {
       // Start right after sign-in.
     }
@@ -66,7 +70,7 @@ export function Onboarding() {
   function go(n: number) {
     setStep(n);
     try {
-      window.sessionStorage.setItem(STEP_KEY, String(n));
+      window.sessionStorage.setItem(ONBOARDING_STEP_KEY, String(n));
     } catch {
       // Not remembered across refreshes.
     }
@@ -75,9 +79,11 @@ export function Onboarding() {
   const finish = (withTarget: boolean) =>
     act.run(async () => {
       if (withTarget && preset) await sama.saveTarget({ weights: PRESETS[preset], costCapBps: 100, residualStyle: "ECONOMIC" });
+      await sama.setOnboardingDone(true);
       try {
-        window.sessionStorage.removeItem(STEP_KEY);
+        window.sessionStorage.removeItem(ONBOARDING_STEP_KEY);
       } catch {}
+      if (session) markOnboardingDone(session.address);
       // "I'll set it myself" continues in the full target editor.
       router.push(withTarget && !preset ? "/portfolio" : next);
     });

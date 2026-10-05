@@ -4,7 +4,7 @@ import type { Dict } from "@/lib/i18n/dict";
 
 const HREFS = [
   ["/", "/circles", "/proof", "/demo"],
-  ["/learn", "/learn#glossary", "/learn#faq", "/learn#security"],
+  ["/docs", "/docs/glossary", "/docs/faq", "/docs/security"],
   ["https://t.me/", "https://x.com/", "https://github.com/", "https://www.bnbchain.org/"],
 ];
 
@@ -51,7 +51,7 @@ export function SiteFooter({ d }: { d: Dict }) {
         {/* Subtle lift behind the wordmark: black fading to a slightly lighter charcoal, no colour. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-white/[0.06] to-transparent" aria-hidden="true" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/sama-brand-logo.svg" alt="Sama" className="pointer-events-none relative mx-auto -mb-[9%] mt-6 block w-[88%] max-w-[1100px] select-none opacity-30" />
+        <img src="/sama-brand-logo.svg" alt="Sama" className="pointer-events-none relative mx-auto -mb-[9%] mt-6 block w-[96%] max-w-[1280px] select-none opacity-30" />
       </div>
     </footer>
   );

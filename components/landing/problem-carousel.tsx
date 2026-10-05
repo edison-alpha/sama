@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Icon } from "@iconify/react";
 import { AssetIcon } from "@/components/asset-icon";
 import { Mark } from "@/components/brand";
-import { Panel, Scene, TONES as T, useInView } from "@/components/landing/scene";
+import { Panel, Scene, useInView } from "@/components/landing/scene";
+import { TONES as T } from "@/components/landing/scene-tones";
 
 const TONES = [T.navy, T.forest, T.amber, T.plum, T.slate];
 
@@ -33,7 +34,7 @@ function TradeRow({ wallet, action, fee, delay }: { wallet: string; action: stri
 function OppositeScene() {
   return (
     <div className="ps-float w-full max-w-[300px]">
-      <TradeRow wallet="Wallet A" action="Sell 4.0 NVDAB" fee="−$3.10" delay="0s" />
+      <TradeRow wallet="Maya" action="Sell 4.0 NVDAB" fee="−$3.10" delay="0s" />
       <div className="relative h-24">
         <svg className="absolute inset-0 size-full" viewBox="0 0 100 96" preserveAspectRatio="none" aria-hidden="true">
           <path className="ps-flow" d="M50 0 V34" />
@@ -46,12 +47,12 @@ function OppositeScene() {
           </div>
         </div>
       </div>
-      <TradeRow wallet="Wallet B" action="Buy 3.8 NVDAB" fee="−$2.96" delay="1.4s" />
+      <TradeRow wallet="Alex" action="Buy 3.8 NVDAB" fee="−$2.96" delay="1.4s" />
     </div>
   );
 }
 
-/* ---------- 2. Rings no pair can see ---------- */
+/* ---------- 2. Three-way swaps nobody spots ---------- */
 const RING = ["AAPLB", "TSLAB", "NVDAB"];
 const R = 44;
 const at = (deg: number) => [50 + R * Math.cos((deg * Math.PI) / 180), 50 + R * Math.sin((deg * Math.PI) / 180)] as const;
@@ -158,7 +159,7 @@ function GasScene() {
 
 /* ---------- 5. Signing blind ---------- */
 function SignScene() {
-  const readable: Array<[string, string, string]> = [["You send", "2.00 AAPLB", "AAPLB"], ["You receive", "2.55 NVDAB", "NVDAB"]];
+  const readable: Array<[string, string, string]> = [["Out", "2.00 AAPLB", "AAPLB"], ["In", "2.55 NVDAB", "NVDAB"]];
   return (
     <Panel className="ps-float w-full max-w-[310px] p-4">
       <div className="flex items-center gap-2 text-[11px] text-white/60">

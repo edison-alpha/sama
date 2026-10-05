@@ -6,7 +6,7 @@ import { friendlyError } from "@/lib/errors";
 
 /**
  * Loads data and optionally polls it. Polling stops when `stopWhen` returns true (for example once a round is terminal),
- * matching Venue0's 4 s round polling (PRD §19.4.6).
+ * as with the 4 s round polling (PRD §19.4.6).
  */
 export function useApi<T>(load: () => Promise<T>, deps: unknown[], options: { pollMs?: number; stopWhen?: (data: T) => boolean } = {}) {
   const [data, setData] = useState<T | null>(null);

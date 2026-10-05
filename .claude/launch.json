@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "remotion-studio",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["video/node_modules/@remotion/cli/remotion-cli.js", "studio", "video/src/index.ts", "--public-dir", "video/public", "--config", "video/remotion.config.ts", "--env-file", "video/remotion.env", "--no-open", "--port", "3300"],
+      "port": 3300
+    }
+  ]
+}

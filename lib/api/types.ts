@@ -33,7 +33,7 @@ export type Asset = {
   logoUrl?: string;
 };
 
-export type Position = { symbol: string; amountTokens: number; valueUsd: number; pct: number };
+export type Position = { symbol: string; amountTokens: number; valueUsd: number; pct: number; logo?: string; priced?: boolean };
 
 export type Portfolio = { ok: true; totalUsd: number; readAt: string; positions: Position[] } | { ok: false; detail: string };
 
@@ -140,6 +140,7 @@ export type Activity = { id: string; kind: string; detail: Record<string, string
 
 export type PendingRound = {
   roundId: string;
+  sequence: number;
   circleName: string;
   state: RoundState;
   freezesAt: number;
@@ -161,7 +162,7 @@ export type Home = {
 
 export type Settings = { notify: { email: boolean; telegram: boolean; inApp: boolean }; residualStyle: ResidualStyle; costCapBps: number; gasSponsorship: boolean };
 
-export type Session = { address: `0x${string}`; demo: boolean };
+export type Session = { address: `0x${string}`; demo: boolean; onboardingDone: boolean };
 
 /** Public evidence for /proof: the deployed contract and every settled round. No participant addresses. */
 export type Proof = {

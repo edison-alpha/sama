@@ -1,0 +1,18 @@
+/* The Next app's stylesheet (Tailwind v4 + Sama tokens), scanned from the app's own sources. */
+@import "../../../app/globals.css";
+@source "../../../components";
+@source "../../../app";
+
+:root {
+  /* Set by next/font in app/layout.tsx; here the same SF Pro Rounded files are loaded by src/fonts.ts. */
+  --font-sama: "SF Pro Rounded";
+  --font-jetbrains: ui-monospace;
+}
+
+/* The app window is a fixed 1536×880 CSS viewport (the screenshots' size at 125% scaling), not the browser's. */
+.sama-app .h-dvh {
+  height: 880px;
+}
+.sama-app .min-h-dvh {
+  min-height: 880px;
+}
