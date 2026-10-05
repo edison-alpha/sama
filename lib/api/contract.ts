@@ -34,6 +34,8 @@ export type SamaApi = {
   previewTarget(target: Omit<Target, "savedAt">): Promise<TargetPreview>;
   saveTarget(target: Omit<Target, "savedAt">): Promise<void>;
   circles(): Promise<Circle[]>;
+  /** Asks the server to scan the chain for this wallet's transfers now, so a send shows in Activity right away. */
+  syncTransfers(): Promise<void>;
   circle(id: string): Promise<Circle>;
   /** `invite` is the code from an invite link; required for invite-only circles. */
   joinCircle(id: string, invite?: string): Promise<void>;

@@ -243,6 +243,7 @@ function mutateRound(id: string, patch: Partial<Store["rounds"][string]>) {
 }
 
 export const mockApi: SamaApi = {
+  async syncTransfers() {},
   async assets() {
     return DEMO_ASSETS;
   },

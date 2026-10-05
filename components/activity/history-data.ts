@@ -2,7 +2,7 @@ import { IconCircles, IconLayers, IconSwap, IconTarget } from "@/components/icon
 import { sama } from "@/lib/api";
 import type { Activity, RoundView } from "@/lib/api/types";
 
-export type Group = "rounds" | "circles" | "targets" | "leftovers";
+export type Group = "rounds" | "circles" | "targets" | "leftovers" | "transfers";
 export type Filter = "all" | Group;
 export type Range = "all" | "week" | "month";
 export type Amount = { symbol: string; amountTokens: number; valueUsd: number };
@@ -14,6 +14,7 @@ export const GROUP = {
   circles: { Icon: IconCircles, tone: "text-accent", fill: "bg-accent" },
   targets: { Icon: IconTarget, tone: "text-ok", fill: "bg-ok" },
   leftovers: { Icon: IconLayers, tone: "text-rest", fill: "bg-rest" },
+  transfers: { Icon: IconSwap, tone: "text-accent", fill: "bg-accent" },
 } as const;
 
 export const RANGE_DAYS: Record<Range, number | null> = { all: null, week: 7, month: 30 };

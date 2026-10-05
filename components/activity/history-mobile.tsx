@@ -37,7 +37,7 @@ export function MobileHistory({ data, rows, filter, onFilter, range, onRange }: 
           value={filter}
           onChange={onFilter}
           label={ad.allTypes}
-          options={(["all", "rounds", "circles", "targets", "leftovers"] as const).map((k) => ({ value: k, label: k === "all" ? ad.allTypes : ad.filters[k] }))}
+          options={(["all", "rounds", "circles", "targets", "leftovers", "transfers"] as const).map((k) => ({ value: k, label: k === "all" ? ad.allTypes : ad.filters[k] }))}
           triggerClassName="inline-flex h-10 items-center gap-1.5 rounded-full bg-surface-2 pl-4 pr-3 text-sm font-semibold text-ink"
         >
           {(selected, open) => (

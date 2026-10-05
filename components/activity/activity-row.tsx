@@ -13,6 +13,7 @@ const GROUP = {
   circles: { Icon: IconCircles, tone: "text-accent" },
   targets: { Icon: IconTarget, tone: "text-ok" },
   leftovers: { Icon: IconLayers, tone: "text-rest" },
+  transfers: { Icon: IconSwap, tone: "text-accent" },
 } as const;
 
 /** One activity line with its kind's icon; rows that belong to a round open it. Shared by Home and Activity. */

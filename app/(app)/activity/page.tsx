@@ -64,7 +64,7 @@ export default function ActivityPage() {
             label={ad.allTypes}
             value={filter}
             onChange={(v) => setFilter(v as Filter)}
-            options={[{ value: "all", label: ad.allTypes }, ...(["rounds", "circles", "targets", "leftovers"] as const).map((k) => ({ value: k, label: ad.filters[k] }))]}
+            options={[{ value: "all", label: ad.allTypes }, ...(["rounds", "circles", "targets", "leftovers", "transfers"] as const).map((k) => ({ value: k, label: ad.filters[k] }))]}
           />
           <PillSelect icon={<IconCalendar size={18} />} label={ad.range.all} value={range} onChange={(v) => setRange(v as Range)} options={(["all", "week", "month"] as const).map((k) => ({ value: k, label: ad.range[k] }))} />
         </div>

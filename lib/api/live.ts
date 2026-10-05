@@ -57,6 +57,9 @@ export const liveApi: SamaApi = {
   assets: () => call("/api/assets"), // NEW
   home: () => call("/api/me/home"), // NEW: aggregates portfolio, target, drift, circles, pending rounds, activity
   portfolio: () => call("/api/me/portfolio"),
+  syncTransfers: async () => {
+    await call("/api/me/transfers/sync", { body: {} });
+  },
   portfolioHistory: async (range) => (await call<{ points: HistoryPoint[] }>(`/api/me/portfolio/history?range=${range}`)).points, // NEW
   previewTarget: (target) => call("/api/me/target/preview", { body: target }),
   saveTarget: async (target) => {
