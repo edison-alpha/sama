@@ -4,7 +4,6 @@ import { m } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { AssetIcon } from "@/components/asset-icon";
 import { GROUP, RANGE_DAYS, circleOf, flow, loadActivity, txOf, type Amount, type Filter, type Range } from "@/components/activity/history-data";
 import { MobileHistory } from "@/components/activity/history-mobile";
 import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
@@ -14,7 +13,8 @@ import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { useApi } from "@/lib/api/use-api";
 import { activityGroup, activityLine } from "@/lib/activity";
-import { EXPLORER } from "@/lib/chain";
+import { EXPLORER, addressUrl, txUrl } from "@/lib/chain";
+import { AssetIcon } from "@/components/asset-icon";
 import { short, tokens, usd } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
@@ -115,11 +115,29 @@ export default function ActivityPage() {
                             <TokenAmounts items={f.in} locale={locale} />
                           </span>
                         ) : (
-                          <span className="text-sm text-ink-2">{activityLine(a, d)}</span>
+                          a.kind.startsWith("TRANSFER_") ? (
+                            <span className="flex items-center gap-2.5 text-sm text-ink-2">
+                              {String(a.detail.logo ?? "").startsWith("https://") ? <img src={String(a.detail.logo)} width={24} height={24} alt="" className="shrink-0 rounded-full" loading="lazy" /> : <AssetIcon symbol={String(a.detail.symbol ?? "")} size={24} />}
+                              {activityLine(a, d)}
+                            </span>
+                          ) : (
+                            <span className="text-sm text-ink-2">{activityLine(a, d)}</span>
+                          )
                         )}
                       </td>
                       <td className="px-4 py-4">
-                        {tx ? (
+                        {a.kind.startsWith("TRANSFER_") ? (
+                          <>
+                            <span className="block text-xs text-ink-3">{a.kind === "TRANSFER_IN" ? ad.addr.from : ad.addr.to}</span>
+                            <a href={addressUrl(String(a.detail.counterparty))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline">
+                              {short(String(a.detail.counterparty))}
+                              <IconExternal size={14} className="text-ink-3" />
+                            </a>
+                            <a href={txUrl(String(a.detail.tx))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums block text-xs text-ink-3 hover:underline">
+                              {ad.addr.tx} {short(String(a.detail.tx))}
+                            </a>
+                          </>
+                        ) : tx ? (
                           <>
                             <span className="block text-xs text-ink-3">{ad.addr.tx}</span>
                             <a href={`${EXPLORER}/tx/${tx}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline">

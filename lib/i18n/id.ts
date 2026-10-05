@@ -454,7 +454,7 @@ export const id: Dict = {
     detail: { title: "Detail", label: "Aktivitasku", status: "Status", network: "Jaringan", reference: "Referensi", time: "Waktu", viewTx: "Lihat detail transaksi", viewRound: "Lihat round", open: "Buka", done: "Selesai", back: "Kembali" },
     range: { all: "Semua waktu", week: "7 hari terakhir", month: "30 hari terakhir" },
     search: "Cari aktivitas",
-    addr: { tx: "Transaksi", circle: "Circle" },
+    addr: { tx: "Transaksi", circle: "Circle", from: "Dari", to: "Ke" },
     types: { ONBOARDED: "Persiapan", TARGET_SAVED: "Target disimpan", CIRCLE_CREATED: "Dibuat", CIRCLE_JOINED: "Bergabung", INTENT_SIGNED: "Ditandatangani", ROUND_MATCHED: "Cocok", ROUND_NO_CROSS: "Tidak cocok", PLAN_APPROVED: "Disetujui", ALLOWANCE_SET: "Diizinkan", SETTLED: "Diselesaikan", RESIDUAL_DECIDED: "Sisa", TRANSFER_IN: "Diterima", TRANSFER_OUT: "Dikirim" },
     kinds: {
       ONBOARDED: "Menyelesaikan setup",

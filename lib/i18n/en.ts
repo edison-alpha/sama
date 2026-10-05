@@ -455,7 +455,7 @@ export const en = {
     detail: { title: "Detail", label: "My activity", status: "Status", network: "Network", reference: "Reference", time: "Time", viewTx: "View transaction details", viewRound: "View round", open: "Open", done: "Done", back: "Back" },
     range: { all: "All time", week: "Last 7 days", month: "Last 30 days" },
     search: "Search activity",
-    addr: { tx: "Transaction", circle: "Circle" },
+    addr: { tx: "Transaction", circle: "Circle", from: "From", to: "To" },
     types: { ONBOARDED: "Set up", TARGET_SAVED: "Target saved", CIRCLE_CREATED: "Created", CIRCLE_JOINED: "Joined", INTENT_SIGNED: "Signed", ROUND_MATCHED: "Matched", ROUND_NO_CROSS: "No match", PLAN_APPROVED: "Approved", ALLOWANCE_SET: "Allowed", SETTLED: "Settled", RESIDUAL_DECIDED: "Leftovers", TRANSFER_IN: "Received", TRANSFER_OUT: "Sent" },
     kinds: {
       ONBOARDED: "Finished setup",
