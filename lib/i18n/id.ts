@@ -243,6 +243,17 @@ export const id: Dict = {
       created: "Circle dibuat",
     },
   },
+  invite: {
+    title: "Kamu diundang ke",
+    body: "Gabung {name} di Sama dan mulai round bareng.",
+    cta: "Lanjut ke circle",
+    note: "Link undangan hanya bisa dipakai sekali. Kamu akan masuk dulu sebelum bergabung.",
+    used: "Undangan ini sudah dipakai.",
+    viewCircle: "Lihat circle",
+    invalidTitle: "Undangan ini tidak valid",
+    browse: "Telusuri circle",
+    needed: "Circle ini hanya lewat undangan. Buka link undangan untuk bergabung.",
+  },
   round: {
     crumb: "Round {seq}",
     statusLabel: "Status round",

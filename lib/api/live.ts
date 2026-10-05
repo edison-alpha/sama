@@ -3,8 +3,8 @@ import type { SamaApi } from "./contract";
 import type { Activity, Circle, HistoryPoint, RoundView } from "./types";
 
 /**
- * Live client for the Sama API. Routes and payloads are Venue0's (venue0-frontend/components/product/round-stage.tsx),
- * so the migrated backend serves this unchanged (PRD §18.2). New endpoints are marked NEW.
+ * Live client for sama-backend (Elysia on Bun). Routes and payloads are Venue0's, ported (PRD §18.2); endpoints Venue0
+ * did not have are marked NEW. Responses are typed by lib/api/types.ts, generated from sama-packages/api-types.
  */
 
 const BASE = process.env.NEXT_PUBLIC_SAMA_API_URL ?? "";
@@ -64,11 +64,12 @@ export const liveApi: SamaApi = {
   },
   circles: async () => (await call<{ circles: Circle[] }>("/api/circles")).circles,
   circle: (circleId) => call(`/api/circles/${circleId}`), // NEW: GET on the existing path
-  joinCircle: async (circleId) => {
-    await call(`/api/circles/${circleId}/join`, { body: {} });
+  joinCircle: async (circleId, invite) => {
+    await call(`/api/circles/${circleId}/join`, { body: invite ? { invite } : {} });
   },
   createCircle: (input) => call("/api/circles", { body: input }),
   invite: (circleId) => call(`/api/circles/${circleId}/invite`, { body: {} }),
+  inviteInfo: (code) => call(`/api/invites/${encodeURIComponent(code)}`), // NEW, public
   openRound: (circleId) => call(`/api/circles/${circleId}/round`, { body: {} }),
   round: (roundId) => call(`/api/rounds/${roundId}`),
 

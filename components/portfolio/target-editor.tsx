@@ -89,7 +89,8 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   // Messages that matter next to the save action: shown in the summary box on larger screens, under the list on phones.
   const notes = (
     <>
-      {preview && preview.trades.length === 0 && ok && <p className="rounded-xl bg-ok-soft px-3 py-2 text-sm text-ok">{d.portfolio.noTrades}</p>}
+      {preview && preview.ok && preview.problems.length > 0 && <p className="rounded-xl bg-surface-2 px-3 py-2 text-sm text-ink-2">{preview.problems.join(" ")}</p>}
+      {preview && preview.trades.length === 0 && preview.problems.length === 0 && ok && <p className="rounded-xl bg-ok-soft px-3 py-2 text-sm text-ok">{d.portfolio.noTrades}</p>}
       {preview && !preview.ok && preview.problems.length > 0 && <ErrorNote>{preview.problems.join(" ")}</ErrorNote>}
       {act.error && <ErrorNote>{act.error}</ErrorNote>}
     </>

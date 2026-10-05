@@ -302,6 +302,14 @@ export const mockApi: SamaApi = {
   async invite(circleId) {
     return { url: `${window.location.origin}/invite/${circleId}-${Math.random().toString(36).slice(2, 10)}` };
   },
+  /** Mock invite codes are `${circleId}-${random}`; circle ids look like "c-bluechips". */
+  async inviteInfo(code) {
+    await wait(80);
+    const circleId = code.split("-").slice(0, 2).join("-");
+    const c = load().circles.find((x) => x.id === circleId);
+    if (!c) throw new Error("This invite link is not valid.");
+    return { circleId: c.id, circleName: c.name, used: false };
+  },
   async openRound(circleId) {
     const store = load();
     const c = store.circles.find((x) => x.id === circleId);

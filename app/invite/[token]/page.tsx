@@ -1,11 +1,10 @@
-import { redirect } from "next/navigation";
+import { InviteLanding } from "@/components/circles/invite-landing";
 
 /**
- * Invite links open onboarding first; the token is redeemed at POST /api/circles/[id]/join after sign-in.
- * The starter forwards to the Circle page (mock tokens are `${circleId}-${random}`).
+ * An invite link: resolve the code with the API (it works before sign-in), show which circle it opens, then continue to
+ * the circle with the code attached. The code is redeemed when the member presses Join (POST /api/circles/:id/join).
  */
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const circleId = token.split("-").slice(0, 2).join("-");
-  redirect(`/start?next=${encodeURIComponent(`/circles/${circleId}?invite=${token}`)}`);
+  return <InviteLanding code={decodeURIComponent(token)} />;
 }
