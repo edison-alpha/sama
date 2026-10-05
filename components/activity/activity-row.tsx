@@ -23,7 +23,10 @@ export function ActivityRow({ a, time }: { a: Activity; time: string }) {
   const { Icon, tone } = GROUP[group];
   const body = (
     <>
-      <IconChip className={tone}><Icon size={18} /></IconChip>
+      <IconChip className={tone}>
+        {/* Transfers show the token's own logo (PancakeSwap list); only https images are shown. */}
+        {String(a.detail.logo ?? "").startsWith("https://") ? <img src={String(a.detail.logo)} alt="" width={18} height={18} className="rounded-full" loading="lazy" /> : <Icon size={18} />}
+      </IconChip>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium text-ink">{activityLine(a, d)}</span>
         <span className="block text-xs text-ink-3">{d.activity.filters[group]}</span>
