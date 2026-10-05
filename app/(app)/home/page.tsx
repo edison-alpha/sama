@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ActivityRow } from "@/components/activity/activity-row";
 import { NextStepCard } from "@/components/home/next-step-card";
-import { IconArrowRight, IconCircles, IconPlay, IconPlus, IconSwap, IconTarget } from "@/components/icons";
+import { IconArrowRight, IconCircles, IconPlay, IconPlus, IconSend, IconSwap, IconTarget } from "@/components/icons";
 import { cx } from "@/utils/cx";
 import { Stagger, rise } from "@/components/motion";
 import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
@@ -76,7 +76,7 @@ export default function HomePage() {
           <ActionTile href="/circles?create=1" icon={<IconPlus size={22} />}>{a.create}</ActionTile>
           {/* Desktop shows four tiles, so Send takes the place of How it works there; phones keep all five in the scroller. */}
           <ActionTile href="/learn" icon={<IconPlay size={22} />} className="sm:hidden">{a.learn}</ActionTile>
-          <ActionTile href="/portfolio?send=1" icon={<IconSwap size={22} />}>{a.send}</ActionTile>
+          <ActionTile href="/portfolio?send=1" icon={<IconSend size={22} />}>{a.send}</ActionTile>
           <span className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
         </div>
       </m.section>

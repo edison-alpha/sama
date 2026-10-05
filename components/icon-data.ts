@@ -6,3 +6,6 @@ export const SOLAR: IconifyJSON = {"prefix":"solar","icons":{"home-2-linear":{"b
 
 /* Carbon (Iconify, Apache 2.0) — sidebar toggle. https://api.iconify.design/carbon.json?icons=open-panel-filled-right */
 export const CARBON: IconifyJSON = {"prefix":"carbon","width":32,"height":32,"icons":{"open-panel-filled-right":{"body":"<path fill=\"currentColor\" d=\"M28 4H4a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2M4 6h16v20H4Z\"/>"}}};
+
+/* Remix Icon (Apache 2.0) "send-ins-fill", bundled for the Send action. Source: https://api.iconify.design/ri.json?icons=send-ins-fill */
+export const RI: IconifyJSON = {"prefix":"ri","lastModified":1770712905,"aliases":{},"width":24,"height":24,"icons":{"send-ins-fill":{"body":"<path fill=\"currentColor\" d=\"M19.5 2.001a3.5 3.5 0 0 1 3.03 5.249l-7.5 12.99a3.5 3.5 0 0 1-6.411-.842l-1.5-5.595l8.77-5.064a1 1 0 0 0-1-1.732L6.12 12.07L2.026 7.975A3.5 3.5 0 0 1 4.5 2z\"/>"}}};

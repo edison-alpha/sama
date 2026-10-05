@@ -1,7 +1,7 @@
 "use client";
 
 import { addCollection, Icon } from "@iconify/react";
-import { CARBON, SOLAR } from "./icon-data";
+import { CARBON, RI, SOLAR } from "./icon-data";
 
 /**
  * UI icons: the Solar set from Iconify — rounded strokes that sit well with SF Pro Rounded. Linear by default; `bold`
@@ -9,6 +9,7 @@ import { CARBON, SOLAR } from "./icon-data";
  */
 addCollection(SOLAR);
 addCollection(CARBON);
+addCollection(RI);
 
 type P = { size?: number; className?: string; bold?: boolean };
 
@@ -48,6 +49,11 @@ export const IconPulse = solar("pulse");
 export const IconCalendar = solar("calendar");
 export const IconLayers = solar("layers-minimalistic");
 export const IconSwap = solar("transfer-horizontal");
+
+/** Send action icon: Remix "send-ins-fill", the filled paper plane. */
+export function IconSend({ size = 20, className }: P) {
+  return <Icon icon="ri:send-ins-fill" width={size} height={size} className={className} aria-hidden="true" />;
+}
 export const IconRound = solar("refresh-circle");
 export const IconMail = solar("letter");
 export const IconPlay = solar("play-circle");
