@@ -50,6 +50,23 @@ export const IconCalendar = solar("calendar");
 export const IconLayers = solar("layers-minimalistic");
 export const IconSwap = solar("transfer-horizontal");
 
+/** Filled Remix icons for the Home action tiles. */
+export function IconTargetFill({ size = 20, className }: P) {
+  return <Icon icon="ri:focus-3-fill" width={size} height={size} className={className} aria-hidden="true" />;
+}
+
+export function IconGroupFill({ size = 20, className }: P) {
+  return <Icon icon="ri:group-fill" width={size} height={size} className={className} aria-hidden="true" />;
+}
+
+export function IconAddFill({ size = 20, className }: P) {
+  return <Icon icon="ri:add-circle-fill" width={size} height={size} className={className} aria-hidden="true" />;
+}
+
+export function IconPlayFill({ size = 20, className }: P) {
+  return <Icon icon="ri:play-circle-fill" width={size} height={size} className={className} aria-hidden="true" />;
+}
+
 /** Send action icon: Remix "send-ins-fill", the filled paper plane. */
 export function IconSend({ size = 20, className }: P) {
   return <Icon icon="ri:send-ins-fill" width={size} height={size} className={className} aria-hidden="true" />;
