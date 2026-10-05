@@ -244,6 +244,17 @@ export const en = {
       close: "Close",
     },
   },
+  invite: {
+    title: "You're invited to",
+    body: "Join {name} on Sama and start a round together.",
+    cta: "Continue to circle",
+    note: "The invite link works once. You'll sign in before you join.",
+    used: "This invite has already been used.",
+    viewCircle: "View circle",
+    invalidTitle: "This invite isn't valid",
+    browse: "Browse circles",
+    needed: "This circle is invite-only. Open the invite link to join.",
+  },
   round: {
     crumb: "Round {seq}",
     statusLabel: "Round status",

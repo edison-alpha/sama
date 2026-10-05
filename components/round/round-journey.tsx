@@ -268,6 +268,41 @@ function CloseNow({ v, refresh, variant }: Props & { variant: "secondary" | "gho
   );
 }
 
+/**
+ * What the round's price snapshot means for this member: outside the regular NYSE session stock prices are the last
+ * close, and assets that failed a price check are left out of the round with the reason.
+ */
+function SnapshotNotes({ v }: { v: RoundView }) {
+  const { d, fmt } = useI18n();
+  const session = v.round.marketSession;
+  const excluded = v.round.excludedAssets ?? [];
+  if ((!session || session === "market") && excluded.length === 0) return null;
+  return (
+    <div className="grid gap-3">
+      {session && session !== "market" && (
+        <p className="flex items-start gap-2 rounded-2xl bg-surface-2 px-4 py-3 text-sm text-ink-2">
+          <IconClock size={18} className="mt-0.5 shrink-0 text-ink-3" />
+          <span>{session === "closed" ? d.round.market.closed : fmt(d.round.market.session, { session: d.round.market.sessions[session] })}</span>
+        </p>
+      )}
+      {excluded.length > 0 && (
+        <div className="rounded-2xl border border-warn/40 bg-warn-soft/40 px-4 py-3">
+          <p className="text-sm font-semibold text-ink">{d.round.excluded.title}</p>
+          <p className="mt-0.5 text-sm text-ink-2">{d.round.excluded.body}</p>
+          <ul className="mt-2 grid gap-2">
+            {excluded.map((e) => (
+              <li key={e.symbol} className="flex items-start gap-2 text-sm">
+                <AssetIcon symbol={e.symbol} size={22} />
+                <span className="min-w-0"><span className="font-semibold text-ink">{e.symbol}</span> <span className="text-ink-3">· {e.reason}</span></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** What the member signs into the round: the most they will sell and buy. */
 function PlanRows({ v }: { v: RoundView }) {
   const { d, fmt } = useI18n();
@@ -306,6 +341,28 @@ function JoinStep({ v, refresh }: Props) {
   const { d } = useI18n();
   const { signer } = useSession();
   const act = useAction();
+  // The server could not build an intent for this wallet (no target, empty wallet, nothing this circle trades): say why
+  // and point at the fix instead of offering a signature that would fail.
+  if (v.you.joinBlocker) {
+    return (
+      <Step
+        v={v}
+        mood="info"
+        title={d.round.blocked.title}
+        body={v.you.joinBlocker}
+        panel={
+          <>
+            <ButtonLink href="/portfolio?tab=target" size="lg" block>{d.round.blocked.fixTarget}</ButtonLink>
+            <ButtonLink href={`/circles/${v.circle.id}`} variant="ghost" block>{d.round.backToCircle}</ButtonLink>
+            <CloseNow v={v} refresh={refresh} variant="ghost" />
+          </>
+        }
+      >
+        <CollectingStats v={v} />
+        <SnapshotNotes v={v} />
+      </Step>
+    );
+  }
   return (
     <Step
       v={v}
@@ -325,6 +382,7 @@ function JoinStep({ v, refresh }: Props) {
       }
     >
       <CollectingStats v={v} />
+      <SnapshotNotes v={v} />
       <PlanRows v={v} />
     </Step>
   );
@@ -336,6 +394,7 @@ function MatchStep({ v, refresh }: Props) {
   return collecting ? (
     <Step v={v} mood="wait" title={d.round.waitingTitle} body={d.round.waitingBody} panel={v.circle.isOrganizer ? <CloseNow v={v} refresh={refresh} variant="secondary" /> : undefined}>
       <CollectingStats v={v} />
+      <SnapshotNotes v={v} />
       <PlanFold v={v} />
     </Step>
   ) : (
@@ -356,7 +415,13 @@ function ResultStep({ v }: Props) {
     : s === "PLAN_STALE" ? [d.round.staleTitle, d.round.staleBody]
     : s === "PLAN_REJECTED" || s === "CANCELLED" ? [d.round.rejectedTitle, d.round.rejectedBody]
     : [d.round.noCrossTitle, d.round.noCrossBody];
-  return <Step v={v} mood="info" title={title} body={body} panel={<ButtonLink href={`/circles/${v.circle.id}`} variant="secondary" block>{d.round.backToCircle}</ButtonLink>} />;
+  // The server records why a round ended early (e.g. a plan over the safety limit); show it under the plain sentence.
+  const reason = v.you.signed ? [...v.round.history].reverse().find((h) => h.state === s)?.reason : null;
+  return (
+    <Step v={v} mood="info" title={title} body={body} panel={<ButtonLink href={`/circles/${v.circle.id}`} variant="secondary" block>{d.round.backToCircle}</ButtonLink>}>
+      {reason && <p className="rounded-2xl bg-surface-2 px-4 py-3 text-sm text-ink-2">{fmt(d.round.endedReason, { reason })}</p>}
+    </Step>
+  );
 }
 
 function ApproveStep({ v, refresh }: Props) {
@@ -569,8 +634,14 @@ function RoundDetails({ v }: { v: RoundView }) {
           <ul className="grid grid-cols-1 divide-y divide-line">
             {v.round.prices.map((p) => (
               <li key={p.symbol} className="flex items-center justify-between gap-3 py-3">
-                <span className="flex items-center gap-3 font-medium text-ink"><AssetIcon symbol={p.symbol} size={28} />{p.symbol}</span>
-                <span className="num font-medium text-ink">{usd(p.priceUsd, locale)}</span>
+                <span className="flex min-w-0 items-center gap-3">
+                  <AssetIcon symbol={p.symbol} size={28} />
+                  <span className="min-w-0">
+                    <span className="block font-medium text-ink">{p.symbol}</span>
+                    {p.source && <span className="block truncate text-xs text-ink-3">{d.round.priceSource[p.source]}{p.uiMultiplier && Math.abs(p.uiMultiplier - 1) > 1e-9 ? ` · ${fmt(d.round.multiplier, { m: p.uiMultiplier.toFixed(4) })}` : ""}</span>}
+                  </span>
+                </span>
+                <span className="num shrink-0 font-medium text-ink">{usd(p.priceUsd, locale)}</span>
               </li>
             ))}
           </ul>

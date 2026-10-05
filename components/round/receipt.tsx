@@ -7,6 +7,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import type { RoundView } from "@/lib/api/types";
 import { blockUrl } from "@/lib/chain";
 import { short, tokens } from "@/lib/format";
+import type { Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { AmountRow, TxLink, who } from "./parts";
 
@@ -63,6 +64,18 @@ export function ReceiptSummary({ v, compact = false }: { v: RoundView; compact?:
   );
 }
 
+/**
+ * A check's label in the user's language, by its stable id. Per-participant checks carry "(you)" or "(member 2)" in the
+ * server's English name; that suffix is translated too. Unknown ids fall back to the server's label.
+ */
+function checkLabel(c: { id?: string; name: string }, d: Dict): string {
+  const labels = d.receipt.checkLabels as Record<string, string>;
+  const base = c.id ? labels[c.id] : undefined;
+  if (!base) return c.name;
+  const suffix = /\((you|member \d+)\)$/.exec(c.name)?.[1];
+  return suffix ? `${base} (${suffix === "you" ? d.receipt.you : who(suffix, d)})` : base;
+}
+
 /** Independent checks as a compact panel: a pass count with a progress bar, then one tight row per check. */
 export function VerifierChecks({ v }: { v: RoundView }) {
   const { d, fmt } = useI18n();
@@ -87,7 +100,7 @@ export function VerifierChecks({ v }: { v: RoundView }) {
               <li key={c.name} className="flex gap-3 py-2.5" title={c.detail}>
                 <span className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded-full ${c.status === "PASS" ? "bg-ok text-white" : c.status === "FAIL" ? "bg-danger text-white" : "bg-warn-soft text-warn"}`}>{c.status === "PASS" ? <IconCheck size={10} /> : <IconX size={10} />}</span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-medium text-ink">{c.name}</span>
+                  <span className="block text-sm font-medium text-ink">{checkLabel(c, d)}</span>
                   <span className="block text-xs leading-snug text-ink-3">{c.detail}</span>
                 </span>
               </li>

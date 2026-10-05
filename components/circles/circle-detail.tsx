@@ -19,6 +19,7 @@ import { cadence, duration } from "@/lib/circle-words";
 import { clock, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
+import { forgetInvite, pendingInvite } from "./invite-landing";
 
 /**
  * Circle detail laid out like a token page on a DEX. Web: breadcrumb, identity row, the headline number, stats grid,
@@ -43,8 +44,17 @@ export function CircleDetail({ id }: { id: string }) {
   const ended = new Intl.DateTimeFormat(tag, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
   // One contextual primary action (PRD §19.4.5): join → go to round → start a round (organizer, on demand).
+  // Invite-only circles need the code from the invite link (kept in the URL or, across sign-in, in session storage).
+  const join = () =>
+    act.run(async () => {
+      const code = pendingInvite(c.id, new URLSearchParams(window.location.search).get("invite"));
+      if (c.visibility !== "PUBLIC" && !code) throw new Error(d.invite.needed);
+      await sama.joinCircle(c.id, code);
+      forgetInvite(c.id);
+      await refresh();
+    });
   const primary: { label: string; run: () => void } | null = !c.role
-    ? { label: d.circles.join, run: () => act.run(async () => { await sama.joinCircle(c.id); await refresh(); }) }
+    ? { label: d.circles.join, run: join }
     : live
       ? { label: d.circles.enterRound, run: () => router.push(`/rounds/${live.id}`) }
       : c.role === "ORGANIZER"

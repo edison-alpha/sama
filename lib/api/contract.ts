@@ -1,7 +1,7 @@
 import type { Hex, TypedDataDefinition } from "viem";
-import type { Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview } from "./types";
+import type { Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, InviteInfo, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview } from "./types";
 
-/** What the UI needs from a wallet. Live mode gets it from Dynamic; mock mode fakes it. */
+/** What the UI needs from a wallet. Live mode gets it from the user's Privy wallet; mock mode fakes it. */
 export type Signer = {
   signTypedData: (typedData: TypedDataDefinition) => Promise<Hex>;
   send: (tx: { to: Hex; data: Hex; value?: bigint | string; gas?: bigint | string }) => Promise<Hex>;
@@ -22,7 +22,7 @@ export type ProgressWords = {
 };
 
 /**
- * One interface, two implementations: mock (browser-only demo) and live (Sama API, same routes as Venue0).
+ * One interface, two implementations: mock (browser-only demo) and live (sama-backend, Elysia; routes ported from Venue0).
  * Screens only ever import `sama` from ./index.
  */
 export type SamaApi = {
@@ -35,9 +35,12 @@ export type SamaApi = {
   saveTarget(target: Omit<Target, "savedAt">): Promise<void>;
   circles(): Promise<Circle[]>;
   circle(id: string): Promise<Circle>;
-  joinCircle(id: string): Promise<void>;
+  /** `invite` is the code from an invite link; required for invite-only circles. */
+  joinCircle(id: string, invite?: string): Promise<void>;
   createCircle(input: NewCircle): Promise<{ id: string }>;
   invite(circleId: string): Promise<{ url: string }>;
+  /** Which circle an invite code opens. Works before sign-in. */
+  inviteInfo(code: string): Promise<InviteInfo>;
   openRound(circleId: string): Promise<{ roundId: string }>;
   round(id: string): Promise<RoundView>;
   signIntent(round: RoundView, signer: Signer, say: Say, words: ProgressWords): Promise<void>;

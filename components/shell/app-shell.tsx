@@ -36,7 +36,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { session, ready } = useSession();
 
   useEffect(() => {
-    if (ready && !session) router.replace(`/start?next=${encodeURIComponent(pathname)}`);
+    // Keep the query (e.g. ?invite=… on a circle) so the page opens exactly as linked after sign-in.
+    if (ready && !session) router.replace(`/start?next=${encodeURIComponent(pathname + window.location.search)}`);
   }, [ready, session, router, pathname]);
 
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`) || (href === "/circles" && pathname.startsWith("/rounds"));
