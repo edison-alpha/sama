@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
-import { BOOT_SCRIPT } from "@/components/shell/boot-scripts";
+import { BootScript } from "@/components/shell/boot-script";
 import { MotionProvider } from "@/components/motion";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import { RegisterServiceWorker } from "@/components/register-sw";
@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={locale} className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: BOOT_SCRIPT }} />
+        <BootScript />
       </head>
       <body>
         <SmoothScroll />

@@ -1,6 +1,9 @@
 import type { Hex, TypedDataDefinition } from "viem";
 import type { Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, InviteInfo, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview } from "./types";
 
+export type ActivityQuery = { cursor?: string | null; group?: "rounds" | "circles" | "targets" | "leftovers" | "transfers" | null; range?: "all" | "week" | "month" };
+export type ActivityPage = { items: Activity[]; nextCursor: string | null };
+
 /** What the UI needs from a wallet. Live mode gets it from the user's Privy wallet; mock mode fakes it. */
 export type Signer = {
   signTypedData: (typedData: TypedDataDefinition) => Promise<Hex>;
@@ -22,7 +25,7 @@ export type ProgressWords = {
 };
 
 /**
- * One interface, two implementations: mock (browser-only demo) and live (sama-backend, Elysia; routes ported from Venue0).
+ * One interface, two implementations: mock (browser-only demo) and live (sama-backend, Elysia).
  * Screens only ever import `sama` from ./index.
  */
 export type SamaApi = {
@@ -51,7 +54,10 @@ export type SamaApi = {
   settle(round: RoundView, signer: Signer, say: Say, words: ProgressWords): Promise<void>;
   decideResidual(round: RoundView, choice: Exclude<ResidualChoice, "EXECUTE_NOW">): Promise<void>;
   swapResidual(round: RoundView, signer: Signer, say: Say, words: ProgressWords): Promise<void>;
-  activity(): Promise<Activity[]>;
+  /** One page of activity, newest first. `cursor` comes from the previous page's `nextCursor`; filters run on the server. */
+  activity(query?: ActivityQuery): Promise<ActivityPage>;
   settings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<void>;
+  onboarding(): Promise<boolean>;
+  setOnboardingDone(done: boolean): Promise<void>;
 };

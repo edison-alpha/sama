@@ -3,10 +3,12 @@
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useCallback, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { IconCheck } from "@/components/icons";
+import { scrollAreaClass } from "@/components/ui/scroll-area";
 import { useDismiss } from "@/lib/hooks/use-dismiss";
 import { cx } from "@/utils/cx";
 
-export type DropdownOption<T extends string> = { value: T; label: string; icon?: ReactNode };
+/** `tag` is a small chip after the label, `sub` a muted line under it, `trailing` a value on the right; all optional. */
+export type DropdownOption<T extends string> = { value: T; label: string; icon?: ReactNode; tag?: string; sub?: string; trailing?: ReactNode };
 
 /**
  * App-styled select: a trigger you shape yourself and a floating menu in the app's colours (the native select popup
@@ -105,6 +107,7 @@ export function Dropdown<T extends string>({
             transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
             className={cx(
               "absolute top-full z-50 mt-2 grid min-w-full w-max max-w-[min(320px,calc(100vw-32px))] gap-0.5 rounded-2xl border border-line bg-surface p-1.5 shadow-[var(--elev-float)]",
+              scrollAreaClass,
               align === "end" ? "right-0 origin-top-right" : "left-0 origin-top-left",
               menuClassName,
             )}
@@ -122,7 +125,13 @@ export function Dropdown<T extends string>({
                   className={cx("flex min-h-10 cursor-pointer items-center gap-2.5 rounded-xl px-3 text-sm font-medium", i === active ? "bg-surface-2 text-ink" : "text-ink-2")}
                 >
                   {o.icon && <span className="shrink-0 text-ink-3">{o.icon}</span>}
-                  <span className="min-w-0 flex-1 truncate">{o.label}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate">{o.label}</span>
+                      {o.tag && <span className="shrink-0 rounded-md bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-ink-3">{o.tag}</span>}                    </span>
+                    {o.sub && <span className="block truncate text-xs font-normal text-ink-3">{o.sub}</span>}
+                  </span>
+                  {o.trailing && <span className="num shrink-0 text-right text-sm font-semibold text-ink-2">{o.trailing}</span>}
                   <IconCheck size={16} className={cx("shrink-0 text-accent", on ? "opacity-100" : "opacity-0")} />
                 </li>
               );

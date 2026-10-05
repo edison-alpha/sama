@@ -3,6 +3,7 @@
 import { AnimatePresence, m } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { AssetIcon } from "@/components/asset-icon";
 import { IconArrowLeft, IconChevronRight, IconExternal } from "@/components/icons";
 import { LocaleButton } from "@/components/shell/preferences";
 import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
@@ -10,9 +11,10 @@ import type { Activity, RoundView } from "@/lib/api/types";
 import { activityGroup, activityLine } from "@/lib/activity";
 import { EXPLORER, isTestnet } from "@/lib/chain";
 import { short, tokens } from "@/lib/format";
+import type { Locale } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
-import { GROUP, circleOf, flow, txOf, type ActivityData, type Amount, type Filter, type Range } from "./history-data";
+import { circleOf, flow, iconOf, partiesOf, transferOf, txOf, type ActivityData, type Amount, type Filter, type Party, type Range, type Transfer } from "./history-data";
 
 /**
  * Activity on phones, styled as a wallet app's history: a centred title, two compact filters, then one rounded card of
@@ -82,20 +84,21 @@ export function MobileHistory({ data, rows, filter, onFilter, range, onRange }: 
           <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/60">
             {rows.map((a) => {
               const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
-              const { Icon, fill } = GROUP[activityGroup(a.kind)];
+              const { Icon, fill } = iconOf(a.kind);
               const f = flow(a, r);
-              const amount = headline(f);
+              const tr = transferOf(a);
+              const shown = shownAmount(f, tr, locale);
               const sub = [f.out[0] && f.in[0] ? `${f.out[0].symbol} → ${f.in[0].symbol}` : (f.out[0] ?? f.in[0])?.symbol, circleOf(a, r) ?? ad.filters[activityGroup(a.kind)]].filter(Boolean).join(" · ");
               return (
                 <li key={a.id}>
                   <button type="button" onClick={() => setOpen(a)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-surface-3/60">
-                    <span className={cx("grid size-11 shrink-0 place-items-center rounded-full text-white", fill)}><Icon size={20} bold /></span>
+                    <TokenDisc symbol={shown?.symbol ?? null} logo={tr?.logo ?? null} size={44} fill={fill} Icon={Icon} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold text-ink">{activityLine(a, d)}</span>
                       <span className="block truncate text-sm text-ink-3">{sub}</span>
                     </span>
                     <span className="shrink-0 text-right">
-                      {amount && <span className="tabular-nums block text-sm font-semibold text-ink">{amount.sign}{tokens(amount.x.amountTokens, locale)} {amount.x.symbol}</span>}
+                      {shown && <span className="tabular-nums block text-sm font-semibold text-ink">{shown.text}</span>}
                       <span className="tabular-nums block text-xs text-ink-3">{date.format(new Date(a.createdAt))}</span>
                     </span>
                     <IconChevronRight size={16} className="shrink-0 text-ink-3" />
@@ -119,14 +122,39 @@ function headline(f: { out: Amount[]; in: Amount[] }): { sign: string; x: Amount
   return null;
 }
 
+/** The token and amount a row shows: a transfer's own token, else the round's headline amount. */
+function shownAmount(f: { out: Amount[]; in: Amount[] }, tr: Transfer | null, locale: Locale): { symbol: string; text: string } | null {
+  if (tr) return { symbol: tr.symbol, text: `${tr.sign}${tokens(tr.amount, locale)} ${tr.symbol}` };
+  const h = headline(f);
+  return h ? { symbol: h.x.symbol, text: `${h.sign}${tokens(h.x.amountTokens, locale)} ${h.x.symbol}` } : null;
+}
+
+/** The token's own logo when the row moves one (a transfer's PancakeSwap logo, or the bStock or USDT artwork); otherwise the kind's disc. */
+function TokenDisc({ symbol, logo, size, fill, Icon }: { symbol: string | null; logo: string | null; size: number; fill: string; Icon: ReturnType<typeof iconOf>["Icon"] }) {
+  if (logo) return <img src={logo} alt="" width={size} height={size} className="shrink-0 rounded-full object-cover" loading="lazy" />;
+  if (symbol) return <AssetIcon symbol={symbol} size={size} className="shrink-0" />;
+  return (
+    <span className={cx("grid shrink-0 place-items-center rounded-full text-white", fill)} style={{ width: size, height: size }}>
+      <Icon size={Math.round(size * 0.45)} bold />
+    </span>
+  );
+}
+
+/** A counterparty in the detail: its address opens the explorer, anything else is plain text. */
+function PartyLink({ party }: { party: Party }) {
+  if (!party.href) return <>{party.label}</>;
+  return <a href={party.href} target="_blank" rel="noreferrer" className="tabular-nums text-accent">{short(party.label)}</a>;
+}
+
 function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onClose: () => void }) {
   const { d, locale } = useI18n();
   const ad = d.activity;
   const dd = ad.detail;
-  const group = activityGroup(a.kind);
-  const { Icon, fill } = GROUP[group];
+  const { Icon, fill } = iconOf(a.kind);
   const f = flow(a, r);
-  const amount = headline(f);
+  const tr = transferOf(a);
+  const shown = shownAmount(f, tr, locale);
+  const parties = partiesOf(a, r, dd.you);
   const tx = txOf(a, r);
   const circle = circleOf(a, r);
   const time = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { dateStyle: "medium", timeStyle: "medium" }).format(new Date(a.createdAt));
@@ -163,17 +191,20 @@ function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onCl
       </header>
 
       <div className="mt-6 rounded-[28px] bg-surface-2/70 px-5 py-7 text-center">
-        <span className={cx("mx-auto grid size-16 place-items-center rounded-full text-white", fill)}><Icon size={28} bold /></span>
+        <span className="mx-auto block w-fit"><TokenDisc symbol={shown?.symbol ?? null} logo={tr?.logo ?? null} size={64} fill={fill} Icon={Icon} /></span>
         <p className="mt-4 text-sm text-ink-3">{dd.label}</p>
         <p id="activity-detail-title" className="mt-1 text-2xl font-bold tracking-tight text-ink">{activityLine(a, d)}</p>
         <p className="mt-1 text-sm text-ink-3">{[(ad.types as Record<string, string>)[a.kind], circle].filter(Boolean).join(" · ")}</p>
-        {amount && <p className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-ink">{amount.sign}{tokens(amount.x.amountTokens, locale)} {amount.x.symbol}</p>}
+        {shown && <p className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-ink">{shown.text}</p>}
         {f.out[0] && f.in[0] && <p className="tabular-nums mt-1 text-sm text-ink-3">−{tokens(f.out[0].amountTokens, locale)} {f.out[0].symbol}</p>}
       </div>
 
       <dl className="mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/70 text-sm">
         <Row label={dd.status}>{r ? d.states[r.round.state] : dd.done}</Row>
         <Row label={dd.network}>{isTestnet ? d.network.testnet : d.network.label}</Row>
+        {parties.from && <Row label={dd.from}><PartyLink party={parties.from} /></Row>}
+        {parties.to && <Row label={dd.to}><PartyLink party={parties.to} /></Row>}
+        {tr?.token && <Row label={dd.token}><a href={`${EXPLORER}/token/${tr.token}`} target="_blank" rel="noreferrer" className="tabular-nums text-accent">{short(tr.token)}</a></Row>}
         <Row label={dd.reference}><span className="tabular-nums">{tx ? short(tx) : a.roundId ?? "—"}</span></Row>
         <Row label={dd.time}>{time}</Row>
         {tx ? (

@@ -11,7 +11,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 751.41,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.000724838657573
@@ -24,7 +24,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 159.07,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -37,7 +37,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 234.88,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.0007782237528078
@@ -50,7 +50,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 771.27,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.001729792036835
@@ -63,7 +63,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 372.61,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -76,7 +76,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 25.29,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -89,7 +89,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 333.58,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.0006039060756324
@@ -102,7 +102,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 6.12,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -115,7 +115,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 344.38,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.0004780589781075
@@ -128,7 +128,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 195.33,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -141,7 +141,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 106.61,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -154,7 +154,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 518.39,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.0013139648333669
@@ -167,7 +167,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 113.63,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -180,7 +180,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 162.47,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -193,7 +193,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 83.23,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -206,7 +206,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 475.49,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1.002110464141051
@@ -219,7 +219,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 1719.44,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -232,7 +232,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 117.86,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "A",
     "leveraged": false,
     "uiMultiplier": 1
@@ -245,7 +245,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 1066.85,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1.0001075125688057
@@ -258,7 +258,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 632.53,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -271,7 +271,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 8.94,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -284,7 +284,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 191.15,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -297,7 +297,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 67.68,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -310,7 +310,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 7.58,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -323,7 +323,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 729.1,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1.000548290410745
@@ -336,7 +336,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 29.01,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -349,7 +349,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 75.54,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -362,7 +362,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 252.33,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -375,7 +375,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 2.79,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "B",
     "leveraged": false,
     "uiMultiplier": 1
@@ -388,7 +388,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 164.25,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1.0004419392788633
@@ -401,7 +401,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 29.59,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1.0090262198541073
@@ -414,7 +414,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 223.23,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.0050058016231744
@@ -427,7 +427,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 81.54,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1.001347622058686
@@ -440,7 +440,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 26.69,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -453,7 +453,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 10.55,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.0023494163204456
@@ -466,7 +466,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 147.09,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -479,7 +479,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 6.17,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -492,7 +492,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 191.02,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -505,7 +505,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 185.45,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -518,7 +518,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 12.1,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -531,7 +531,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 22.58,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1
@@ -544,7 +544,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 16.27,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1
@@ -557,7 +557,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 33,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1.0098410162425662
@@ -570,7 +570,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 3.02,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -583,7 +583,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 61.28,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -596,7 +596,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 238,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -609,7 +609,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 357.07,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.001269208611258
@@ -622,7 +622,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 189.67,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -635,7 +635,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 58.75,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -648,7 +648,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 74.5,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -661,7 +661,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 273.84,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -674,7 +674,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 142.99,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -687,7 +687,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 36.54,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1.0039519680686277
@@ -700,7 +700,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 116.8,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -713,7 +713,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 46.59,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -726,7 +726,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 1.31,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -739,7 +739,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 1093.56,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -752,7 +752,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 182.5,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -765,7 +765,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 53.15,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.0017717788129643
@@ -778,7 +778,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 51.28,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -791,7 +791,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 241.29,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -804,7 +804,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 38.45,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1
@@ -817,7 +817,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 234.14,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.001229509379035
@@ -830,7 +830,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 85.84,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -843,7 +843,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 164.87,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.001290269312565
@@ -856,7 +856,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 89.4,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -869,7 +869,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 187.09,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.00380432322353
@@ -882,7 +882,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 13.78,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -895,7 +895,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 417,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.000224983929809
@@ -908,7 +908,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 43.64,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -921,7 +921,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 1867.46,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -934,7 +934,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 286.84,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -947,7 +947,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 30.04,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": true,
     "uiMultiplier": 1
@@ -960,7 +960,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 218.57,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -973,7 +973,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 353.04,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -986,7 +986,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 41.79,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -999,7 +999,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 69.83,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1012,7 +1012,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 543.73,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.0007484004405192
@@ -1025,7 +1025,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 562.52,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1038,7 +1038,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 337.22,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1051,7 +1051,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "ETF",
     "priceUsd": 633.74,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1064,7 +1064,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 308.16,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1077,7 +1077,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 93.52,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1090,7 +1090,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 904.91,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.0034062788407505
@@ -1103,7 +1103,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 272.86,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1116,7 +1116,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 845.86,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1.0005592471784446
@@ -1129,7 +1129,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 8.16,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1
@@ -1142,7 +1142,7 @@ export const BSTOCKS: Asset[] = [
     "decimals": 18,
     "class": "STOCK",
     "priceUsd": 0,
-    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama is software, not investment advice.",
+    "disclosure": "bStock issued by Binance. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama coordinates the trades you choose; it gives no investment advice.",
     "tier": "C",
     "leveraged": false,
     "uiMultiplier": 1

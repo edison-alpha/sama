@@ -95,7 +95,7 @@ export default function SettingsPage() {
         </ListSection>
 
         <ListSection title={st.sections.support}>
-          <ListRow icon={<IconPlay size={22} />} label={d.nav.learn} href="/learn" />
+          <ListRow icon={<IconPlay size={22} />} label={d.nav.learn} href="/docs" />
           <ListRow icon={<IconCheckCircle size={22} />} label={d.nav.proof} href="/proof" />
           {API_MODE === "mock" && <ListRow icon={<IconAlert size={22} />} label={st.resetDemo} onClick={() => { resetDemo(); window.location.href = "/home"; }} />}
           <ListRow icon={<IconArrowLeft size={22} />} label={d.common.signOut} tone="danger" onClick={() => { signOut(); router.push("/"); }} trailing={<span />} />

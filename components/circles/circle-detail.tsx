@@ -100,7 +100,7 @@ export function CircleDetail({ id }: { id: string }) {
         </>
       )}
       <button type="button" onClick={copyLink} className={pill}><IconCopy size={18} />{copied === "link" ? cd.copied : cd.copyLink}</button>
-      <Link href="/learn" className={pill}><IconPlay size={18} />{d.nav.learn}</Link>
+      <Link href="/docs" className={pill}><IconPlay size={18} />{d.nav.learn}</Link>
     </div>
   );
 

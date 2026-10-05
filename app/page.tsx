@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AssetIcon } from "@/components/asset-icon";
+import { BStockMark } from "@/components/bstock-mark";
 import { Mark } from "@/components/brand";
 import { ProblemCarousel } from "@/components/landing/problem-carousel";
 import { FeatureBento } from "@/components/landing/feature-bento";
@@ -36,7 +37,7 @@ export default async function Landing() {
         <div className="relative flex min-h-[calc(100svh-16px)] flex-col px-4 pb-10 pt-5 sm:min-h-[calc(100svh-28px)] sm:px-14 sm:pt-8">
           <nav className="grid grid-cols-[1fr_auto_1fr] items-center">
             <div className="hidden w-fit items-center rounded-full glass px-2 py-1.5  md:flex">
-              {([["/", L.nav.home], ["/circles", L.nav.circles], ["/learn", L.nav.rails], ["/proof", L.nav.proof]] as const).map(([href, label]) => (
+              {([["/", L.nav.home], ["/circles", L.nav.circles], ["/docs", L.nav.rails], ["/proof", L.nav.proof]] as const).map(([href, label]) => (
                 <Link key={label} href={href} className="rounded-full px-5 py-2 text-base font-medium text-white hover:bg-white/15">{label}</Link>
               ))}
             </div>
@@ -54,7 +55,7 @@ export default async function Landing() {
             <p className="mt-5 max-w-md text-pretty text-sm leading-relaxed text-white/80 [text-shadow:0_1px_12px_rgb(0_20_60/0.4)] sm:text-[15px]">{L.lead}</p>
             <div className="mt-9 flex flex-wrap justify-center gap-2.5">
               <ButtonLink href="/start" variant="glass" size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.secondary}</ButtonLink>
-              <ButtonLink href="/learn" size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.start}</ButtonLink>
+              <ButtonLink href="/docs" size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.start}</ButtonLink>
             </div>
           </div>
         </div>
@@ -63,6 +64,9 @@ export default async function Landing() {
       {/* ---------- Supported assets ---------- */}
       <section className="mx-auto max-w-3xl px-4 py-20 text-center sm:py-28">
         <p className="text-sm text-ink-2">{L.worksWith}<br className="hidden sm:block" /> {L.worksWith2}</p>
+        <div className="mt-6 flex justify-center">
+          <BStockMark height={30} />
+        </div>
         <ul className="mt-8 flex flex-wrap items-center justify-center gap-3">
           {ASSETS.map((symbol) => (
             <li key={symbol} title={symbol} className="rounded-full shadow-card">

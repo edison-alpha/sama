@@ -3,8 +3,8 @@ import type { SamaApi } from "./contract";
 import type { Activity, Circle, HistoryPoint, RoundView } from "./types";
 
 /**
- * Live client for sama-backend (Elysia on Bun). Routes and payloads are Venue0's, ported (PRD §18.2); endpoints Venue0
- * did not have are marked NEW. Responses are typed by lib/api/types.ts, generated from sama-packages/api-types.
+ * Live client for sama-backend (Elysia on Bun), one method per API route (PRD §18.2). Responses are typed by
+ * lib/api/types.ts, generated from sama-packages/api-types.
  */
 
 const BASE = process.env.NEXT_PUBLIC_SAMA_API_URL ?? "";
@@ -54,25 +54,25 @@ function permitTypedData(permit: Permit): TypedDataDefinition {
 const id = (r: RoundView) => r.round.id;
 
 export const liveApi: SamaApi = {
-  assets: () => call("/api/assets"), // NEW
-  home: () => call("/api/me/home"), // NEW: aggregates portfolio, target, drift, circles, pending rounds, activity
+  assets: () => call("/api/assets"),
+  home: () => call("/api/me/home"), // aggregates portfolio, target, drift, circles, pending rounds, activity
   portfolio: () => call("/api/me/portfolio"),
   syncTransfers: async () => {
     await call("/api/me/transfers/sync", { body: {} });
   },
-  portfolioHistory: async (range) => (await call<{ points: HistoryPoint[] }>(`/api/me/portfolio/history?range=${range}`)).points, // NEW
+  portfolioHistory: async (range) => (await call<{ points: HistoryPoint[] }>(`/api/me/portfolio/history?range=${range}`)).points,
   previewTarget: (target) => call("/api/me/target/preview", { body: target }),
   saveTarget: async (target) => {
     await call("/api/me/target", { body: target });
   },
   circles: async () => (await call<{ circles: Circle[] }>("/api/circles")).circles,
-  circle: (circleId) => call(`/api/circles/${circleId}`), // NEW: GET on the existing path
+  circle: (circleId) => call(`/api/circles/${circleId}`),
   joinCircle: async (circleId, invite) => {
     await call(`/api/circles/${circleId}/join`, { body: invite ? { invite } : {} });
   },
   createCircle: (input) => call("/api/circles", { body: input }),
   invite: (circleId) => call(`/api/circles/${circleId}/invite`, { body: {} }),
-  inviteInfo: (code) => call(`/api/invites/${encodeURIComponent(code)}`), // NEW, public
+  inviteInfo: (code) => call(`/api/invites/${encodeURIComponent(code)}`), // public
   openRound: (circleId) => call(`/api/circles/${circleId}/round`, { body: {} }),
   round: (roundId) => call(`/api/rounds/${roundId}`),
 
@@ -114,7 +114,7 @@ export const liveApi: SamaApi = {
     await call(`/api/rounds/${id(round)}/residual`, { body: { choice, engineDecision: round.you.recommendation?.decision ?? "NONE" } });
   },
 
-  /** PancakeSwap replaces Uniswap behind the same prepare → build → record steps. */
+  /** Leftover swap on PancakeSwap in three steps: prepare → build → record. */
   async swapResidual(round, signer, say, words) {
     say(words.quote);
     const path = `/api/rounds/${id(round)}/residual/swap`;
@@ -131,9 +131,20 @@ export const liveApi: SamaApi = {
     await call(path, { body: { step: "record", txHash } });
   },
 
-  activity: async () => (await call<{ activity: Activity[] }>("/api/me/activity")).activity, // NEW
+  activity: async (query = {}) => {
+    const qs = new URLSearchParams();
+    if (query.cursor) qs.set("cursor", query.cursor);
+    if (query.group) qs.set("group", query.group);
+    if (query.range && query.range !== "all") qs.set("range", query.range);
+    const page = await call<{ activity: Activity[]; nextCursor: string | null }>(`/api/me/activity?${qs}`);
+    return { items: page.activity, nextCursor: page.nextCursor };
+  },
   settings: () => call("/api/me/settings"),
   saveSettings: async (settings) => {
     await call("/api/me/settings", { body: settings });
+  },
+  onboarding: async () => (await call<{ onboardingDone: boolean }>("/api/me/onboarding")).onboardingDone,
+  setOnboardingDone: async (done) => {
+    await call("/api/me/onboarding", { body: { done } });
   },
 };

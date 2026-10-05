@@ -12,7 +12,7 @@ export function PublicPage({ d, children }: { d: Dict; children: React.ReactNode
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-5 sm:px-8">
         <BrandLogo className="h-8 sm:h-9" />
         <nav className="hidden items-center gap-1 rounded-full bg-surface-2 p-1 text-sm font-medium sm:flex">
-          <Link href="/learn" className="rounded-full px-4 py-2 hover:bg-surface">{d.nav.learn}</Link>
+          <Link href="/docs" className="rounded-full px-4 py-2 hover:bg-surface">{d.nav.learn}</Link>
           <Link href="/proof" className="rounded-full px-4 py-2 hover:bg-surface">{d.nav.proof}</Link>
           <Link href="/demo" className="rounded-full px-4 py-2 hover:bg-surface">{d.nav.demo}</Link>
         </nav>

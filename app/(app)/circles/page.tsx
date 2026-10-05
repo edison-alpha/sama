@@ -19,7 +19,7 @@ export default function CirclesPage() {
   const { data, error } = useApi(() => sama.circles(), [], { pollMs: 10_000 });
   const [tab, setTab] = useState<"mine" | "explore">("mine");
   const [creating, setCreating] = useState(false);
-  // Home's "Create a Circle" tile and the old /circles/new route land here with ?create=1.
+  // Home's new-Circle tile and the old /circles/new route land here with ?create=1.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("create") === "1") {
       setCreating(true);

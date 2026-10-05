@@ -1,4 +1,7 @@
+import { activityGroup } from "@/lib/activity";
 import type { SamaApi } from "./contract";
+
+const PAGE_SIZE = 30;
 import { DEMO_ACTIVITY, DEMO_ASSETS, DEMO_CIRCLES, DEMO_HOLDINGS, DEMO_SETTLEMENT, DEMO_TARGET, VERIFIER_CHECKS } from "./demo-data";
 import type { Activity, Circle, Drift, HistoryPoint, HistoryRange, Home, Portfolio, RoundState, RoundView, Settings, Target, TargetPreview } from "./types";
 
@@ -378,9 +381,14 @@ export const mockApi: SamaApi = {
     await wait(120);
     return history(range);
   },
-  async activity() {
+  async activity(query = {}) {
     await wait(120);
-    return load().activity;
+    const days = query.range === "week" ? 7 : query.range === "month" ? 30 : null;
+    const since = days ? Date.now() - days * 86_400_000 : 0;
+    const matching = load().activity.filter((a) => (!query.group || activityGroup(a.kind) === query.group) && new Date(a.createdAt).getTime() >= since);
+    // The mock's cursor is just the offset; the real API uses a time-and-id cursor.
+    const start = query.cursor ? Number(query.cursor) : 0;
+    return { items: matching.slice(start, start + PAGE_SIZE), nextCursor: start + PAGE_SIZE < matching.length ? String(start + PAGE_SIZE) : null };
   },
   async settings() {
     return load().settings;
@@ -389,6 +397,10 @@ export const mockApi: SamaApi = {
     load().settings = settings;
     persist();
   },
+  async onboarding() {
+    return false;
+  },
+  async setOnboardingDone() {},
 };
 
 /** The live round's displayed state and countdown come from the derived round, not the stored summary. */

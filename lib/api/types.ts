@@ -162,7 +162,7 @@ export type Home = {
 
 export type Settings = { notify: { email: boolean; telegram: boolean; inApp: boolean }; residualStyle: ResidualStyle; costCapBps: number; gasSponsorship: boolean };
 
-export type Session = { address: `0x${string}`; demo: boolean };
+export type Session = { address: `0x${string}`; demo: boolean; onboardingDone: boolean };
 
 /** Public evidence for /proof: the deployed contract and every settled round. No participant addresses. */
 export type Proof = {

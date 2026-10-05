@@ -2,7 +2,9 @@
 
 import { m } from "motion/react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+
+const TOKENS_PER_PAGE = 20;
 import { ActivityRow } from "@/components/activity/activity-row";
 import { NextStepCard } from "@/components/home/next-step-card";
 import { IconAddFill, IconArrowRight, IconGroupFill, IconPlayFill, IconSend, IconSwap, IconTargetFill } from "@/components/icons";
@@ -28,6 +30,8 @@ export default function HomePage() {
   const { d, fmt, locale } = useI18n();
   const { data: h, error, refresh } = useApi(() => sama.home(), [], { pollMs: 4_000 });
   const { data: assets } = useApi(() => sama.assets(), []);
+  // Home shows 20 tokens; "Show more" adds 20 at a time, only while there are more to show.
+  const [tokenLimit, setTokenLimit] = useState(TOKENS_PER_PAGE);
 
   if (!h) return error ? <ErrorNote action={<button className="underline" onClick={() => void refresh()}>{d.common.retry}</button>}>{error}</ErrorNote> : <PageSkeleton />;
 
@@ -75,7 +79,7 @@ export default function HomePage() {
           <ActionTile href="/circles" icon={<IconGroupFill size={22} />}>{a.circles}</ActionTile>
           <ActionTile href="/circles?create=1" icon={<IconAddFill size={22} />}>{a.create}</ActionTile>
           {/* Desktop shows four tiles, so Send takes the place of How it works there; phones keep all five in the scroller. */}
-          <ActionTile href="/learn" icon={<IconPlayFill size={22} />} className="sm:hidden">{a.learn}</ActionTile>
+          <ActionTile href="/docs" icon={<IconPlayFill size={22} />} className="sm:hidden">{a.learn}</ActionTile>
           <ActionTile href="/portfolio?send=1" icon={<IconSend size={22} />}>{a.send}</ActionTile>
           <span className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
         </div>
@@ -90,8 +94,12 @@ export default function HomePage() {
           <SectionTitle id="tokens-title" title={d.portfolio.tabs.tokens} sub={count} />
           {h.portfolio.ok && (
             <>
-              <TokenTable positions={h.portfolio.positions} totalUsd={h.portfolio.totalUsd} drift={drift} assets={assets ?? undefined} compact limit={6} />
-              <PillLink href="/portfolio">{d.home.viewTokens}</PillLink>
+              <TokenTable positions={h.portfolio.positions} totalUsd={h.portfolio.totalUsd} drift={drift} assets={assets ?? undefined} compact limit={tokenLimit} />
+              {h.portfolio.positions.length > tokenLimit && (
+                <button type="button" onClick={() => setTokenLimit((n) => n + TOKENS_PER_PAGE)} className="mt-4 inline-flex h-10 items-center gap-2 rounded-full border border-line px-4 text-sm font-medium text-ink transition-colors hover:bg-surface-2">
+                  {d.home.showMore}
+                </button>
+              )}
             </>
           )}
         </m.section>

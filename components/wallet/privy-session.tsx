@@ -6,6 +6,7 @@ import { createPublicClient, createWalletClient, custom, http, type Hex, type Ty
 import { API_MODE } from "@/lib/api";
 import type { Signer } from "@/lib/api/contract";
 import { SAMA_CHAIN_ID, samaChain } from "@/lib/chain";
+import { clearOnboardingCache, onboardingDone as localOnboardingDone } from "@/lib/onboarding";
 import { SessionContext, demoSigner, type SessionState, type SignInMethod } from "./session";
 
 const BASE = process.env.NEXT_PUBLIC_SAMA_API_URL ?? "";
@@ -61,6 +62,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
 
   // Live mode only: the address the Sama API has bound to this browser's session cookie.
   const [bound, setBound] = useState<`0x${string}` | null>(null);
+  const [boundOnboardingDone, setBoundOnboardingDone] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inflight = useRef<string | null>(null);
 
@@ -73,9 +75,10 @@ function Bridge({ children }: { children: React.ReactNode }) {
         const token = await getAccessToken();
         if (!token) throw new Error("Sign-in expired. Please sign in again.");
         const r = await fetch(`${BASE}/api/session`, { method: "POST", credentials: "include", headers: { "content-type": "application/json" }, body: JSON.stringify({ token, address }) });
-        const data = (await r.json()) as { user?: { address: `0x${string}` }; error?: string };
+        const data = (await r.json()) as { user?: { address: `0x${string}`; onboardingDone?: boolean }; error?: string };
         if (!r.ok || !data.user) throw new Error(data.error ?? "Sign-in failed");
         setBound(data.user.address);
+        setBoundOnboardingDone(data.user.onboardingDone === true);
         setError(null);
       } catch (e) {
         inflight.current = null;
@@ -110,7 +113,9 @@ function Bridge({ children }: { children: React.ReactNode }) {
   }, [ensureWallet]);
 
   const signedIn = ready && authenticated && address !== null;
-  const session = !signedIn ? null : LIVE ? (bound?.toLowerCase() === address.toLowerCase() ? { address: bound, demo: false } : null) : { address, demo: true };
+  const session = !signedIn ? null : LIVE
+    ? (bound?.toLowerCase() === address.toLowerCase() && boundOnboardingDone !== null ? { address: bound, demo: false, onboardingDone: boundOnboardingDone } : null)
+    : { address, demo: true, onboardingDone: localOnboardingDone(address) };
 
   const value = useMemo<SessionState>(
     () => ({
@@ -120,7 +125,9 @@ function Bridge({ children }: { children: React.ReactNode }) {
       signIn: (method?: SignInMethod) => login(method ? { loginMethods: [method] } : undefined),
       signOut: () => {
         if (LIVE) void fetch(`${BASE}/api/session`, { method: "DELETE", credentials: "include" });
+        clearOnboardingCache(address);
         setBound(null);
+        setBoundOnboardingDone(null);
         inflight.current = null;
         void logout();
       },
@@ -132,7 +139,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
       error,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [session?.address, session?.demo, ready, signedIn, login, logout, signer, wallet, ensureWallet, error],
+    [session?.address, session?.demo, session?.onboardingDone, ready, signedIn, login, logout, signer, wallet, ensureWallet, error, address],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

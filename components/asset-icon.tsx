@@ -8,7 +8,7 @@ import { cx } from "@/utils/cx";
  * Asset logos. bStocks use the issuer's logo from /assets/<SYMBOL>.png (downloaded by
  * sama-packages/scripts/assets/build-allowlist.mjs). Otherwise Iconify: crypto uses the full-colour `cryptocurrency-color` set;
  * stocks use `simple-icons` marks on a round chip in the brand colour, as in the landing design. Tokenized-stock
- * symbols ("tNVDA", "NVDAB") map to their underlying ticker. Unknown symbols fall back to a monogram.
+ * symbols ("NVDAB") map to their underlying ticker. Unknown symbols fall back to a monogram.
  */
 type Spec = { icon: string | null; bg?: string; fg?: string; text?: string };
 
@@ -39,7 +39,7 @@ const STOCKS: Record<string, Spec> = {
 
 function specFor(symbol: string): Spec | null {
   const s = symbol.toUpperCase();
-  return CRYPTO[s] ?? STOCKS[s] ?? STOCKS[s.replace(/^T(?=[A-Z]{2,5}$)/, "")] ?? STOCKS[s.replace(/B$/, "")] ?? null;
+  return CRYPTO[s] ?? STOCKS[s] ?? STOCKS[s.replace(/B$/, "")] ?? null;
 }
 
 export function AssetIcon({ symbol, size = 28, className }: { symbol: string; size?: number; className?: string }) {
