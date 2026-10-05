@@ -149,7 +149,7 @@ export const id: Dict = {
     viewTokens: "Lihat semua token",
     chart: { label: "Nilai portofolio dari waktu ke waktu", empty: "Belum ada riwayat nilai.", demoNote: "Riwayat contoh untuk demo, bukan performa aslimu.", ranges: { "1H": "1J", "1D": "1H", "1W": "1M", "1M": "1B", "1Y": "1T", ALL: "Semua" }, period: { "1H": "sejam terakhir", "1D": "hari ini", "1W": "seminggu terakhir", "1M": "sebulan terakhir", "1Y": "setahun terakhir", ALL: "sepanjang waktu" } },
     recentSub: "{n} dalam 7 hari terakhir",
-    actions: { target: "Atur target", circles: "Cari Circle", create: "Buat Circle", learn: "Cara kerja" },
+    actions: { target: "Atur target", circles: "Cari Circle", create: "Buat Circle", learn: "Cara kerja", send: "Kirim" },
   },
   portfolio: {
     title: "Portofolio",

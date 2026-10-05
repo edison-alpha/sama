@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { ActivityRow } from "@/components/activity/activity-row";
 import { NextStepCard } from "@/components/home/next-step-card";
 import { IconArrowRight, IconCircles, IconPlay, IconPlus, IconSwap, IconTarget } from "@/components/icons";
+import { cx } from "@/utils/cx";
 import { Stagger, rise } from "@/components/motion";
 import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
 import { ValueChart } from "@/components/portfolio/value-chart";
@@ -73,7 +74,9 @@ export default function HomePage() {
           <ActionTile href="/portfolio?tab=target" icon={<IconTarget size={22} />}>{a.target}</ActionTile>
           <ActionTile href="/circles" icon={<IconCircles size={22} />}>{a.circles}</ActionTile>
           <ActionTile href="/circles?create=1" icon={<IconPlus size={22} />}>{a.create}</ActionTile>
-          <ActionTile href="/learn" icon={<IconPlay size={22} />}>{a.learn}</ActionTile>
+          {/* Desktop shows four tiles, so Send takes the place of How it works there; phones keep all five in the scroller. */}
+          <ActionTile href="/learn" icon={<IconPlay size={22} />} className="sm:hidden">{a.learn}</ActionTile>
+          <ActionTile href="/portfolio?send=1" icon={<IconSwap size={22} />}>{a.send}</ActionTile>
           <span className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
         </div>
       </m.section>
@@ -146,9 +149,9 @@ function SectionTitle({ id, title, sub }: { id: string; title: string; sub?: str
 }
 
 /** Quick action in the brand tint, like the Send/Receive tiles in wallet apps. */
-function ActionTile({ href, icon, children }: { href: string; icon: ReactNode; children: ReactNode }) {
+function ActionTile({ href, icon, children, className }: { href: string; icon: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <Link href={href} className="flex h-24 w-32 shrink-0 snap-start flex-col justify-between rounded-[20px] bg-accent-soft p-4 sm:h-28 sm:w-auto text-accent transition-[filter,transform] hover:brightness-110 active:scale-[0.98]">
+    <Link href={href} className={cx("flex h-24 w-32 shrink-0 snap-start flex-col justify-between rounded-[20px] bg-accent-soft p-4 sm:h-28 sm:w-auto text-accent transition-[filter,transform] hover:brightness-110 active:scale-[0.98]", className)}>
       {icon}
       <span className="text-base font-semibold">{children}</span>
     </Link>
