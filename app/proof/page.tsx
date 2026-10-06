@@ -1,6 +1,4 @@
 import { PublicPage } from "@/components/landing/public-page";
-import { ButtonLink } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/states";
 import type { Proof } from "@/lib/api/types";
 import { addressUrl, txUrl } from "@/lib/chain";
 import { fmt } from "@/lib/i18n/dict";
@@ -60,12 +58,10 @@ export default async function ProofPage() {
         </dl>
       </section>
 
-      <h2 className="mt-12 text-2xl font-semibold tracking-tight">{p.rounds}</h2>
-      {!proof || proof.rounds.length === 0 ? (
-        <div className="mt-4">
-          <EmptyState title={p.none} body={proof ? p.noneBody : p.offline} action={<ButtonLink href="/demo" variant="secondary">{d.nav.demo}</ButtonLink>} />
-        </div>
-      ) : (
+      {/* Only once something has settled: an empty "no rounds yet" box adds nothing to the evidence above. */}
+      {proof && proof.rounds.length > 0 && (
+        <>
+        <h2 className="mt-12 text-2xl font-semibold tracking-tight">{p.rounds}</h2>
         <ul className="mt-4 grid gap-3">
           {proof.rounds.map((r) => (
             <li key={r.roundId} className="rounded-[20px] border border-line p-5">
@@ -87,6 +83,7 @@ export default async function ProofPage() {
             </li>
           ))}
         </ul>
+        </>
       )}
     </PublicPage>
   );
