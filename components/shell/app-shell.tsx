@@ -8,7 +8,7 @@ import { BrandLogo, Mark } from "@/components/brand";
 import { IconCircles, IconClock, IconHome, IconLayers, IconPie, IconSidebar } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { page, spring } from "@/components/motion";
-import { PageSkeleton } from "@/components/ui/states";
+import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { useSession } from "@/components/wallet/session";
 import { UserAvatar } from "@/components/wallet/user-avatar";
 import { isTestnet } from "@/lib/chain";
@@ -118,7 +118,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             // Keyed by route so each screen plays its entrance; cards and tiles inside stagger in (see `rise`).
             <m.div key={pathname} initial="hidden" animate="show" variants={page}>{children}</m.div>
           ) : (
-            <PageSkeleton />
+            <RouteSkeleton pathname={pathname} />
           )}
         </main>
       </div>

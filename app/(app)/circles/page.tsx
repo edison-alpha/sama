@@ -7,7 +7,8 @@ import { CreateCircleModal } from "@/components/circles/create-circle-modal";
 import { LocaleButton } from "@/components/shell/preferences";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/segmented";
-import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
+import { CirclesSkeleton } from "@/components/skeletons/circles-skeleton";
+import { EmptyState, ErrorNote } from "@/components/ui/states";
 import { sama } from "@/lib/api";
 import { useApi } from "@/lib/api/use-api";
 import { useI18n } from "@/lib/i18n/provider";
@@ -26,7 +27,7 @@ export default function CirclesPage() {
       window.history.replaceState(null, "", "/circles");
     }
   }, []);
-  if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
+  if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <CirclesSkeleton />;
 
   const mine = data.filter((c) => c.role);
   const explore = data.filter((c) => !c.role);

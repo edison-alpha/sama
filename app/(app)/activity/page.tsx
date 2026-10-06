@@ -10,7 +10,8 @@ import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
 import { IconArrowRight, IconCalendar, IconExternal } from "@/components/icons";
 import { Stagger, rise } from "@/components/motion";
 import { WalletHeader } from "@/components/portfolio/wallet-header";
-import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
+import { ActivitySkeleton } from "@/components/skeletons/activity-skeleton";
+import { EmptyState, ErrorNote } from "@/components/ui/states";
 import { activityLine } from "@/lib/activity";
 import { EXPLORER, addressUrl, txUrl } from "@/lib/chain";
 import { AssetIcon } from "@/components/asset-icon";
@@ -67,7 +68,7 @@ export default function ActivityPage() {
     return () => io.disconnect();
   }, [loadMore]);
 
-  if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
+  if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <ActivitySkeleton />;
 
   const ad = d.activity;
   const types = ad.types as Record<string, string>;
