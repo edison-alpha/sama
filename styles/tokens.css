@@ -204,3 +204,23 @@
   --radius-card: 28px;
   --radius-panel: 40px;
 }
+
+/* shadcn-style raw variables for registry components (beui.dev) that read var(--…) directly rather than through a
+   utility class. Aliases of the tokens above; no new colours. --chart-ink-l is the text lightness cap the returns
+   calendar uses: it follows Sama's theme (data-theme or system), which Tailwind's dark: variant would not. */
+:root {
+  --foreground: var(--ink);
+  --background: var(--app-bg);
+  --success: var(--ok);
+  --destructive: var(--danger);
+  --border-strong: var(--line-strong);
+  --chart-ink-l: 0.5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --chart-ink-l: 1;
+  }
+}
+:root[data-theme="dark"] {
+  --chart-ink-l: 1;
+}

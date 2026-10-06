@@ -149,7 +149,7 @@ export const en = {
     tokensCount: "{n} tokens",
     viewTokens: "View all tokens",
     showMore: "Show more",
-    chart: { label: "Portfolio value over time", empty: "No value history yet.", demoNote: "Sample history for the demo, not your real performance.", ranges: { "1H": "1H", "1D": "1D", "1W": "1W", "1M": "1M", "1Y": "1Y", ALL: "All" }, period: { "1H": "past hour", "1D": "today", "1W": "past week", "1M": "past month", "1Y": "past year", ALL: "all time" } },
+    chart: { label: "Portfolio value over time", viewLabel: "Chart or calendar", views: { chart: "Chart", calendar: "Calendar" }, calendarEmpty: "Monthly returns appear once Sama has recorded your wallet value for a while.", calendarNote: "Month-by-month change in total wallet value, from Sama's own records. Deposits and withdrawals count too, so this is not pure investment return. Empty months have no record.", empty: "No value history yet.", demoNote: "Sample history for the demo, not your real performance.", ranges: { "1H": "1H", "1D": "1D", "1W": "1W", "1M": "1M", "1Y": "1Y", ALL: "All" }, period: { "1H": "past hour", "1D": "today", "1W": "past week", "1M": "past month", "1Y": "past year", ALL: "all time" } },
     recentSub: "{n} in the last 7 days",
     actions: { target: "Set target", circles: "Pick a Circle", create: "Start a new Circle", learn: "Guide", send: "Send" },
   },

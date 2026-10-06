@@ -148,7 +148,7 @@ export const id: Dict = {
     tokensCount: "{n} token",
     viewTokens: "Lihat semua token",
     showMore: "Tampilkan lebih banyak",
-    chart: { label: "Nilai portofolio dari waktu ke waktu", empty: "Belum ada riwayat nilai.", demoNote: "Riwayat contoh untuk demo, bukan performa aslimu.", ranges: { "1H": "1J", "1D": "1H", "1W": "1M", "1M": "1B", "1Y": "1T", ALL: "Semua" }, period: { "1H": "sejam terakhir", "1D": "hari ini", "1W": "seminggu terakhir", "1M": "sebulan terakhir", "1Y": "setahun terakhir", ALL: "sepanjang waktu" } },
+    chart: { label: "Nilai portofolio dari waktu ke waktu", viewLabel: "Chart atau kalender", views: { chart: "Chart", calendar: "Kalender" }, calendarEmpty: "Return bulanan muncul setelah Sama mencatat nilai wallet-mu beberapa waktu.", calendarNote: "Perubahan nilai total wallet per bulan, dari catatan Sama sendiri. Setoran dan penarikan ikut terhitung, jadi ini bukan murni return investasi. Bulan kosong berarti tidak ada catatan.", empty: "Belum ada riwayat nilai.", demoNote: "Riwayat contoh untuk demo, bukan performa aslimu.", ranges: { "1H": "1J", "1D": "1H", "1W": "1M", "1M": "1B", "1Y": "1T", ALL: "Semua" }, period: { "1H": "sejam terakhir", "1D": "hari ini", "1W": "seminggu terakhir", "1M": "sebulan terakhir", "1Y": "setahun terakhir", ALL: "sepanjang waktu" } },
     recentSub: "{n} dalam 7 hari terakhir",
     actions: { target: "Atur target", circles: "Cari Circle", create: "Buat Circle", learn: "Panduan", send: "Kirim" },
   },
