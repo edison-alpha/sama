@@ -43,6 +43,25 @@ export type Target = { weights: Record<string, number>; costCapBps: number; resi
 
 export type TargetPreview = { ok: boolean; problems: string[]; trades: Array<{ symbol: string; side: Side; amountTokens: number; valueUsd: number }> };
 
+/** What the AI helper made of a sentence: editable percent weights, or the reasons it could not. */
+export type TargetSuggestion = { ok: true; weights: Record<string, number> } | { ok: false; problems: string[] };
+
+/** What the assistant can ask the user to confirm. The server never runs these: the app does, on a click. */
+export type AssistantAction =
+  | { type: "apply_target"; weights: Record<string, number> }
+  | { type: "join_circle"; circleId: string; name: string; needsInvite: boolean }
+  | { type: "open"; path: string; label: string };
+
+/** Rich results shown under the assistant's words; every figure in them is read from the server. */
+export type AssistantBlock =
+  | { type: "prices"; items: Array<{ symbol: string; name: string; priceUsd: number }>; missing: string[] }
+  | { type: "circles"; circles: Array<{ id: string; name: string; description: string; memberCount: number; assetSymbols: string[]; role: "ORGANIZER" | "MEMBER" | null }> };
+
+/** One turn of the chat, sent back each time for context. */
+export type AssistantTurn = { role: "user" | "assistant"; content: string };
+
+export type AssistantReply = { text: string; blocks: AssistantBlock[]; actions: AssistantAction[] };
+
 /** Time windows for the portfolio value chart. */
 export type HistoryRange = "1H" | "1D" | "1W" | "1M" | "1Y" | "ALL";
 

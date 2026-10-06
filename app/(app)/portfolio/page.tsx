@@ -4,6 +4,7 @@ import { m } from "motion/react";
 import { useEffect, useState } from "react";
 import { Stagger, rise, spring } from "@/components/motion";
 import { TargetEditor } from "@/components/portfolio/target-editor";
+import { APPLY_TARGET_EVENT } from "@/components/ai/apply-target";
 import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
 import { ReceiveModal } from "@/components/wallet/receive-modal";
 import { SendTokenModal } from "@/components/wallet/send-token";
@@ -34,6 +35,13 @@ export default function PortfolioPage() {
   // Home's "Set target" tile links to ?tab=target. Read once on mount so the page needs no Suspense boundary.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("tab") === "target") setTab("target");
+  }, []);
+
+  // The AI assistant's "Apply to my target" opens the Target tab (the editor then picks the weights up itself).
+  useEffect(() => {
+    const open = () => setTab("target");
+    window.addEventListener(APPLY_TARGET_EVENT, open);
+    return () => window.removeEventListener(APPLY_TARGET_EVENT, open);
   }, []);
 
   if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;

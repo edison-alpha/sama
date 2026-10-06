@@ -132,7 +132,7 @@ function preview(weights: Record<string, number>): TargetPreview {
       const delta = want - have;
       return { symbol, side: delta < 0 ? ("SELL" as const) : ("BUY" as const), valueUsd: Math.abs(delta), amountTokens: Math.abs(delta) / (price(symbol) || 1) };
     })
-    .filter((t) => t.valueUsd >= 1)
+    .filter((t) => t.valueUsd >= 0.01)
     .sort((a, b) => b.valueUsd - a.valueUsd);
   return { ok: problems.length === 0, problems, trades };
 }
@@ -266,6 +266,15 @@ export const mockApi: SamaApi = {
   async portfolio() {
     await wait(150);
     return { portfolio: portfolioNow(), target: load().target };
+  },
+  async agentEnabled() {
+    return false;
+  },
+  async assist() {
+    return { text: "The AI assistant needs the live API.", blocks: [], actions: [] };
+  },
+  async suggestTarget() {
+    return { ok: false, problems: ["The AI helper needs the live API."] };
   },
   async previewTarget(target) {
     await wait(250);

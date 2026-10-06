@@ -62,6 +62,9 @@ export const liveApi: SamaApi = {
   },
   portfolioHistory: async (range) => (await call<{ points: HistoryPoint[] }>(`/api/me/portfolio/history?range=${range}`)).points,
   previewTarget: (target) => call("/api/me/target/preview", { body: target }),
+  agentEnabled: async () => (await call<{ enabled: boolean }>("/api/agent")).enabled,
+  suggestTarget: (instruction) => call("/api/me/target/suggest", { body: { instruction } }),
+  assist: (messages) => call("/api/me/assistant", { body: { messages } }),
   saveTarget: async (target) => {
     await call("/api/me/target", { body: target });
   },
