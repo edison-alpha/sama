@@ -8,7 +8,6 @@ import type { Asset, HistoryPoint } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
 import { percent, usd } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
-import { fetchMarketStats, fetchPriceHistory } from "@/lib/market";
 import { cx } from "@/utils/cx";
 
 let assetsOnce: Promise<Asset[]> | undefined;
@@ -53,8 +52,8 @@ export function TokenCard({ symbol, name, priceUsd, onNavigate, className }: { s
   const { data } = useApi(async () => {
     const asset = (await assetList()).find((a) => a.symbol === symbol);
     if (!asset) return null;
-    const stats = await fetchMarketStats(asset.address);
-    const points = stats.poolAddress ? await fetchPriceHistory(stats.poolAddress, asset.address, "1D") : [];
+    const stats = await sama.marketStats(asset.address);
+    const points = stats.poolAddress ? await sama.marketHistory(asset.address, "1D") : [];
     return { asset, stats, points };
   }, [symbol]);
 

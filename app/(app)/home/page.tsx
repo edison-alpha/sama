@@ -16,7 +16,8 @@ import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { Badge, stateTone } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { IconChip } from "@/components/ui/card";
-import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
+import { HomeSkeleton } from "@/components/skeletons/home-skeleton";
+import { EmptyState, ErrorNote } from "@/components/ui/states";
 import { sama } from "@/lib/api";
 import { useApi } from "@/lib/api/use-api";
 import { percent } from "@/lib/format";
@@ -33,7 +34,7 @@ export default function HomePage() {
   // Home shows 20 tokens; "Show more" adds 20 at a time, only while there are more to show.
   const [tokenLimit, setTokenLimit] = useState(TOKENS_PER_PAGE);
 
-  if (!h) return error ? <ErrorNote action={<button className="underline" onClick={() => void refresh()}>{d.common.retry}</button>}>{error}</ErrorNote> : <PageSkeleton />;
+  if (!h) return error ? <ErrorNote action={<button className="underline" onClick={() => void refresh()}>{d.common.retry}</button>}>{error}</ErrorNote> : <HomeSkeleton />;
 
   const drift = h.target ? h.drift : null;
   const offTarget = h.totalDriftPct > 2;

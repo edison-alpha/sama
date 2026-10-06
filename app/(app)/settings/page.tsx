@@ -6,7 +6,7 @@ import { IconAlert, IconArrowLeft, IconCheck, IconCheckCircle, IconCopy, IconGas
 import { Stagger, rise } from "@/components/motion";
 import { useTheme } from "@/components/shell/preferences";
 import { ListRow, ListSection, ScreenHeader, SelectRow, Toggle } from "@/components/ui/list";
-import { PageSkeleton } from "@/components/ui/states";
+import { SettingsSkeleton } from "@/components/skeletons/settings-skeleton";
 import { useSession } from "@/components/wallet/session";
 import { UserAvatar } from "@/components/wallet/user-avatar";
 import { API_MODE, sama } from "@/lib/api";
@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const [theme, setTheme] = useTheme();
   const [copied, setCopied] = useState(false);
   const { data: s, refresh } = useApi(() => sama.settings(), []);
-  if (!s || !session) return <PageSkeleton />;
+  if (!s || !session) return <SettingsSkeleton />;
 
   const st = d.settings;
   const update = async (patch: Partial<Settings>) => {

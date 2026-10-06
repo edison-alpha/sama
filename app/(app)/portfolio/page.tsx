@@ -12,7 +12,8 @@ import { WrapBnbModal } from "@/components/wallet/wrap-bnb";
 import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { Button } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
-import { ErrorNote, PageSkeleton } from "@/components/ui/states";
+import { PortfolioSkeleton } from "@/components/skeletons/portfolio-skeleton";
+import { ErrorNote } from "@/components/ui/states";
 import { sama } from "@/lib/api";
 import type { Drift } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
@@ -46,7 +47,7 @@ export default function PortfolioPage() {
     return () => window.removeEventListener(APPLY_TARGET_EVENT, open);
   }, []);
 
-  if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
+  if (!data) return error ? <ErrorNote>{error}</ErrorNote> : <PortfolioSkeleton />;
   const [{ portfolio, target }, assets] = data;
 
   // Same shape as Home's drift, built from the saved target, so the table can say what each token needs.
