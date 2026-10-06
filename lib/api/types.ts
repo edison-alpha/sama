@@ -55,6 +55,34 @@ export type HistoryRange = "1H" | "1D" | "1W" | "1M" | "1Y" | "ALL";
 /** One point of total wallet value: `t` in ms since epoch, `usd` the total at that moment. Oldest first. */
 export type HistoryPoint = { t: number; usd: number };
 
+/**
+ * Market data for one token, read from its deepest on-chain pool (GeckoTerminal). Any figure the source does not have
+ * is null, and `poolAddress` is null when the token has no pool, so there is nothing to chart.
+ */
+export type MarketStats = {
+  priceUsd: number | null;
+  marketCapUsd: number | null;
+  fdvUsd: number | null;
+  volume24hUsd: number | null;
+  liquidityUsd: number | null;
+  supply: number | null;
+  poolAddress: string | null;
+  poolName: string | null;
+};
+
+/** One swap in the token's pool, from the token's side: a buy puts it in the trader's wallet, a sell takes it out. */
+export type Trade = {
+  id: string;
+  /** ms since epoch. */
+  at: number;
+  side: "buy" | "sell";
+  amount: number;
+  priceUsd: number;
+  valueUsd: number;
+  tx: string;
+  trader: string;
+};
+
 export type Drift = { symbol: string; currentPct: number; targetPct: number };
 
 export type Visibility = "PUBLIC" | "INVITE_ONLY" | "PRIVATE";

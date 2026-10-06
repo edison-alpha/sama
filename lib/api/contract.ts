@@ -1,5 +1,5 @@
 import type { Hex, TypedDataDefinition } from "viem";
-import type { AssistantResponse, ChatDetail, ChatSummary, Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, InviteInfo, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview, TargetSuggestion } from "./types";
+import type { AssistantResponse, ChatDetail, ChatSummary, Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, InviteInfo, MarketStats, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, Trade, TargetPreview, TargetSuggestion } from "./types";
 
 export type ActivityQuery = { cursor?: string | null; group?: "rounds" | "circles" | "targets" | "leftovers" | "transfers" | null; range?: "all" | "week" | "month" };
 export type ActivityPage = { items: Activity[]; nextCursor: string | null };
@@ -34,6 +34,12 @@ export type SamaApi = {
   portfolio(): Promise<{ portfolio: Portfolio; target: Target | null }>;
   /** Total wallet value over a time window, oldest first; the last point is the current total. */
   portfolioHistory(range: HistoryRange): Promise<HistoryPoint[]>;
+  /** Price, size and pool of a listed token (by address or symbol). Needs no session. */
+  marketStats(token: string): Promise<MarketStats>;
+  /** The token's price over a window, oldest first. Empty when it has no pool. */
+  marketHistory(token: string, range: HistoryRange): Promise<HistoryPoint[]>;
+  /** Latest trades in the token's pool from every wallet, newest first (the last 24 hours at most). */
+  marketTrades(token: string): Promise<Trade[]>;
   previewTarget(target: Omit<Target, "savedAt">): Promise<TargetPreview>;
   /** Whether the server has an AI provider configured. The helper box is hidden when it does not. */
   agentEnabled(): Promise<boolean>;

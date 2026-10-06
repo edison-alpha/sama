@@ -1,5 +1,6 @@
 import { encodeFunctionData, erc20Abi, type Hex, type TypedDataDefinition } from "viem";
 import type { SamaApi } from "./contract";
+import { marketApi } from "./market-http";
 import type { Activity, ChatSummary, Circle, HistoryPoint, RoundView } from "./types";
 
 /**
@@ -54,6 +55,7 @@ function permitTypedData(permit: Permit): TypedDataDefinition {
 const id = (r: RoundView) => r.round.id;
 
 export const liveApi: SamaApi = {
+  ...marketApi,
   assets: () => call("/api/assets"),
   home: () => call("/api/me/home"), // aggregates portfolio, target, drift, circles, pending rounds, activity
   portfolio: () => call("/api/me/portfolio"),

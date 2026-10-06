@@ -1,5 +1,6 @@
 import { activityGroup } from "@/lib/activity";
 import type { SamaApi } from "./contract";
+import { marketApi } from "./market-http";
 
 const PAGE_SIZE = 30;
 import { DEMO_ACTIVITY, DEMO_ASSETS, DEMO_CIRCLES, DEMO_HOLDINGS, DEMO_SETTLEMENT, DEMO_TARGET, VERIFIER_CHECKS } from "./demo-data";
@@ -246,6 +247,8 @@ function mutateRound(id: string, patch: Partial<Store["rounds"][string]>) {
 }
 
 export const mockApi: SamaApi = {
+  // Market data has no demo copy: it is real and public, so it comes from the backend's open routes in both modes.
+  ...marketApi,
   async syncTransfers() {},
   async assets() {
     return DEMO_ASSETS;
