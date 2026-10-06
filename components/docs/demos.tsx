@@ -3,6 +3,8 @@
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { Icon } from "@iconify/react";
 import { useEffect, useState, type ReactNode } from "react";
+import { AiAvatar } from "@/components/ai/ai-avatar";
+import { Message, type Entry as AssistantEntry } from "@/components/ai/assistant";
 import { AssetIcon, AssetStack } from "@/components/asset-icon";
 import { DocIcon, type DocIconName } from "@/components/docs/icon";
 import { Panel } from "@/components/landing/scene";
@@ -42,6 +44,8 @@ export function Demo({ demo }: { demo: DemoKey }) {
       return <LeftoverDemo />;
     case "tiers":
       return <TiersDemo />;
+    case "assistant":
+      return <AssistantDemo />;
   }
 }
 
@@ -470,6 +474,88 @@ function TiersDemo() {
           {x.note && <p className="mt-1.5 text-[11px] text-[#ffc178]">{x.note}</p>}
         </Panel>
       ))}
+    </div>
+  );
+}
+
+/* ---------- Assistant ---------- */
+
+type Phase = 0 | 1 | 2 | 3 | 4;
+
+/**
+ * The real chat UI (`Message` from components/ai/assistant.tsx, with live token cards) replaying a short scripted
+ * conversation: ask, the assistant reads through tools, answers with cards, then proposes a target the reader confirms.
+ * The script is fixed; the token card's price and chart are live. Nothing is saved.
+ */
+function AssistantDemo() {
+  const tr = useT();
+  const reduce = useReducedMotion();
+  const [phase, setPhase] = useState<Phase>(reduce ? 3 : 0);
+  const [run, setRun] = useState(0);
+  const [done, setDone] = useState<Record<string, boolean>>({});
+
+  // 0 reading → 1 answer → 2 reading → 3 proposal; 4 is reached only by pressing the proposal's button.
+  useEffect(() => {
+    if (reduce || phase >= 3) return;
+    const t = window.setTimeout(() => setPhase((p) => (p + 1) as Phase), phase === 1 ? 3600 : 1700);
+    return () => window.clearTimeout(t);
+  }, [phase, run, reduce]);
+
+  const ask1: AssistantEntry = { role: "user", content: tr("What is NVDAB worth right now?", "Berapa harga NVDAB sekarang?") };
+  const answer1: AssistantEntry = {
+    role: "assistant",
+    content: tr("Here is NVDAB's live price. Open the card for its chart, size and latest trades.", "Ini harga live NVDAB. Buka kartunya untuk melihat chart, ukuran pasar, dan trade terbarunya."),
+    blocks: [{ type: "prices", items: [{ symbol: "NVDAB", name: "Nvidia Corp", priceUsd: 0 }], missing: [] }],
+  };
+  const ask2: AssistantEntry = { role: "user", content: tr("Make my target safer: 60% cash", "Buat targetku lebih aman: 60% kas") };
+  const answer2: AssistantEntry = {
+    role: "assistant",
+    content: tr(
+      "A safer mix: 60% in USDT and the rest across what you already hold. I checked it against your wallet. Apply it, then review and save it in the editor.",
+      "Campuran yang lebih aman: 60% di USDT dan sisanya di aset yang sudah kamu pegang. Sudah kucek terhadap wallet-mu. Terapkan, lalu periksa dan simpan di editor.",
+    ),
+    actions: [{ type: "apply_target", weights: { USDT: 60, NVDAB: 25, SPYB: 15 } }],
+  };
+
+  const reading = phase === 0 ? ["get_prices"] : phase === 2 ? ["get_overview", "search_assets", "preview_target", "propose_target"] : null;
+  const shown: AssistantEntry[] = [ask1, ...(phase >= 1 ? [answer1] : []), ...(phase >= 2 ? [ask2] : []), ...(phase >= 3 ? [answer2] : [])];
+  const step = phase === 4 ? 4 : phase === 3 ? 3 : phase === 1 ? 2 : 1;
+  const steps = [tr("Ask", "Tanya"), tr("It reads", "Membaca"), tr("It answers", "Menjawab"), tr("It proposes", "Mengusulkan"), tr("You confirm", "Kamu setujui")];
+
+  return (
+    <div className="w-full max-w-[440px]">
+      <ol className="mb-3 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+        {steps.map((s, i) => (
+          <li key={s} className={cx("rounded-full px-2.5 py-1 transition-colors", i <= step ? "bg-white text-black" : "bg-white/12 text-white/70")}>{i + 1}. {s}</li>
+        ))}
+      </ol>
+
+      {/* The app's own surface, so the real components keep their real colours on the dark scene. */}
+      <div className="grid gap-4 rounded-[24px] border border-line bg-[var(--app-bg)] p-4 text-left text-ink shadow-[var(--elev-float)]">
+        <AnimatePresence initial={false}>
+          {shown.map((entry, i) => (
+            <m.div key={`${run}-${i}`} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid">
+              <Message entry={entry} id={`demo-${run}-${i}`} done={done} onRun={(key) => { setDone((x) => ({ ...x, [key]: true })); setPhase(4); }} onClose={() => {}} />
+            </m.div>
+          ))}
+        </AnimatePresence>
+
+        {reading && (
+          <div className="flex items-center gap-2.5">
+            <AiAvatar size={28} thinking />
+            <span className="flex flex-wrap gap-1.5">
+              {reading.map((tool) => <code key={tool} className="rounded-md bg-surface-2 px-1.5 py-0.5 text-[11px] text-ink-2">{tool}</code>)}
+            </span>
+          </div>
+        )}
+
+        {phase === 4 && <p className="rounded-2xl bg-ok/12 px-3.5 py-2.5 text-sm text-ok">{tr("Applied: the target editor opens with these weights for you to check and save. (Demo: nothing was saved.)", "Diterapkan: editor target terbuka dengan bobot ini untuk kamu cek dan simpan. (Demo: tidak ada yang disimpan.)")}</p>}
+        {phase === 3 && <p className="text-xs text-ink-3">{tr("Press the button: nothing changes until you do.", "Tekan tombolnya: tidak ada yang berubah sebelum kamu menekannya.")}</p>}
+      </div>
+
+      <button type="button" onClick={() => { setDone({}); setPhase(reduce ? 3 : 0); setRun((r) => r + 1); }} className="mt-3 text-xs font-semibold text-white/80 underline-offset-4 hover:text-white hover:underline">
+        {tr("Replay", "Putar ulang")}
+      </button>
     </div>
   );
 }

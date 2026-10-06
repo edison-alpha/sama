@@ -12,18 +12,20 @@ export const architecture: DocPage = {
    │             ▼
    │          sama-backend (Elysia on Bun) ── Postgres / PGlite
    │             │  @sama/* packages: assets · oracle · portfolio · matcher
-   │             │                     settlement · verifier · residual · pancakeswap
+   │             │                     settlement · verifier · residual · pancakeswap · market
    │             ├── BNB Chain RPC (executor)      balances, snapshot, simulation
    │             ├── BNB Chain RPC (verifier)      a different provider
-   │             └── Binance Web3 API              stock prices
+   │             ├── Binance Web3 API              stock prices (BNB from the spot ticker)
+   │             ├── CoinGecko on-chain API        token charts, size and latest trades
+   │             └── AI provider (optional)        assistant, target from a sentence
    │
    └── Privy wallet ── EIP-712 signatures, approve, settle() ──▶ SamaSettlement (BSC 56)`, "architecture"),
     h2("repos", "Repositories", "Repositori"),
     table(
       [["Folder", "Folder"], ["What lives there", "Isinya"]],
       [
-        ["`sama-frontend`", ["Next.js app: landing, docs, onboarding, portfolio, Circles, rounds, activity. Talks to the API or runs fully in the browser in mock mode", "Aplikasi Next.js: landing, docs, onboarding, portofolio, Circle, round, aktivitas. Berbicara ke API atau berjalan penuh di browser dalam mode mock"]],
-        ["`sama-backend`", ["Elysia API on Bun: sessions, targets, Circles, the round state machine, leftovers, proof", "API Elysia di Bun: sesi, target, Circle, state machine round, sisa, bukti"]],
+        ["`sama-frontend`", ["Next.js app: landing, docs, onboarding, portfolio, token pages, Circles, rounds, activity, the AI assistant. Talks to the API or runs fully in the browser in mock mode", "Aplikasi Next.js: landing, docs, onboarding, portofolio, halaman token, Circle, round, aktivitas, asisten AI. Berbicara ke API atau berjalan penuh di browser dalam mode mock"]],
+        ["`sama-backend`", ["Elysia API on Bun: sessions, targets, Circles, the round state machine, leftovers, proof, market data, the assistant and its saved chats", "API Elysia di Bun: sesi, target, Circle, state machine round, sisa, bukti, data pasar, asisten dan riwayat chat-nya"]],
         ["`sama-packages`", ["Domain logic as `@sama/*` packages, imported by the backend without a build step", "Logika domain sebagai paket `@sama/*`, diimpor backend tanpa langkah build"]],
         ["`sama-contract`", ["`SamaSettlement.sol`, Foundry tests and the deploy script", "`SamaSettlement.sol`, test Foundry, dan script deploy"]],
       ],
@@ -33,7 +35,7 @@ export const architecture: DocPage = {
       [["Package", "Paket"], ["Responsibility", "Tanggung jawab"]],
       [
         ["`@sama/shared`", ["Chain config, fixed-point math, canonical JSON, logging, deployments", "Konfigurasi chain, matematika fixed-point, JSON kanonik, logging, deployment"]],
-        ["`@sama/assets`", ["Allowlist, on-chain checks, BEP-8056 multipliers, market calendar, TWAP reads", "Allowlist, cek on-chain, pengali BEP-8056, kalender pasar, pembacaan TWAP"]],
+        ["`@sama/assets`", ["Allowlist (bStocks, WBNB, USDT), on-chain checks, BEP-8056 multipliers, market calendar, TWAP reads", "Allowlist (bStocks, WBNB, USDT), cek on-chain, pengali BEP-8056, kalender pasar, pembacaan TWAP"]],
         ["`@sama/binance`, `@sama/oracle`", ["Stock prices and the per-round snapshot with cross-checks", "Harga saham dan snapshot per round dengan cek silang"]],
         ["`@sama/portfolio`", ["Holdings, targets, rebalance deltas, intent limits", "Kepemilikan, target, delta rebalance, batas intent"]],
         ["`@sama/matcher`", ["The production solver (`sama-mmcc-1`)", "Solver produksi (`sama-mmcc-1`)"]],
@@ -43,6 +45,8 @@ export const architecture: DocPage = {
         ["`@sama/verifier`", ["Settlement verification from chain data only", "Verifikasi settlement hanya dari data chain"]],
         ["`@sama/residual`, `@sama/pancakeswap`", ["Leftover recommendations and PancakeSwap quotes and swaps", "Rekomendasi sisa serta quote dan swap PancakeSwap"]],
         ["`@sama/agent`", ["Optional natural-language target interpreter; code resolves every number", "Penerjemah target bahasa alami (opsional); kode yang menentukan setiap angka"]],
+        ["`@sama/market`", ["Token charts, market cap, volume, liquidity and latest trades from CoinGecko's on-chain API, behind one shared cache (TTL, merged requests, a cooldown after 429, the last good answer when the source fails)", "Chart token, kapitalisasi pasar, volume, likuiditas, dan trade terbaru dari API on-chain CoinGecko, di balik satu cache bersama (TTL, request digabung, jeda setelah 429, jawaban terakhir yang valid saat sumber gagal)"]],
+        ["`@sama/tokens`", ["PancakeSwap's token list: names and logos for wallet tokens outside the allowlist", "Daftar token PancakeSwap: nama dan logo untuk token di wallet yang di luar allowlist"]],
         ["`@sama/api-types`", ["Wire types shared by the API and the frontend", "Tipe data yang dipakai bersama API dan frontend"]],
       ],
     ),
@@ -86,7 +90,7 @@ export const api: DocPage = {
         ["401", ["No session, or the sign-in token didn't verify", "Tidak ada sesi, atau token sign-in gagal diverifikasi"]],
         ["404", ["Not found, or not visible to you", "Tidak ditemukan, atau tidak terlihat olehmu"]],
         ["409", ["A round or Circle rule blocks the step (wrong state, not a member)", "Aturan round atau Circle menghalangi langkah ini (state salah, bukan anggota)"]],
-        ["502 / 503", ["PancakeSwap, Binance, the database or the RPC is unavailable; retry shortly", "PancakeSwap, Binance, database, atau RPC tidak tersedia; coba lagi sebentar"]],
+        ["502 / 503", ["PancakeSwap, Binance, CoinGecko, the database or the RPC is unavailable; retry shortly", "PancakeSwap, Binance, CoinGecko, database, atau RPC tidak tersedia; coba lagi sebentar"]],
       ],
     ),
     h2("session", "Session", "Sesi"),
@@ -96,6 +100,7 @@ export const api: DocPage = {
         ["POST", "`/api/session`", ["Exchange a Privy access token `{ token, address }` for the session cookie", "Tukar token akses Privy `{ token, address }` dengan cookie sesi"]],
         ["GET", "`/api/session`", ["The signed-in address, or `null`", "Alamat yang sedang masuk, atau `null`"]],
         ["DELETE", "`/api/session`", ["Sign out", "Keluar"]],
+        ["POST", "`/api/session/dev`", ["Signed-message login for scripts and tests. Only with `SAMA_DEV_AUTH=1`, never in production", "Login lewat pesan bertanda tangan untuk script dan test. Hanya dengan `SAMA_DEV_AUTH=1`, tidak pernah di produksi"]],
       ],
     ),
     h2("public", "Public", "Publik"),
@@ -106,6 +111,10 @@ export const api: DocPage = {
         ["GET", "`/api/assets`", ["The allowlist with prices, tiers and disclosures", "Allowlist beserta harga, tier, dan disclosure"]],
         ["GET", "`/api/proof`", ["Contract deployment and every settled round", "Deployment kontrak dan setiap round yang sudah diselesaikan"]],
         ["GET", "`/api/invites/:code`", ["Which Circle an invite opens, and whether it was used", "Circle yang dibuka sebuah undangan, dan apakah sudah dipakai"]],
+        ["GET", "`/api/market/:token`", ["Price, market cap, FDV, 24-hour volume, liquidity and the pool behind them, for a listed token by address or symbol (`MarketStats`). Any other token is a 404", "Harga, kapitalisasi pasar, FDV, volume 24 jam, likuiditas, dan pool di baliknya, untuk token terdaftar berdasarkan alamat atau simbol (`MarketStats`). Token lain dijawab 404"]],
+        ["GET", "`/api/market/:token/history?range=`", ["`{ points }`: the token's price over `1H`, `1D` (default), `1W`, `1M`, `1Y` or `ALL`, oldest first", "`{ points }`: harga token selama `1H`, `1D` (default), `1W`, `1M`, `1Y`, atau `ALL`, dari yang terlama"]],
+        ["GET", "`/api/market/:token/trades`", ["`{ trades }`: the last trades in the token's pool from every wallet, newest first (up to 300, past 24 hours)", "`{ trades }`: trade terakhir di pool token dari semua wallet, terbaru dulu (maksimal 300, 24 jam terakhir)"]],
+        ["GET", "`/api/agent`", ["`{ enabled }`: whether an AI provider is configured; the app hides the assistant when it is not", "`{ enabled }`: apakah penyedia AI dikonfigurasi; aplikasi menyembunyikan asisten bila tidak"]],
       ],
     ),
     h2("me", "Your account", "Akunmu"),
@@ -117,6 +126,11 @@ export const api: DocPage = {
         ["GET", "`/api/me/portfolio/history?range=`", ["Value over time: `1H`, `1D`, `1W`, `1M`, `1Y`, `ALL`", "Nilai dari waktu ke waktu: `1H`, `1D`, `1W`, `1M`, `1Y`, `ALL`"]],
         ["POST", "`/api/me/target/preview`", ["Check a target against your wallet without saving", "Cek target terhadap wallet tanpa menyimpan"]],
         ["GET / POST", "`/api/me/target`", ["Read or save your target", "Baca atau simpan target"]],
+        ["POST", "`/api/me/target/suggest`", ["`{ instruction }` in words to percent weights for the editor; nothing is saved", "`{ instruction }` berupa kalimat menjadi bobot persen untuk editor; tidak ada yang disimpan"]],
+        ["POST", "`/api/me/assistant`", ["One assistant message `{ chatId?, message }`. Returns `{ chatId, title, reply }` where `reply` has text, result blocks and actions the user may confirm. A missing `chatId` starts a new saved chat", "Satu pesan ke asisten `{ chatId?, message }`. Mengembalikan `{ chatId, title, reply }` dengan `reply` berisi teks, blok hasil, dan aksi yang bisa dikonfirmasi pengguna. Tanpa `chatId`, chat baru dibuat dan disimpan"]],
+        ["GET / DELETE", "`/api/me/chats`", ["List your saved chats / delete all of them", "Daftar chat tersimpan / hapus semuanya"]],
+        ["GET / DELETE", "`/api/me/chats/:id`", ["One chat with its messages / delete it", "Satu chat beserta pesannya / hapus chat itu"]],
+        ["GET / POST", "`/api/me/onboarding`", ["Whether onboarding is done / set it with `{ done }`", "Apakah onboarding sudah selesai / atur dengan `{ done }`"]],
         ["GET / POST", "`/api/me/settings`", ["Notification and default preferences", "Preferensi notifikasi dan default"]],
         ["GET", "`/api/me/activity`", ["Paged history: `limit` (30), `cursor`, `group`, `range`", "Riwayat per halaman: `limit` (30), `cursor`, `group`, `range`"]],
         ["POST", "`/api/me/transfers/sync`", ["Scan the chain now so a transfer you just sent shows in Activity", "Pindai chain sekarang agar transfer yang baru dikirim muncul di Aktivitas"]],
@@ -350,6 +364,10 @@ cd sama-frontend
 pnpm install
 cp .env.example .env.local   # set NEXT_PUBLIC_PRIVY_APP_ID, keep NEXT_PUBLIC_SAMA_API_MODE=mock
 pnpm dev                     # http://localhost:3200`),
+    note(
+      "Token pages (charts, size, trades) read the API's open `/api/market` routes in both modes, the way `/proof` does. In mock mode, set `NEXT_PUBLIC_SAMA_API_URL` to a running backend to see them.",
+      "Halaman token (chart, ukuran pasar, trade) membaca route terbuka `/api/market` dari API di kedua mode, seperti `/proof`. Di mode mock, isi `NEXT_PUBLIC_SAMA_API_URL` dengan backend yang berjalan untuk melihatnya.",
+    ),
     tip(
       "In the Privy dashboard, enable Email and Wallet login, turn on EVM embedded wallets, and add `http://localhost:3200` to the allowed domains.",
       "Di dashboard Privy, aktifkan login Email dan Wallet, nyalakan EVM embedded wallet, lalu tambahkan `http://localhost:3200` ke allowed domains.",
@@ -376,13 +394,17 @@ pnpm dev`),
         ["`SAMA_CHAIN_ID`, `SAMA_ENABLE_MAINNET`", ["56 or 97; mainnet must be switched on explicitly", "56 atau 97; mainnet harus diaktifkan secara eksplisit"]],
         ["`SAMA_SETTLEMENT_ADDRESS`", ["Override the recorded deployment", "Menimpa deployment yang tercatat"]],
         ["`BSC_RPC_URL`, `VERIFIER_RPC_URL`", ["Executor RPC, and a different provider with archive state for the verifier", "RPC executor, dan penyedia lain dengan archive state untuk verifier"]],
+        ["`BSC_WS_URL`", ["Optional websocket RPC for realtime transfer logs; polling runs either way", "RPC websocket opsional untuk log transfer realtime; polling tetap berjalan"]],
         ["`PRIVY_APP_ID`, `PRIVY_APP_SECRET`", ["Verify sign-in tokens", "Memverifikasi token sign-in"]],
         ["`BINANCE_WEB3_API_KEY`, `BINANCE_WEB3_API_SECRET`", ["Stock prices", "Harga saham"]],
         ["`DATABASE_URL`, `SAMA_PGLITE_DIR`", ["Postgres, or PGlite for local work", "Postgres, atau PGlite untuk kerja lokal"]],
         ["`SESSION_SECRET`, `SAMA_ALLOWED_ORIGINS`, `SAMA_APP_ORIGIN`, `SAMA_CROSS_SITE_COOKIE`", ["Sessions and CORS", "Sesi dan CORS"]],
         ["`SAMA_MAX_PLAN_USD`, `SAMA_SWAP_SLIPPAGE_BPS`", ["Plan value cap (500) and leftover swap slippage (50)", "Batas nilai rencana (500) dan slippage swap sisa (50)"]],
         ["`SAMA_CRON_INTERVAL_SEC`", ["How often the background loop runs", "Seberapa sering loop latar berjalan"]],
-        ["`ANTHROPIC_API_KEY`, `GROQ_API_KEY`", ["Optional, for describing a target in words", "Opsional, untuk menuliskan target dengan kalimat"]],
+        ["`COINGECKO_API_KEY`", ["Optional CoinGecko Demo key for token pages. Limits are then per key; without it the free per-IP limit applies and `/api/market` can answer 503", "Key Demo CoinGecko opsional untuk halaman token. Batasnya lalu dihitung per key; tanpa key berlaku batas gratis per IP dan `/api/market` bisa menjawab 503"]],
+        ["`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`", ["Optional, any OpenAI-compatible gateway for the assistant and targets in words", "Opsional, gateway apa pun yang kompatibel dengan OpenAI untuk asisten dan target dengan kalimat"]],
+        ["`GROQ_API_KEY`", ["Optional fallback when `AI_*` is not set; powers both the assistant and targets in words", "Cadangan opsional bila `AI_*` tidak diisi; menjalankan asisten dan target dengan kalimat"]],
+        ["`ANTHROPIC_API_KEY`", ["Optional, describing a target in words only. The assistant needs `AI_*` or Groq", "Opsional, hanya untuk menuliskan target dengan kalimat. Asisten butuh `AI_*` atau Groq"]],
       ],
     ),
     h2("tests", "Tests", "Test"),

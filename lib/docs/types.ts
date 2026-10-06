@@ -12,7 +12,7 @@ export const same = (s: string): T => ({ en: s, id: s });
 export const pick = (v: T, locale: Locale) => v[locale];
 
 /** Live demos shown in a Preview card; each is a small client component in components/docs/demos.tsx. */
-export type DemoKey = "ring" | "pair" | "round" | "target" | "approval" | "checks" | "leftover" | "tiers";
+export type DemoKey = "ring" | "pair" | "round" | "target" | "approval" | "checks" | "leftover" | "tiers" | "assistant";
 
 /**
  * Page content. Inline text supports `code`, **bold** and [label](href). Headings get an id from `id` and feed the

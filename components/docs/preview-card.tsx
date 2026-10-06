@@ -19,6 +19,7 @@ const DEMO_TONE: Record<DemoKey, Tone> = {
   checks: TONES.forest,
   leftover: TONES.navy,
   tiers: TONES.slate,
+  assistant: TONES.ocean,
 };
 
 /**

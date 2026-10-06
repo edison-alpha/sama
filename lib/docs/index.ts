@@ -1,5 +1,5 @@
 import type { Locale } from "@/lib/i18n/dict";
-import { assets, circles, leftovers, matching, rounds, settlement, targets } from "./content/concepts";
+import { assets, assistant, circles, leftovers, matching, rounds, settlement, targets } from "./content/concepts";
 import { api, architecture, contract, localSetup, signing } from "./content/developers";
 import { faq, glossary } from "./content/reference";
 import { security, verification } from "./content/security";
@@ -9,7 +9,7 @@ import { t, type Block, type DocGroup, type DocPage, type T } from "./types";
 /** Sidebar order. A page's group is where it appears; prev/next follow this order too. */
 export const DOC_GROUPS: DocGroup[] = [
   { title: t("Getting started", "Memulai"), pages: [introduction, whySama, quickstart] },
-  { title: t("Concepts", "Konsep"), pages: [targets, circles, rounds, matching, settlement, leftovers, assets] },
+  { title: t("Concepts", "Konsep"), pages: [targets, assistant, circles, rounds, matching, settlement, leftovers, assets] },
   { title: t("Security", "Keamanan"), pages: [security, verification] },
   { title: t("Developers", "Developer"), pages: [architecture, api, contract, signing, localSetup] },
   { title: t("Reference", "Referensi"), pages: [glossary, faq] },
