@@ -14,7 +14,6 @@ export function fmt(template: string, vars: Record<string, string | number> = {}
 }
 
 /** Cookie wins; otherwise Indonesian browsers get Indonesian and everyone else English (PRD §19.7). */
-export function pickLocale(cookie: string | undefined, acceptLanguage: string | null): Locale {
-  if (cookie === "id" || cookie === "en") return cookie;
-  return /^(id|ms)\b/i.test(acceptLanguage?.trim() ?? "") ? "id" : "en";
+export function pickLocale(cookie: string | undefined): Locale {
+  return cookie === "id" ? "id" : "en";
 }
