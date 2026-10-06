@@ -35,6 +35,8 @@ export const security: DocPage = {
       ["State-changing requests from an origin outside the allowlist are refused before any handler runs.", "Request yang mengubah state dari origin di luar allowlist ditolak sebelum handler mana pun berjalan."],
       ["Sign-in tokens are verified with Privy on the server; the session is an HTTP-only cookie.", "Token sign-in diverifikasi dengan Privy di server; sesi berupa cookie HTTP-only."],
       ["Round state changes are compare-and-set, so a retried request never doubles a signature or a step.", "Perubahan state round memakai compare-and-set, jadi request yang diulang tidak pernah menggandakan tanda tangan atau langkah."],
+      ["The AI assistant reads through the same API and can only propose. Every change it suggests is a button you press, and every number it states comes from a tool call, not the model's memory.", "Asisten AI membaca lewat API yang sama dan hanya bisa mengusulkan. Setiap perubahan yang disarankannya berupa tombol yang kamu tekan, dan setiap angka yang disebutkannya berasal dari pemanggilan tool, bukan ingatan model."],
+      ["Market data routes serve only tokens on Sama's allowlist; any other address is a 404.", "Route data pasar hanya melayani token di allowlist Sama; alamat lain dijawab 404."],
     ),
     h2("risks", "Risks that remain", "Risiko yang tersisa"),
     table(

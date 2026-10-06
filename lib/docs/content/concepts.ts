@@ -1,4 +1,4 @@
-import { h2, h3, note, ol, p, preview, steps, table, tip, ul, warn, t, type DocPage } from "../types";
+import { code, h2, h3, note, ol, p, preview, steps, table, tip, ul, warn, t, type DocPage } from "../types";
 
 export const targets: DocPage = {
   slug: "concepts/targets",
@@ -49,6 +49,10 @@ await fetch("/api/me/target/preview", {
     p(
       "Sama can read a sentence such as \"reduce NVDAB to 20% and put the rest into USDT\". The language model only turns the sentence into structured operations; code resolves every symbol, price and amount against the allowlist. This mode is off by default on public servers.",
       "Sama bisa membaca kalimat seperti \"kurangi NVDAB jadi 20% dan sisanya ke USDT\". Model bahasa hanya mengubah kalimat menjadi operasi terstruktur; kode yang menentukan setiap simbol, harga, dan jumlah terhadap allowlist. Mode ini mati secara default di server publik.",
+    ),
+    p(
+      "The [AI assistant](/docs/concepts/assistant) can also propose a target from a conversation; you still review and save it in the editor.",
+      "[Asisten AI](/docs/concepts/assistant) juga bisa mengusulkan target dari percakapan; kamu tetap memeriksa dan menyimpannya di editor.",
     ),
   ],
 };
@@ -247,12 +251,21 @@ export const leftovers: DocPage = {
 export const assets: DocPage = {
   slug: "concepts/assets",
   title: t("Supported assets", "Aset yang didukung"),
-  description: t("88 bStocks on BNB Chain plus USDT as cash, identified by contract address and grouped into three tiers.", "88 bStocks di BNB Chain plus USDT sebagai kas, dikenali dari alamat kontrak dan dikelompokkan dalam tiga tier."),
+  description: t("88 bStocks on BNB Chain, WBNB for BNB, and USDT as cash, identified by contract address and grouped into three tiers.", "88 bStocks di BNB Chain, WBNB untuk BNB, dan USDT sebagai kas, dikenali dari alamat kontrak dan dikelompokkan dalam tiga tier."),
   blocks: [
     h2("bstocks", "bStocks", "bStocks"),
     p(
       "bStocks are tokenized shares and ETFs issued by Binance on BNB Chain. Each token is backed 1:1 by the underlying share held by Nest Clearing and Custody (ADGM). Sama's allowlist currently has 88 of them: 75 stocks and 13 ETFs. USDT is the cash leg.",
       "bStocks adalah saham dan ETF tokenized yang diterbitkan Binance di BNB Chain. Setiap token didukung 1:1 oleh saham dasarnya yang disimpan Nest Clearing and Custody (ADGM). Allowlist Sama saat ini berisi 88: 75 saham dan 13 ETF. USDT menjadi kas.",
+    ),
+    h2("wbnb", "BNB as WBNB", "BNB sebagai WBNB"),
+    p(
+      "Besides bStocks, Sama trades **WBNB**: BNB wrapped as a token, where 1 WBNB is always 1 BNB. The settlement contract moves tokens only with `transferFrom`, which native BNB does not have, so the BNB in a target is WBNB. **Convert BNB** on the Portfolio page wraps or unwraps it in one transaction (`deposit()` or `withdraw()` on the WBNB contract) and keeps a little BNB back for gas.",
+      "Selain bStocks, Sama memperdagangkan **WBNB**: BNB yang dibungkus menjadi token, dengan 1 WBNB selalu sama dengan 1 BNB. Kontrak settlement hanya memindahkan token lewat `transferFrom`, yang tidak dimiliki BNB native, jadi BNB dalam target berupa WBNB. **Ubah BNB** di halaman Portofolio membungkus atau membukanya dalam satu transaksi (`deposit()` atau `withdraw()` di kontrak WBNB) dan menyisakan sedikit BNB untuk gas.",
+    ),
+    p(
+      "WBNB is tier A. Its round price is Binance's BNB/USDT spot price, cross-checked like any tier A asset against a 30-minute TWAP of the PancakeSwap V3 USDT/WBNB pool. It has no share multiplier and no bStock disclosure.",
+      "WBNB termasuk tier A. Harga round-nya adalah harga spot BNB/USDT dari Binance, dicek silang seperti aset tier A lain terhadap TWAP 30 menit pool PancakeSwap V3 USDT/WBNB. WBNB tidak punya pengali saham dan tidak memakai disclosure bStock.",
     ),
     h2("identity", "Identity by address", "Identitas dari alamat"),
     p(
@@ -281,10 +294,91 @@ export const assets: DocPage = {
       ["Pause and blocklist status is read when the token supports it; blocked wallets are left out of a plan.", "Status pause dan blocklist dibaca bila token mendukungnya; wallet yang diblokir dikeluarkan dari rencana."],
       ["bStocks use a share multiplier (BEP-8056). Wallet balances are shown as raw balance × multiplier.", "bStocks memakai pengali saham (BEP-8056). Saldo wallet ditampilkan sebagai saldo mentah × pengali."],
     ),
+    h2("token-pages", "Token pages and market data", "Halaman token dan data pasar"),
+    p(
+      "Every listed token has its own page, opened from the token list or from the AI assistant: its price from one hour to all time, market cap, fully diluted value, 24-hour volume, liquidity, your balance, and the latest trades in its pool from every wallet.",
+      "Setiap token yang terdaftar punya halaman sendiri, dibuka dari daftar token atau dari asisten AI: harganya dari satu jam sampai sepanjang waktu, kapitalisasi pasar, nilai terdilusi penuh, volume 24 jam, likuiditas, saldomu, dan trade terbaru di pool-nya dari semua wallet.",
+    ),
+    ul(
+      ["The figures come from the token's deepest on-chain pool, through CoinGecko's on-chain data (GeckoTerminal). They are for reading only: a round always uses its own Binance snapshot, so the two prices can differ slightly.", "Angkanya berasal dari pool on-chain terdalam token itu, lewat data on-chain CoinGecko (GeckoTerminal). Angka ini hanya untuk dibaca: round selalu memakai snapshot Binance-nya sendiri, jadi kedua harga bisa sedikit berbeda."],
+      ["Trades are the last 300 from the past 24 hours; the source has no older page. The list shows 25 at a time as you scroll and refreshes every 30 seconds.", "Trade yang tampil adalah 300 terakhir dalam 24 jam; sumbernya tidak punya halaman yang lebih lama. Daftar menampilkan 25 setiap kali kamu menggulir dan diperbarui tiap 30 detik."],
+      ["Liquidity varies. Tier A and B tokens trade every day, while many tier C tokens have a pool with no trades in a day and a few have no pool at all. Their pages say so instead of drawing an empty chart.", "Likuiditas berbeda-beda. Token tier A dan B diperdagangkan setiap hari, sedangkan banyak token tier C punya pool tanpa trade dalam sehari dan beberapa tidak punya pool sama sekali. Halamannya mengatakan itu, bukan menggambar chart kosong."],
+    ),
     h2("market-hours", "Market hours", "Jam bursa"),
     p(
       "Prices follow the US market sessions (regular, extended, overnight). Outside them, stock prices are the last close, the cross-check tolerance widens, and the leftover engine leans toward rolling over rather than swapping.",
       "Harga mengikuti sesi pasar AS (reguler, extended, overnight). Di luar sesi, harga saham adalah harga penutupan terakhir, toleransi cek silang melebar, dan mesin sisa cenderung menyarankan membawa ke round berikutnya daripada swap.",
+    ),
+  ],
+};
+
+export const assistant: DocPage = {
+  slug: "concepts/assistant",
+  title: t("AI assistant", "Asisten AI"),
+  description: t(
+    "Ask about your wallet, prices and Circles in plain words. It reads through the API and only proposes; you confirm every change.",
+    "Tanyakan wallet, harga, dan Circle dengan kalimat biasa. Asisten membaca lewat API dan hanya mengusulkan; kamu menyetujui setiap perubahan.",
+  ),
+  blocks: [
+    p(
+      "The assistant lives in the pill at the bottom of every screen. It answers in English or Indonesian, shows results as the same cards the app uses, and turns a request into a proposal you can accept or ignore.",
+      "Asisten ada di pil di bagian bawah setiap layar. Ia menjawab dalam bahasa Inggris atau Indonesia, menampilkan hasil sebagai kartu yang sama dengan yang dipakai aplikasi, dan mengubah permintaan menjadi usulan yang bisa kamu terima atau abaikan.",
+    ),
+    preview("assistant", [
+      "The app's own chat components replaying a short conversation. The token card is live; the questions and the proposed target are examples, and nothing is saved.",
+      "Komponen chat aplikasi itu sendiri memutar ulang percakapan singkat. Kartu token-nya live; pertanyaan dan target yang diusulkan hanyalah contoh, dan tidak ada yang disimpan.",
+    ]),
+    h2("flow", "How a message flows", "Alur sebuah pesan"),
+    steps(
+      [["Ask", "Tanya"], ["Type a question or a request (up to 500 characters). It goes to `POST /api/me/assistant` with the conversation so far.", "Ketik pertanyaan atau permintaan (maksimal 500 karakter). Pesan dikirim ke `POST /api/me/assistant` bersama percakapan sejauh ini."]],
+      [["It reads", "Asisten membaca"], ["The model calls read-only tools on the server for your overview, wallet, prices, assets, Circles, activity and value history. Every number it states comes from one of these calls, not from its memory.", "Model memanggil tool baca-saja di server untuk ringkasan, wallet, harga, aset, Circle, aktivitas, dan riwayat nilaimu. Setiap angka yang disebutkannya berasal dari pemanggilan itu, bukan dari ingatannya."]],
+      [["It answers", "Asisten menjawab"], ["Words first, then cards: live token cards for prices (each opens the token's page) and Circle cards for search results.", "Kata-kata dulu, lalu kartu: kartu token live untuk harga (masing-masing membuka halaman token) dan kartu Circle untuk hasil pencarian."]],
+      [["It proposes", "Asisten mengusulkan"], ["To change something it calls a propose tool. A target is checked against your live wallet first, then offered as a button; so is joining a Circle or opening a page.", "Untuk mengubah sesuatu, asisten memanggil tool usulan. Target dicek dulu terhadap wallet live-mu, lalu ditawarkan sebagai tombol; begitu juga bergabung ke Circle atau membuka halaman."]],
+      [["You confirm", "Kamu menyetujui"], ["Nothing happens until you press the button. **Apply to my target** opens the target editor with the weights, and you still review and save. Joining an invite-only Circle needs the invite code, which you type yourself.", "Tidak ada yang terjadi sampai kamu menekan tombolnya. **Terapkan ke target saya** membuka editor target dengan bobot itu, dan kamu tetap memeriksa lalu menyimpannya. Bergabung ke Circle khusus undangan butuh kode undangan, yang kamu ketik sendiri."]],
+      [["It is saved", "Tersimpan"], ["The conversation is saved for your wallet. Reopen it from History, delete it, or delete all of them.", "Percakapan disimpan untuk wallet-mu. Buka lagi dari Riwayat, hapus, atau hapus semuanya."]],
+    ),
+    h2("tools", "What it can read and propose", "Yang bisa dibaca dan diusulkan"),
+    table(
+      [["Tool", "Tool"], ["What it does", "Fungsinya"], ["Changes anything", "Mengubah sesuatu"]],
+      [
+        ["`get_overview`", ["Home view: value, positions, target, drift, Circles, rounds waiting on you, recent activity", "Tampilan Beranda: nilai, posisi, target, drift, Circle, round yang menunggumu, aktivitas terbaru"], ["No", "Tidak"]],
+        ["`get_portfolio`", ["Wallet positions with amount, value and share, including BNB and tokens Sama does not trade", "Posisi wallet dengan jumlah, nilai, dan porsi, termasuk BNB dan token yang tidak diperdagangkan Sama"], ["No", "Tidak"]],
+        ["`get_prices`", ["Live prices by ticker (NVDAB or NVDA) or company name; shown as token cards", "Harga live berdasarkan ticker (NVDAB atau NVDA) atau nama perusahaan; ditampilkan sebagai kartu token"], ["No", "Tidak"]],
+        ["`search_assets`", ["Tradable assets with class, tier, leverage flag and price", "Aset yang bisa diperdagangkan beserta kelas, tier, tanda leverage, dan harga"], ["No", "Tidak"]],
+        ["`search_circles`, `get_circle`", ["Circles you can see, and one Circle's rules, members and rounds", "Circle yang bisa kamu lihat, serta aturan, anggota, dan round satu Circle"], ["No", "Tidak"]],
+        ["`get_activity`, `portfolio_history`", ["Recent activity, and wallet value over a window (start, end, change, low, high)", "Aktivitas terbaru, dan nilai wallet dalam satu rentang (awal, akhir, perubahan, terendah, tertinggi)"], ["No", "Tidak"]],
+        ["`preview_target`", ["The trades a set of weights would cause, or why they are invalid", "Trade yang ditimbulkan sekumpulan bobot, atau alasan bobot itu tidak valid"], ["No", "Tidak"]],
+        ["`propose_target`", ["Validated weights, offered as an Apply button", "Bobot yang sudah divalidasi, ditawarkan sebagai tombol Terapkan"], ["No, shows a button", "Tidak, menampilkan tombol"]],
+        ["`propose_join_circle`", ["A Join button for a Circle", "Tombol Gabung untuk sebuah Circle"], ["No, shows a button", "Tidak, menampilkan tombol"]],
+        ["`propose_open`", ["A button that opens a page in the app", "Tombol yang membuka halaman di aplikasi"], ["No, shows a button", "Tidak, menampilkan tombol"]],
+      ],
+    ),
+    h2("limits", "Limits", "Batasan"),
+    ul(
+      ["It gives no investment advice or predictions. It explains, compares and sets up what you ask for.", "Asisten tidak memberi nasihat investasi atau prediksi. Ia menjelaskan, membandingkan, dan menyiapkan apa yang kamu minta."],
+      ["It only helps with Sama. Other questions get a short no.", "Asisten hanya membantu soal Sama. Pertanyaan lain dijawab dengan penolakan singkat."],
+      ["Each message runs at most six rounds of tool calls, and the last twelve turns of the chat are kept as context.", "Setiap pesan menjalankan paling banyak enam putaran pemanggilan tool, dan dua belas giliran terakhir percakapan disimpan sebagai konteks."],
+    ),
+    h2("developers", "For developers", "Untuk developer"),
+    code("ts", `
+// POST /api/me/assistant (signed in). chatId null starts a new saved chat.
+const r = await fetch(\`\${API}/api/me/assistant\`, {
+  method: "POST",
+  credentials: "include",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ chatId: null, message: "What is NVDAB worth right now?" }),
+}).then((res) => res.json());
+
+// r = { chatId, title, reply: { text, blocks, actions } }
+// blocks:  { type: "prices", items, missing } | { type: "circles", circles }
+// actions: { type: "apply_target", weights } | { type: "join_circle", circleId, name, needsInvite } | { type: "open", path, label }`, "assistant"),
+    p(
+      "Actions are data. The server never runs them; the app does, when the user presses the button. Saved chats are at `/api/me/chats`.",
+      "Aksi hanyalah data. Server tidak pernah menjalankannya; aplikasi yang menjalankan, saat pengguna menekan tombol. Chat tersimpan ada di `/api/me/chats`.",
+    ),
+    note(
+      "The assistant needs an OpenAI-compatible provider with tool calling: set `AI_BASE_URL`, `AI_API_KEY` and `AI_MODEL`, or `GROQ_API_KEY`. `ANTHROPIC_API_KEY` alone powers describing a target in words, not the assistant. `GET /api/agent` tells the app whether an AI provider is configured, and the app hides the assistant when none is.",
+      "Asisten butuh penyedia yang kompatibel dengan OpenAI dan mendukung pemanggilan tool: isi `AI_BASE_URL`, `AI_API_KEY`, dan `AI_MODEL`, atau `GROQ_API_KEY`. `ANTHROPIC_API_KEY` saja hanya menjalankan fitur menuliskan target dengan kalimat, bukan asisten. `GET /api/agent` memberi tahu aplikasi apakah penyedia AI dikonfigurasi, dan aplikasi menyembunyikan asisten bila tidak ada.",
     ),
   ],
 };

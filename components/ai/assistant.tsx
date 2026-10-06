@@ -19,7 +19,7 @@ const HIDDEN_KEY = "sama:ai:hidden";
 const CHAT_ID_KEY = "sama:ai:chat-id";
 
 /** A chat turn as shown; `createdAt` is only there for turns that came from the server. */
-type Entry = Omit<ChatMessage, "createdAt"> & { createdAt?: string };
+export type Entry = Omit<ChatMessage, "createdAt"> & { createdAt?: string };
 
 /**
  * The AI assistant, on every screen of the app: a compact glass pill floating at the bottom that can be hidden down to
@@ -238,8 +238,8 @@ export function AiAssistant() {
   );
 }
 
-/** One chat turn: the words, then any result cards, then the buttons for actions the user may confirm. */
-function Message({ entry, id, done, onRun, onClose }: { entry: Entry; id: string; done: Record<string, boolean>; onRun: (key: string, a: AssistantAction) => void; onClose: () => void }) {
+/** One chat turn: the words, then any result cards, then the buttons for actions the user may confirm. Also used by the docs demo. */
+export function Message({ entry, id, done, onRun, onClose }: { entry: Entry; id: string; done: Record<string, boolean>; onRun: (key: string, a: AssistantAction) => void; onClose: () => void }) {
   const { d, fmt } = useI18n();
   const e = d.portfolio.editor;
   if (entry.role === "user") {

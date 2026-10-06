@@ -39,7 +39,7 @@ export const introduction: DocPage = {
       [["Area", "Area"], ["Status", "Status"]],
       [
         [["Network", "Jaringan"], ["BNB Smart Chain mainnet (56); testnet 97 for development", "BNB Smart Chain mainnet (56); testnet 97 untuk pengembangan"]],
-        [["Assets", "Aset"], ["88 bStocks (stocks and ETFs) plus USDT as cash", "88 bStocks (saham dan ETF) plus USDT sebagai kas"]],
+        [["Assets", "Aset"], ["88 bStocks (stocks and ETFs), WBNB for BNB, and USDT as cash", "88 bStocks (saham dan ETF), WBNB untuk BNB, dan USDT sebagai kas"]],
         ["SamaSettlement", "`0x7811a30D29d6c2Ca95Aeb4EE9D896cE44Cb72AC8`"],
         [["Plan size limit", "Batas nilai plan"], ["$500 crossed per plan while the contract is unaudited", "$500 yang dicocokkan per plan selama kontrak belum diaudit"]],
         [["Gas sponsorship", "Sponsor gas"], ["Planned. Approvals and settlement need a little BNB today", "Direncanakan. Approval dan settlement saat ini masih butuh sedikit BNB"]],
@@ -116,13 +116,13 @@ export const quickstart: DocPage = {
     h2("before-you-start", "Before you start", "Sebelum mulai"),
     ul(
       ["An email address, or a wallet such as MetaMask, Trust Wallet, Binance Wallet or OKX Wallet.", "Alamat email, atau wallet seperti MetaMask, Trust Wallet, Binance Wallet, atau OKX Wallet."],
-      ["Some bStocks or USDT on BNB Chain. You can finish setup without them and add assets later.", "Sedikit bStocks atau USDT di BNB Chain. Kamu bisa menyelesaikan setup tanpanya dan menambah aset nanti."],
+      ["Some bStocks, BNB or USDT on BNB Chain. You can finish setup without them and add assets later.", "Sedikit bStocks, BNB, atau USDT di BNB Chain. Kamu bisa menyelesaikan setup tanpanya dan menambah aset nanti."],
       ["A little BNB for gas, until gas sponsorship goes live.", "Sedikit BNB untuk gas, sampai sponsor gas aktif."],
     ),
     h2("first-round", "Your first round", "Round pertamamu"),
     steps(
       [["Sign in", "Masuk"], ["Open [sama](/start) and continue with email (you get an embedded wallet) or connect your own wallet. Sama never sees your keys.", "Buka [sama](/start) lalu lanjut dengan email (kamu mendapat embedded wallet) atau hubungkan wallet-mu sendiri. Sama tidak pernah melihat kunci kamu."]],
-      [["Check your portfolio", "Cek portofolio"], ["Sama reads your balances straight from BNB Chain and lists every asset it supports.", "Sama membaca saldo langsung dari BNB Chain dan menampilkan setiap aset yang didukung."]],
+      [["Check your portfolio", "Cek portofolio"], ["Sama reads your balances straight from BNB Chain and lists every asset it supports. Open any token for its chart, size and latest trades. To rebalance BNB, convert it to WBNB with **Convert BNB**.", "Sama membaca saldo langsung dari BNB Chain dan menampilkan setiap aset yang didukung. Buka token mana pun untuk melihat chart, ukuran pasar, dan trade terbarunya. Untuk me-rebalance BNB, ubah dulu menjadi WBNB lewat **Ubah BNB**."]],
       [["Set a target", "Atur target"], ["Pick a preset or type a percentage per token. The total must be exactly 100%. Sama previews what it would take to get there before you save.", "Pilih preset atau ketik persentase tiap token. Totalnya harus tepat 100%. Sama menunjukkan apa yang dibutuhkan untuk mencapainya sebelum kamu simpan."]],
       [["Join a Circle", "Gabung Circle"], ["Pick a Circle that trades the assets you hold, or start your own and invite people.", "Pilih Circle yang memperdagangkan aset yang kamu pegang, atau buat sendiri dan undang orang lain."]],
       [["Sign into the round", "Tanda tangan untuk ikut round"], ["One free signature adds your rebalance to the open round. Nothing moves yet.", "Satu tanda tangan gratis menambahkan rebalance-mu ke round yang sedang dibuka. Belum ada yang berpindah."]],
