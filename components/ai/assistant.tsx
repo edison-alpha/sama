@@ -5,19 +5,21 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AssetIcon } from "@/components/asset-icon";
+import { TokenCard } from "@/components/market/token-card";
 import { IconArrowRight } from "@/components/icons";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { sama } from "@/lib/api";
-import type { AssistantAction, AssistantBlock, AssistantTurn } from "@/lib/api/types";
-import { usd } from "@/lib/format";
+import type { AssistantAction, ChatMessage, ChatSummary } from "@/lib/api/types";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
 import { AiAvatar } from "./ai-avatar";
 import { APPLY_TARGET_EVENT, PENDING_TARGET_KEY } from "./apply-target";
 
 const HIDDEN_KEY = "sama:ai:hidden";
-const CHAT_KEY = "sama:ai:chat";
+const CHAT_ID_KEY = "sama:ai:chat-id";
 
-type Entry = { role: "user" | "assistant"; content: string; blocks?: AssistantBlock[]; actions?: AssistantAction[]; error?: boolean };
+/** A chat turn as shown; `createdAt` is only there for turns that came from the server. */
+type Entry = Omit<ChatMessage, "createdAt"> & { createdAt?: string };
 
 /**
  * The AI assistant, on every screen of the app: a compact glass pill floating at the bottom that can be hidden down to
@@ -37,6 +39,10 @@ export function AiAssistant() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [chat, setChat] = useState<Entry[]>([]);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [view, setView] = useState<"chat" | "history">("chat");
+  const [history, setHistory] = useState<ChatSummary[] | null>(null);
+  const [confirmAll, setConfirmAll] = useState(false);
   const [done, setDone] = useState<Record<string, boolean>>({});
   const end = useRef<HTMLDivElement>(null);
 
@@ -44,16 +50,70 @@ export function AiAssistant() {
     setMounted(true);
     try {
       setHidden(window.localStorage.getItem(HIDDEN_KEY) === "1");
-      const saved = window.sessionStorage.getItem(CHAT_KEY);
-      if (saved) setChat(JSON.parse(saved) as Entry[]);
     } catch {}
     void sama.agentEnabled().then(setEnabled, () => setEnabled(false));
   }, []);
 
+  // Conversations live on the server. The last one opened is remembered in this browser and restored when the panel
+  // first opens, so a reload does not lose your place.
+  const restored = useRef(false);
   useEffect(() => {
-    try { window.sessionStorage.setItem(CHAT_KEY, JSON.stringify(chat.slice(-30))); } catch {}
+    if (!open || !enabled || restored.current) return;
+    restored.current = true;
+    let id: string | null = null;
+    try { id = window.localStorage.getItem(CHAT_ID_KEY); } catch {}
+    if (id) void openChat(id, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, enabled]);
+
+  useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [chat, busy, open]);
+  }, [chat, busy, open, view]);
+
+  const remember = (id: string | null) => {
+    setChatId(id);
+    try { if (id) window.localStorage.setItem(CHAT_ID_KEY, id); else window.localStorage.removeItem(CHAT_ID_KEY); } catch {}
+  };
+
+  const openChat = async (id: string, quiet = false) => {
+    try {
+      const c = await sama.chat(id);
+      setChat(c.messages);
+      remember(c.id);
+      setView("chat");
+    } catch {
+      if (quiet) remember(null);
+      else setChat((x) => [...x, { role: "assistant", content: e.aiLoadFailed, error: true }]);
+    }
+  };
+
+  const showHistory = async () => {
+    setView("history");
+    setConfirmAll(false);
+    setHistory(null);
+    try { setHistory(await sama.chats()); } catch { setHistory([]); }
+  };
+
+  const newChat = () => {
+    setChat([]);
+    setDone({});
+    remember(null);
+    setView("chat");
+  };
+
+  const removeChat = async (id: string) => {
+    setHistory((h) => (h ? h.filter((c) => c.id !== id) : h));
+    if (id === chatId) { newChat(); setView("history"); }
+    try { await sama.deleteChat(id); } catch { void showHistory(); }
+  };
+
+  const removeAll = async () => {
+    setHistory([]);
+    setConfirmAll(false);
+    newChat();
+    setView("history");
+    try { await sama.deleteAllChats(); } catch { void showHistory(); }
+  };
 
   const setHide = (next: boolean) => {
     setHidden(next);
@@ -70,9 +130,9 @@ export function AiAssistant() {
     setOpen(true);
     setBusy(true);
     try {
-      const turns: AssistantTurn[] = next.filter((m) => !m.error).map((m) => ({ role: m.role, content: m.content }));
-      const r = await sama.assist(turns);
-      setChat([...next, { role: "assistant", content: r.text, blocks: r.blocks, actions: r.actions }]);
+      const r = await sama.assist(chatId, content);
+      remember(r.chatId);
+      setChat([...next, { role: "assistant", content: r.reply.text, blocks: r.reply.blocks, actions: r.reply.actions }]);
     } catch (err) {
       setChat([...next, { role: "assistant", content: err instanceof Error ? err.message : String(err), error: true }]);
     } finally {
@@ -123,13 +183,22 @@ export function AiAssistant() {
         {open && (
           <div className="glass-panel-strong flex max-h-[min(70vh,560px)] flex-col overflow-hidden rounded-[24px]">
             <div className="flex items-center justify-between gap-3 px-4 pb-1 pt-3.5">
-              <p className="text-sm font-semibold text-ink">{e.aiTitle}</p>
+              {view === "history" ? (
+                <button type="button" onClick={() => setView("chat")} className="flex items-center gap-1.5 text-sm font-semibold text-ink"><span aria-hidden="true">‹</span>{e.aiHistory}</button>
+              ) : (
+                <p className="text-sm font-semibold text-ink">{e.aiTitle}</p>
+              )}
               <div className="flex items-center gap-1">
-                {chat.length > 0 && <button type="button" onClick={() => { setChat([]); setDone({}); }} className="rounded-full px-2.5 py-1 text-xs text-ink-3 hover:bg-surface-2 hover:text-ink">{e.aiNew}</button>}
+                {view === "chat" && <button type="button" onClick={() => void showHistory()} className="rounded-full px-2.5 py-1 text-xs text-ink-3 hover:bg-surface-2 hover:text-ink">{e.aiHistory}</button>}
+                {(view === "history" || chat.length > 0) && <button type="button" onClick={newChat} className="rounded-full px-2.5 py-1 text-xs text-ink-3 hover:bg-surface-2 hover:text-ink">{e.aiNew}</button>}
                 <button type="button" onClick={() => setOpen(false)} aria-label={d.common.done} className="grid size-7 place-items-center rounded-full text-ink-3 hover:bg-surface-2 hover:text-ink">×</button>
               </div>
             </div>
-            <div className="grid min-h-0 flex-1 gap-3 overflow-y-auto px-4 pb-4 pt-2">
+            <ScrollArea className="grid min-h-0 flex-1 content-start gap-3 px-4 pb-4 pt-2">
+              {view === "history" ? (
+                <HistoryList items={history} activeId={chatId} confirmAll={confirmAll} onOpen={(id) => void openChat(id)} onDelete={(id) => void removeChat(id)} onAskAll={() => setConfirmAll(true)} onDeleteAll={() => void removeAll()} />
+              ) : (
+              <>
               {chat.length === 0 && (
                 <>
                   <p className="text-sm leading-relaxed text-ink-2">{e.aiIntro}</p>
@@ -150,7 +219,9 @@ export function AiAssistant() {
                 </div>
               )}
               <div ref={end} />
-            </div>
+              </>
+              )}
+            </ScrollArea>
           </div>
         )}
         <form onSubmit={(ev) => { ev.preventDefault(); void send(text); }} className="glass-panel-strong flex items-center gap-2.5 rounded-full p-1.5 pr-2">
@@ -169,7 +240,7 @@ export function AiAssistant() {
 
 /** One chat turn: the words, then any result cards, then the buttons for actions the user may confirm. */
 function Message({ entry, id, done, onRun, onClose }: { entry: Entry; id: string; done: Record<string, boolean>; onRun: (key: string, a: AssistantAction) => void; onClose: () => void }) {
-  const { d, fmt, locale } = useI18n();
+  const { d, fmt } = useI18n();
   const e = d.portfolio.editor;
   if (entry.role === "user") {
     return <p className="ml-10 w-fit max-w-full justify-self-end whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-accent-soft px-3.5 py-2 text-sm text-ink">{entry.content}</p>;
@@ -185,13 +256,8 @@ function Message({ entry, id, done, onRun, onClose }: { entry: Entry; id: string
               {b.items.length > 0 && <p className="text-xs text-ink-3">{e.aiPrices}</p>}
               <ul className="grid gap-2">
                 {b.items.map((p) => (
-                  <li key={p.symbol} className="flex items-center gap-3 text-sm">
-                    <AssetIcon symbol={p.symbol} size={26} />
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-medium text-ink">{p.symbol}</span>
-                      <span className="block truncate text-xs text-ink-3">{p.name}</span>
-                    </span>
-                    <span className="tabular-nums font-semibold text-ink">{p.priceUsd > 0 ? usd(p.priceUsd, locale) : "—"}</span>
+                  <li key={p.symbol}>
+                    <TokenCard symbol={p.symbol} name={p.name} priceUsd={p.priceUsd} onNavigate={onClose} />
                   </li>
                 ))}
               </ul>
@@ -238,5 +304,32 @@ function Message({ entry, id, done, onRun, onClose }: { entry: Entry; id: string
         })}
       </div>
     </div>
+  );
+}
+
+/** Saved conversations: open one, delete one, or clear them all (two taps). */
+function HistoryList({ items, activeId, confirmAll, onOpen, onDelete, onAskAll, onDeleteAll }: { items: ChatSummary[] | null; activeId: string | null; confirmAll: boolean; onOpen: (id: string) => void; onDelete: (id: string) => void; onAskAll: () => void; onDeleteAll: () => void }) {
+  const { d, locale } = useI18n();
+  const e = d.portfolio.editor;
+  const when = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  if (items === null) return <p className="text-sm text-ink-3">…</p>;
+  if (items.length === 0) return <p className="text-sm text-ink-3">{e.aiHistoryEmpty}</p>;
+  return (
+    <>
+      <ul className="grid gap-1.5">
+        {items.map((c) => (
+          <li key={c.id} className={cx("flex items-center gap-2 rounded-2xl border px-3.5 py-2.5", c.id === activeId ? "border-accent bg-accent-soft/40" : "border-line")}>
+            <button type="button" onClick={() => onOpen(c.id)} className="min-w-0 flex-1 text-left">
+              <span className="block truncate text-sm font-medium text-ink">{c.title}</span>
+              <span className="block text-xs text-ink-3">{when.format(new Date(c.updatedAt))}</span>
+            </button>
+            <button type="button" onClick={() => onDelete(c.id)} aria-label={`${e.aiDelete}: ${c.title}`} title={e.aiDelete} className="grid size-8 shrink-0 place-items-center rounded-full text-ink-3 transition-colors hover:bg-surface-2 hover:text-danger">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={confirmAll ? onDeleteAll : onAskAll} className={cx("h-10 rounded-full border text-sm font-semibold transition-colors", confirmAll ? "border-danger bg-danger/10 text-danger" : "border-line text-ink-2 hover:bg-surface-2")}>{confirmAll ? e.aiDeleteAllConfirm : e.aiDeleteAll}</button>
+    </>
   );
 }

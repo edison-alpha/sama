@@ -1,5 +1,5 @@
 import type { Hex, TypedDataDefinition } from "viem";
-import type { AssistantReply, AssistantTurn, Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, InviteInfo, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview, TargetSuggestion } from "./types";
+import type { AssistantResponse, ChatDetail, ChatSummary, Activity, Asset, Circle, HistoryPoint, HistoryRange, Home, InviteInfo, NewCircle, Portfolio, ResidualChoice, RoundView, Settings, Target, TargetPreview, TargetSuggestion } from "./types";
 
 export type ActivityQuery = { cursor?: string | null; group?: "rounds" | "circles" | "targets" | "leftovers" | "transfers" | null; range?: "all" | "week" | "month" };
 export type ActivityPage = { items: Activity[]; nextCursor: string | null };
@@ -39,8 +39,12 @@ export type SamaApi = {
   agentEnabled(): Promise<boolean>;
   /** Turns a sentence into percent weights (nothing is saved); the editor shows them for review. */
   suggestTarget(instruction: string): Promise<TargetSuggestion>;
-  /** Chat with the AI assistant (it reads your data and proposes actions; nothing happens until you confirm). */
-  assist(messages: AssistantTurn[]): Promise<AssistantReply>;
+  /** One chat message to the AI assistant. A null `chatId` starts a new saved conversation. Nothing happens until the user confirms an action. */
+  assist(chatId: string | null, message: string): Promise<AssistantResponse>;
+  chats(): Promise<ChatSummary[]>;
+  chat(id: string): Promise<ChatDetail>;
+  deleteChat(id: string): Promise<void>;
+  deleteAllChats(): Promise<void>;
   saveTarget(target: Omit<Target, "savedAt">): Promise<void>;
   circles(): Promise<Circle[]>;
   /** Asks the server to scan the chain for this wallet's transfers now, so a send shows in Activity right away. */

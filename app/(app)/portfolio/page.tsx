@@ -8,6 +8,7 @@ import { APPLY_TARGET_EVENT } from "@/components/ai/apply-target";
 import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
 import { ReceiveModal } from "@/components/wallet/receive-modal";
 import { SendTokenModal } from "@/components/wallet/send-token";
+import { WrapBnbModal } from "@/components/wallet/wrap-bnb";
 import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { Button } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
@@ -25,6 +26,7 @@ export default function PortfolioPage() {
   const { d, fmt, locale } = useI18n();
   const [sending, setSending] = useState(false);
   const [receiving, setReceiving] = useState(false);
+  const [wrapping, setWrapping] = useState(false);
   // The home tile links here as /portfolio?send=1, so the Send dialog opens straight away.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("send") === "1") setSending(true);
@@ -88,6 +90,7 @@ export default function PortfolioPage() {
                 </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
+                  {assets.some((a) => a.symbol === "WBNB") && <Button size="lg" variant="ghost" onClick={() => setWrapping(true)}>{d.wrap.open}</Button>}
                   <Button size="lg" variant="ghost" onClick={() => setReceiving(true)}>{d.send.receive.open}</Button>
                   <Button size="lg" onClick={() => setSending(true)}>{d.send.open}</Button>
                 </div>
@@ -95,6 +98,7 @@ export default function PortfolioPage() {
               <TokenTable positions={portfolio.positions} totalUsd={portfolio.totalUsd} drift={drift} assets={assets} />
               {sending && <SendTokenModal assets={assets} positions={portfolio.positions} onClose={() => setSending(false)} onSent={() => void refresh()} />}
               {receiving && <ReceiveModal onClose={() => setReceiving(false)} />}
+              {wrapping && <WrapBnbModal assets={assets} positions={portfolio.positions} onClose={() => setWrapping(false)} onDone={() => void refresh()} />}
               {assets.some((a) => a.disclosure && portfolio.positions.some((p) => p.symbol === a.symbol)) && (
                 <p className="mt-4 text-xs text-ink-3">{assets.find((a) => a.disclosure && portfolio.positions.some((p) => p.symbol === a.symbol))?.disclosure}</p>
               )}

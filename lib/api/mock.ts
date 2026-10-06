@@ -271,8 +271,16 @@ export const mockApi: SamaApi = {
     return false;
   },
   async assist() {
-    return { text: "The AI assistant needs the live API.", blocks: [], actions: [] };
+    throw new Error("The AI assistant needs the live API.");
   },
+  async chats() {
+    return [];
+  },
+  async chat() {
+    throw new Error("The AI assistant needs the live API.");
+  },
+  async deleteChat() {},
+  async deleteAllChats() {},
   async suggestTarget() {
     return { ok: false, problems: ["The AI helper needs the live API."] };
   },
