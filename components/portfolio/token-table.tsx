@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AssetIcon } from "@/components/asset-icon";
 import { Money } from "@/components/ui/money";
 import type { Asset, Drift, Position } from "@/lib/api/types";
@@ -14,6 +15,9 @@ function RowIcon({ row, size }: { row: Row; size: number }) {
   if (row.logo) return <img src={row.logo} width={size} height={size} alt="" className="shrink-0 rounded-full" loading="lazy" />;
   return <AssetIcon symbol={row.symbol} size={size} />;
 }
+
+/** Native BNB has no token page of its own: it opens WBNB, the ERC-20 Sama trades and prices. */
+const marketHref = (symbol: string) => `/markets/${symbol === "BNB" ? "WBNB" : symbol}`;
 
 /** Under one point of difference counts as on target, so rounding noise never asks you to trade. */
 const ON_TARGET_PCT = 1;
@@ -71,7 +75,8 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
       {list.map((r) => {
         const action = todo(r);
         return (
-          <li key={r.symbol} className={cx("flex items-center gap-3 py-3", r.amount === 0 && "opacity-60")}>
+          <li key={r.symbol} className={cx("py-3", r.amount === 0 && "opacity-60")}>
+            <Link href={marketHref(r.symbol)} className="flex items-center gap-3">
             <RowIcon row={r} size={44} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-base font-semibold text-ink">{r.name ?? r.symbol}</span>
@@ -81,6 +86,7 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
               {r.priced ? <Money value={r.value} locale={locale} className="tabular-nums block text-base font-semibold text-ink" /> : <span className="block text-sm text-ink-3">No price</span>}
               {action ? <span className={cx("block text-sm font-medium", action.tone)}>{action.text}</span> : null}
             </span>
+            </Link>
           </li>
         );
       })}
@@ -107,7 +113,7 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
                 <span className="flex min-w-0 items-center gap-3">
                   <RowIcon row={r} size={36} />
                   <span className="min-w-0">
-                    <span className="block truncate font-medium text-ink">{r.name ?? r.symbol}</span>
+                    <Link href={marketHref(r.symbol)} className="block truncate font-medium text-ink hover:underline">{r.name ?? r.symbol}</Link>
                     {r.name && <span className="block truncate text-sm text-ink-3">{r.symbol}</span>}
                   </span>
                 </span>

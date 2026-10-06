@@ -1149,6 +1149,21 @@ export const BSTOCKS: Asset[] = [
   }
 ];
 
+export const CRYPTO: Asset[] = [
+  {
+    "uid": "56:0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    "address": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    "symbol": "WBNB",
+    "name": "Wrapped BNB",
+    "decimals": 18,
+    "class": "CRYPTO",
+    "priceUsd": 780,
+    "tier": "A",
+    "leveraged": false,
+    "uiMultiplier": 1
+  }
+];
+
 export const CASH: Asset = {
   "uid": "56:0x55d398326f99059fF775485246999027B3197955",
   "address": "0x55d398326f99059fF775485246999027B3197955",

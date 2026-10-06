@@ -6,7 +6,7 @@
  * Fields marked optional were added after the frontend's first version, so an older client still parses responses.
  */
 
-export type AssetClass = "STOCK" | "ETF" | "CASH";
+export type AssetClass = "STOCK" | "ETF" | "CASH" | "CRYPTO";
 
 /**
  * A: PancakeSwap pool + TWAP, price cross-checked on-chain, leftovers can be swapped.
@@ -42,6 +42,12 @@ export type ResidualStyle = "ECONOMIC" | "CARRY_FORWARD" | "CANCEL";
 export type Target = { weights: Record<string, number>; costCapBps: number; residualStyle: ResidualStyle; savedAt: string };
 
 export type TargetPreview = { ok: boolean; problems: string[]; trades: Array<{ symbol: string; side: Side; amountTokens: number; valueUsd: number }> };
+
+/**
+ * What the AI helper made of a sentence: percent weights the user can edit and save (the server preview still decides
+ * whether they are valid), or the reasons it could not.
+ */
+export type TargetSuggestion = { ok: true; weights: Record<string, number> } | { ok: false; problems: string[] };
 
 /** Time windows for the portfolio value chart. */
 export type HistoryRange = "1H" | "1D" | "1W" | "1M" | "1Y" | "ALL";
@@ -183,3 +189,27 @@ export type Proof = {
     verification: { status: "PASS" | "FAIL" | "INCONCLUSIVE"; passed: number; total: number; providersIndependent: boolean; pricesIndependent: boolean } | null;
   }>;
 };
+
+/** What the assistant can ask the user to confirm. The server never runs these itself: the app does, on a click. */
+export type AssistantAction =
+  | { type: "apply_target"; weights: Record<string, number> }
+  | { type: "join_circle"; circleId: string; name: string; needsInvite: boolean }
+  | { type: "open"; path: string; label: string };
+
+/** Rich results shown under the assistant's words. Every figure in them is read from the server. */
+export type AssistantBlock =
+  | { type: "prices"; items: Array<{ symbol: string; name: string; priceUsd: number }>; missing: string[] }
+  | { type: "circles"; circles: Array<{ id: string; name: string; description: string; memberCount: number; assetSymbols: string[]; role: "ORGANIZER" | "MEMBER" | null }> };
+
+/** One turn of the chat, as the app sends it back for context. */
+export type AssistantTurn = { role: "user" | "assistant"; content: string };
+
+/** One reply from the AI assistant: words, optional result blocks, and actions the user may confirm. */
+export type AssistantReply = { text: string; blocks: AssistantBlock[]; actions: AssistantAction[] };
+
+/** Saved assistant conversations (per wallet). */
+export type ChatSummary = { id: string; title: string; updatedAt: string };
+export type ChatMessage = { role: "user" | "assistant"; content: string; blocks?: AssistantBlock[]; actions?: AssistantAction[]; error?: boolean; createdAt: string };
+export type ChatDetail = { id: string; title: string; messages: ChatMessage[] };
+/** The answer to one chat message: which conversation it belongs to (new or existing) and the reply. */
+export type AssistantResponse = { chatId: string; title: string; reply: AssistantReply };

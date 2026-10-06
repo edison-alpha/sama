@@ -32,9 +32,28 @@ export function CircleDetail({ id }: { id: string }) {
   const { data: c, error, refresh } = useApi(() => sama.circle(id), [id], { pollMs: 10_000 });
   const act = useAction();
   const [invite, setInvite] = useState<string | null>(null);
-  const [copied, setCopied] = useState<"invite" | "link" | null>(null);
+  const [copied, setCopied] = useState<"invite" | "link" | "code" | null>(null);
   const [typedCode, setTypedCode] = useState("");
   const now = useNow();
+
+  // Organizers of non-public circles see their invitation code right away. The generated invite is remembered per
+  // circle in this browser so revisiting the page shows the same code instead of minting a new one.
+  const circleId = c?.id;
+  const needsCode = c?.role === "ORGANIZER" && c.visibility !== "PUBLIC";
+  useEffect(() => {
+    if (!circleId || !needsCode) return;
+    const key = `sama:invite:${circleId}`;
+    let cached: string | null = null;
+    try { cached = window.localStorage.getItem(key); } catch {}
+    if (cached) { setInvite(cached); return; }
+    let live = true;
+    sama.invite(circleId).then(({ url }) => {
+      if (!live) return;
+      setInvite(url);
+      try { window.localStorage.setItem(key, url); } catch {}
+    }, () => {});
+    return () => { live = false; };
+  }, [circleId, needsCode]);
 
   if (!c) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
 
@@ -66,8 +85,12 @@ export function CircleDetail({ id }: { id: string }) {
     act.run(async () => {
       const { url } = await sama.invite(c.id);
       setInvite(url);
+      try { window.localStorage.setItem(`sama:invite:${c.id}`, url); } catch {}
       await navigator.clipboard?.writeText(url).then(() => setCopied("invite"), () => {});
     });
+  // The invitation code is the last path segment of the invite URL (/invite/<code>).
+  const inviteCode = invite ? decodeURIComponent(invite.split("?")[0]!.split("/").filter(Boolean).pop() ?? "") : null;
+  const copyCode = () => { if (inviteCode) void navigator.clipboard?.writeText(inviteCode).then(() => { setCopied("code"); window.setTimeout(() => setCopied(null), 1500); }, () => {}); };
   const copyLink = () => void navigator.clipboard?.writeText(window.location.href).then(() => { setCopied("link"); window.setTimeout(() => setCopied(null), 1500); }, () => {});
   const shareText = encodeURIComponent(`${c.name} — Sama`);
   const status = live ? (
@@ -90,6 +113,15 @@ export function CircleDetail({ id }: { id: string }) {
 
   const links = (
     <div className="flex flex-wrap gap-2">
+      {c.role === "ORGANIZER" && inviteCode && (
+        <div className="flex w-full flex-wrap items-center gap-3 rounded-2xl bg-surface-2 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-ink-3">{d.invite.codeLabel}</p>
+            <p className="select-all truncate font-mono text-base font-medium text-ink">{inviteCode}</p>
+          </div>
+          <button type="button" onClick={copyCode} className={pill}><IconCopy size={18} />{copied === "code" ? d.common.copied : cd.copyCode}</button>
+        </div>
+      )}
       {c.role === "ORGANIZER" && (
         <button type="button" onClick={makeInvite} className={pill}><IconUsers size={18} />{copied === "invite" ? d.common.copied : d.circles.invite}</button>
       )}

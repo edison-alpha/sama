@@ -1,6 +1,6 @@
 import { encodeFunctionData, erc20Abi, type Hex, type TypedDataDefinition } from "viem";
 import type { SamaApi } from "./contract";
-import type { Activity, Circle, HistoryPoint, RoundView } from "./types";
+import type { Activity, ChatSummary, Circle, HistoryPoint, RoundView } from "./types";
 
 /**
  * Live client for sama-backend (Elysia on Bun), one method per API route (PRD §18.2). Responses are typed by
@@ -62,6 +62,17 @@ export const liveApi: SamaApi = {
   },
   portfolioHistory: async (range) => (await call<{ points: HistoryPoint[] }>(`/api/me/portfolio/history?range=${range}`)).points,
   previewTarget: (target) => call("/api/me/target/preview", { body: target }),
+  agentEnabled: async () => (await call<{ enabled: boolean }>("/api/agent")).enabled,
+  suggestTarget: (instruction) => call("/api/me/target/suggest", { body: { instruction } }),
+  assist: (chatId, message) => call("/api/me/assistant", { body: { chatId: chatId ?? undefined, message } }),
+  chats: async () => (await call<{ chats: ChatSummary[] }>("/api/me/chats")).chats,
+  chat: (id) => call(`/api/me/chats/${encodeURIComponent(id)}`),
+  deleteChat: async (id) => {
+    await call(`/api/me/chats/${encodeURIComponent(id)}`, { method: "DELETE" });
+  },
+  deleteAllChats: async () => {
+    await call("/api/me/chats", { method: "DELETE" });
+  },
   saveTarget: async (target) => {
     await call("/api/me/target", { body: target });
   },

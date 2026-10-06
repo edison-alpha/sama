@@ -3,6 +3,7 @@
 import { m } from "motion/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { spring } from "@/components/motion";
+import { ChartSkeleton } from "@/components/market/chart-skeleton";
 import { Money } from "@/components/ui/money";
 import { API_MODE, sama } from "@/lib/api";
 import type { HistoryPoint, HistoryRange } from "@/lib/api/types";
@@ -61,7 +62,8 @@ export function ValueChart({ live, below }: { live: number; below?: ReactNode })
       {/* Phones show just the number and its change, as wallet apps do; the plot starts at tablet width. */}
       <div className="mt-6 hidden sm:block">
         {/* No history endpoint yet means no plot, not a placeholder. In demo mode the history is generated, so say so. */}
-        {!error && (
+        {!error && !data && <ChartSkeleton />}
+        {!error && data && (
           <>
             <Plot points={points} up={up} hover={hover} onHover={setHover} range={range} label={`${c.label}, ${c.period[range]}`} />
             {API_MODE === "mock" && <p className="mt-2 text-xs text-ink-3">{c.demoNote}</p>}
@@ -88,7 +90,7 @@ export function ValueChart({ live, below }: { live: number; below?: ReactNode })
   );
 }
 
-function Plot({ points, up, hover, onHover, range, label }: { points: HistoryPoint[]; up: boolean; hover: number | null; onHover: (i: number | null) => void; range: HistoryRange; label: string }) {
+export function Plot({ points, up, hover, onHover, range, label }: { points: HistoryPoint[]; up: boolean; hover: number | null; onHover: (i: number | null) => void; range: HistoryRange; label: string }) {
   const { locale } = useI18n();
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);

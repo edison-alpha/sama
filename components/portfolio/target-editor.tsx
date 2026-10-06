@@ -10,7 +10,6 @@ import { Sheet } from "@/components/ui/sheet";
 import { ErrorNote } from "@/components/ui/states";
 import { Term } from "@/components/ui/term";
 import { sama } from "@/lib/api";
-import { PRESETS } from "@/lib/api/demo-data";
 import type { Asset, Portfolio, ResidualStyle, Target, TargetPreview } from "@/lib/api/types";
 import { useAction } from "@/lib/api/use-api";
 import { percent, tokens, usd } from "@/lib/format";
@@ -18,7 +17,47 @@ import { useI18n } from "@/lib/i18n/provider";
 import { useTokenVisibility } from "@/lib/token-visibility";
 import { cx } from "@/utils/cx";
 
-type PresetKey = keyof typeof PRESETS;
+import { APPLY_TARGET_EVENT, PENDING_TARGET_KEY } from "@/components/ai/apply-target";
+
+const PRESET_KEYS = ["balanced", "conservative", "growth"] as const;
+type PresetKey = (typeof PRESET_KEYS)[number];
+
+/** Share of the target kept in cash (the stable asset) for each preset; the rest is spread over the risk assets. */
+const CASH_SHARE: Record<PresetKey, number> = { conservative: 60, balanced: 30, growth: 10 };
+/** With no stock held yet, a preset spreads its risk share over this many catalogue assets (the API lists the best first). */
+const STARTER_COUNT = 3;
+
+/**
+ * What the wallet holds among the assets Sama trades, as a share of that part only. Other wallet tokens (BNB, listed
+ * tokens) are shown in the portfolio but cannot be in a target, so they must not count towards "now" or a preset.
+ */
+function tradableShares(assets: Asset[], portfolio: Portfolio): Array<{ symbol: string; pct: number }> {
+  if (!portfolio.ok) return [];
+  const known = new Set(assets.map((a) => a.symbol));
+  const held = portfolio.positions.filter((p) => known.has(p.symbol) && p.valueUsd > 0);
+  const total = held.reduce((s, p) => s + p.valueUsd, 0);
+  return total > 0 ? held.map((p) => ({ symbol: p.symbol, pct: (p.valueUsd / total) * 100 })) : [];
+}
+
+/**
+ * A preset built from real assets: the cash share goes to the stable asset, the rest is split over the stocks the user
+ * holds in proportion to what they hold now. With no stock held, it is split equally over the first catalogue stocks.
+ */
+function presetFor(key: PresetKey, assets: Asset[], portfolio: Portfolio): Record<string, number> {
+  const cash = assets.find((a) => a.class === "CASH")?.symbol;
+  const cls = new Map(assets.map((a) => [a.symbol, a.class]));
+  let risk = tradableShares(assets, portfolio).filter((p) => cls.get(p.symbol) !== "CASH");
+  if (risk.length === 0) risk = assets.filter((a) => a.class !== "CASH").slice(0, STARTER_COUNT).map((a) => ({ symbol: a.symbol, pct: 1 }));
+  if (risk.length === 0 || !cash) return {};
+  const cashPct = CASH_SHARE[key];
+  const riskTotal = risk.reduce((s, p) => s + p.pct, 0);
+  const out: Record<string, number> = { [cash]: cashPct };
+  for (const p of risk) out[p.symbol] = Math.round(((100 - cashPct) * p.pct) / riskTotal);
+  const drift = 100 - Object.values(out).reduce((s, v) => s + v, 0);
+  const largest = risk.reduce((a, b) => (out[a.symbol]! >= out[b.symbol]! ? a : b)).symbol;
+  out[largest] = out[largest]! + drift;
+  return Object.fromEntries(Object.entries(out).filter(([, v]) => v > 0));
+}
 
 /**
  * Target editor (PRD §19.4.4) laid out like a DEX page: preset chips and a settings icon on top, one list of tokens
@@ -30,7 +69,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   const { d, fmt, locale } = useI18n();
   const e = d.portfolio.editor;
   const t = d.portfolio.table;
-  const [weights, setWeights] = useState<Record<string, number>>(target?.weights ?? PRESETS.balanced);
+  const [weights, setWeights] = useState<Record<string, number>>(target?.weights ?? presetFor("balanced", assets, portfolio));
   const [costCapBps, setCostCapBps] = useState(target?.costCapBps ?? 100);
   const [residualStyle, setResidualStyle] = useState<ResidualStyle>(target?.residualStyle ?? "ECONOMIC");
   const [preview, setPreview] = useState<TargetPreview | null>(null);
@@ -38,20 +77,33 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const act = useAction();
+  // The global AI assistant can hand over weights ("Apply to my target"). They arrive as an event when this page is open,
+  // or through sessionStorage when the assistant first navigated here.
 
   const total = Object.values(weights).reduce((s, w) => s + w, 0);
   const ok = Math.abs(total - 100) < 0.05;
-  const current: Record<string, number> = portfolio.ok ? Object.fromEntries(portfolio.positions.map((p) => [p.symbol, p.pct])) : {};
+  const current: Record<string, number> = Object.fromEntries(tradableShares(assets, portfolio).map((p) => [p.symbol, p.pct]));
   const trades = new Map((preview?.trades ?? []).map((x) => [x.symbol, x]));
   const sellUsd = (preview?.trades ?? []).filter((x) => x.side === "SELL").reduce((s, x) => s + x.valueUsd, 0);
   const buyUsd = (preview?.trades ?? []).filter((x) => x.side === "BUY").reduce((s, x) => s + x.valueUsd, 0);
   // Held tokens first (largest first), then the rest in catalogue order. Fixed while editing, so rows never jump.
   const [rows] = useState(() => [...assets].sort((a, b) => (current[b.symbol] ?? 0) - (current[a.symbol] ?? 0)));
-  // With ~90 bStocks the list starts with what matters: held, weighted, tier A and cash (or everything when the API
-  // sends no tiers). The rest is one search away, and stays listed once it gets a weight.
+  // With ~90 bStocks the list starts with what the user holds (plus anything already weighted in the target). The
+  // rest is added in Manage tokens, and stays listed once it gets a weight.
   const [query, setQuery] = useState("");
-  const [pinned, setPinned] = useState(() => new Set(assets.filter((a) => (current[a.symbol] ?? 0) > 0 || (weights[a.symbol] ?? 0) > 0 || !a.tier || a.tier === "A" || a.class === "CASH").map((a) => a.symbol)));
+  const [pinned, setPinned] = useState(() => new Set(assets.filter((a) => (current[a.symbol] ?? 0) > 0 || (weights[a.symbol] ?? 0) > 0).map((a) => a.symbol)));
   const pin = (symbols: string[]) => setPinned((p) => (symbols.every((s) => p.has(s)) ? p : new Set([...p, ...symbols])));
+  useEffect(() => {
+    const apply = (w: Record<string, number>) => { pin(Object.keys(w)); setWeights(w); };
+    try {
+      const raw = window.sessionStorage.getItem(PENDING_TARGET_KEY);
+      if (raw) { window.sessionStorage.removeItem(PENDING_TARGET_KEY); apply(JSON.parse(raw) as Record<string, number>); }
+    } catch {}
+    const onApply = (ev: Event) => { try { window.sessionStorage.removeItem(PENDING_TARGET_KEY); } catch {} apply((ev as CustomEvent<Record<string, number>>).detail); };
+    window.addEventListener(APPLY_TARGET_EVENT, onApply);
+    return () => window.removeEventListener(APPLY_TARGET_EVENT, onApply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // The user's own show/hide choices sit over the default list. A held or weighted token is always listed: hiding it
   // would count as a 0% target and the next round would sell it.
   const { visibility, setShown, reset: resetVisibility } = useTokenVisibility();
@@ -61,6 +113,9 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   const q = query.trim().toLowerCase();
   // The page search covers only the tokens listed here; adding others is done in Manage tokens.
   const visible = rows.filter((a) => !hiddenByUser(a) && listedByDefault(a) && (!q || `${a.symbol} ${a.name}`.toLowerCase().includes(q)));
+  // Typing in the page search also finds tokens that are not listed yet, each one tap from being added.
+  const addable = q ? rows.filter((a) => !visible.includes(a) && `${a.symbol} ${a.name}`.toLowerCase().includes(q)).slice(0, 6) : [];
+  const addToken = (a: Asset) => { pin([a.symbol]); setShown(a.symbol, true); };
   const caution = (a: Asset) => (a.leveraged ? e.leveraged : a.tier === "C" ? e.fewHolders : null);
 
   // Debounced server check: never one request per keystroke.
@@ -115,9 +170,10 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
           {/* Presets fill the numbers in one tap; the gear opens the rarely-touched settings in a sheet. */}
           <div className="flex items-center gap-2">
             <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {(Object.keys(PRESETS) as PresetKey[]).map((k) => {
+              {PRESET_KEYS.map((k) => {
                 const [name, body] = d.portfolio.presets[k];
-                const selected = JSON.stringify(PRESETS[k]) === JSON.stringify(weights);
+                const preset = presetFor(k, assets, portfolio);
+                const selected = JSON.stringify(preset) === JSON.stringify(weights);
                 return (
                   <button
                     key={k}
@@ -125,8 +181,8 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                     title={body}
                     aria-pressed={selected}
                     onClick={() => {
-                      pin(Object.keys(PRESETS[k]));
-                      setWeights(PRESETS[k]);
+                      pin(Object.keys(preset));
+                      setWeights(preset);
                     }}
                     className={cx("h-9 shrink-0 rounded-full border px-3.5 text-sm font-semibold transition-colors sm:h-10 sm:px-4", selected ? "border-accent bg-accent-soft text-accent" : "border-line text-ink hover:bg-surface-2")}
                   >
@@ -161,7 +217,21 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
               {e.manage}
             </button>
           </div>
-          {q && visible.length === 0 && <p className="mt-3 text-sm text-ink-3">{fmt(e.noMatch, { q: query.trim() })}</p>}
+          {q && visible.length === 0 && addable.length === 0 && <p className="mt-3 text-sm text-ink-3">{fmt(e.noMatch, { q: query.trim() })}</p>}
+          {addable.length > 0 && (
+            <ul className="mt-3 divide-y divide-line overflow-hidden rounded-2xl border border-line">
+              {addable.map((a) => (
+                <li key={a.symbol} className="flex items-center gap-3 px-4 py-2.5">
+                  <AssetIcon symbol={a.symbol} size={32} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-medium text-ink">{a.symbol}</span>
+                    <span className="block truncate text-xs text-ink-3">{a.name}</span>
+                  </span>
+                  <button type="button" onClick={() => addToken(a)} aria-label={`${e.addFromSearch}: ${a.symbol}`} className="h-9 shrink-0 rounded-full border border-line px-4 text-sm font-semibold text-ink transition-colors hover:bg-surface-2">{e.add}</button>
+                </li>
+              ))}
+            </ul>
+          )}
 
           {/* Phones: one row per token (now on the left, the target stepper on the right, the trade underneath). */}
           <ul className={cx("mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/60 sm:hidden", visible.length === 0 && "hidden")}>
@@ -182,7 +252,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                   </div>
                   {trade && (
                     <p className="tabular-nums mt-1.5 pl-12 text-xs">
-                      <span className={cx("font-semibold", trade.side === "SELL" ? "text-danger" : "text-ok")}>{fmt(trade.side === "SELL" ? t.sell : t.buy, { amount: usd(trade.valueUsd, locale, 0) })}</span>
+                      <span className={cx("font-semibold", trade.side === "SELL" ? "text-danger" : "text-ok")}>{fmt(trade.side === "SELL" ? t.sell : t.buy, { amount: usd(trade.valueUsd, locale, trade.valueUsd < 10 ? 2 : 0) })}</span>
                       <span className="text-ink-3"> · {tokens(trade.amountTokens, locale)} {a.symbol}</span>
                     </p>
                   )}
@@ -233,7 +303,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
                       <td className="px-4 py-3.5 text-right text-sm">
                         {trade ? (
                           <>
-                            <span className={cx("block font-semibold", trade.side === "SELL" ? "text-danger" : "text-ok")}>{fmt(trade.side === "SELL" ? t.sell : t.buy, { amount: usd(trade.valueUsd, locale, 0) })}</span>
+                            <span className={cx("block font-semibold", trade.side === "SELL" ? "text-danger" : "text-ok")}>{fmt(trade.side === "SELL" ? t.sell : t.buy, { amount: usd(trade.valueUsd, locale, trade.valueUsd < 10 ? 2 : 0) })}</span>
                             <span className="tabular-nums block text-xs text-ink-3">{tokens(trade.amountTokens, locale)} {a.symbol}</span>
                           </>
                         ) : (
@@ -258,7 +328,7 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
 
           {/* Phones: the same messages the summary box shows, plus room so the pinned save bar never covers a row. */}
           <div className="mt-4 grid gap-3 sm:hidden">{notes}</div>
-          <div className="h-20 sm:hidden" aria-hidden="true" />
+          <div className="h-28 sm:h-24" aria-hidden="true" />
         </div>
 
         <aside className="hidden gap-4 rounded-[24px] border border-line bg-surface p-5 sm:grid lg:sticky lg:top-6">
@@ -279,9 +349,9 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
         <div className="glass-panel-strong flex items-center gap-3 rounded-[22px] py-2 pl-4 pr-2">
           <div className="min-w-0 flex-1">
             <p className="tabular-nums truncate text-sm font-semibold">
-              <span className="text-danger">{fmt(t.sell, { amount: usd(sellUsd, locale, 0) })}</span>
+              <span className="text-danger">{fmt(t.sell, { amount: usd(sellUsd, locale, sellUsd < 10 ? 2 : 0) })}</span>
               <span className="text-ink-3"> · </span>
-              <span className="text-ok">{fmt(t.buy, { amount: usd(buyUsd, locale, 0) })}</span>
+              <span className="text-ok">{fmt(t.buy, { amount: usd(buyUsd, locale, buyUsd < 10 ? 2 : 0) })}</span>
             </p>
             <p className={cx("tabular-nums text-xs", ok ? "text-ink-3" : "text-warn")}>{d.portfolio.total} {percent(total, locale, 0)}</p>
           </div>

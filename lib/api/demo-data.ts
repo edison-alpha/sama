@@ -1,4 +1,4 @@
-import { BSTOCKS, CASH } from "./bstocks.generated";
+import { BSTOCKS, CASH, CRYPTO } from "./bstocks.generated";
 import type { Activity, Asset, Circle, Target } from "./types";
 
 /**
@@ -11,7 +11,7 @@ const placeholder = (n: number) => `0x${n.toString(16).padStart(40, "0")}` as `0
 export const DEMO_ADDRESS = "0x5a3a00000000000000000000000000000000dE30" as const;
 export const DEMO_SETTLEMENT = placeholder(0x5a3a);
 
-export const DEMO_ASSETS: Asset[] = [CASH, ...BSTOCKS];
+export const DEMO_ASSETS: Asset[] = [CASH, ...CRYPTO, ...BSTOCKS];
 
 export const DEMO_HOLDINGS: Record<string, number> = { NVDAB: 6, AAPLB: 4, TSLAB: 3, GOOGLB: 3, USDT: 1_500 };
 
