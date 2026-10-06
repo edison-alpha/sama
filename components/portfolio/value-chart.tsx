@@ -4,6 +4,7 @@ import { m } from "motion/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { spring } from "@/components/motion";
 import { ChartSkeleton } from "@/components/market/chart-skeleton";
+import { ReturnsView } from "@/components/portfolio/returns-view";
 import { Money } from "@/components/ui/money";
 import { API_MODE, sama } from "@/lib/api";
 import type { HistoryPoint, HistoryRange } from "@/lib/api/types";
@@ -28,6 +29,7 @@ export function ValueChart({ live, below }: { live: number; below?: ReactNode })
   const { d, locale } = useI18n();
   const c = d.home.chart;
   const [range, setRange] = useState<HistoryRange>("1D");
+  const [view, setView] = useState<"chart" | "calendar">("chart");
   const { data, error } = useApi(() => sama.portfolioHistory(range), [range]);
   const [hover, setHover] = useState<number | null>(null);
 
@@ -61,30 +63,58 @@ export function ValueChart({ live, below }: { live: number; below?: ReactNode })
 
       {/* Phones show just the number and its change, as wallet apps do; the plot starts at tablet width. */}
       <div className="mt-6 hidden sm:block">
-        {/* No history endpoint yet means no plot, not a placeholder. In demo mode the history is generated, so say so. */}
-        {!error && !data && <ChartSkeleton />}
-        {!error && data && (
+        {view === "calendar" ? (
+          <ReturnsView />
+        ) : (
           <>
-            <Plot points={points} up={up} hover={hover} onHover={setHover} range={range} label={`${c.label}, ${c.period[range]}`} />
-            {API_MODE === "mock" && <p className="mt-2 text-xs text-ink-3">{c.demoNote}</p>}
+            {/* No history endpoint yet means no plot, not a placeholder. In demo mode the history is generated, so say so. */}
+            {!error && !data && <ChartSkeleton />}
+            {!error && data && (
+              <>
+                <Plot points={points} up={up} hover={hover} onHover={setHover} range={range} label={`${c.label}, ${c.period[range]}`} />
+                {API_MODE === "mock" && <p className="mt-2 text-xs text-ink-3">{c.demoNote}</p>}
+              </>
+            )}
           </>
         )}
       </div>
 
-      <div role="radiogroup" aria-label={c.label} className="mt-4 hidden rounded-full border border-line p-1 sm:inline-flex">
-        {RANGES.map((r) => (
-          <button
-            key={r}
-            type="button"
-            role="radio"
-            aria-checked={r === range}
-            onClick={() => { setRange(r); setHover(null); }}
-            className={cx("relative h-8 min-w-11 rounded-full px-3 text-sm font-semibold transition-colors", r === range ? "text-ink" : "text-ink-3 hover:text-ink")}
-          >
-            {r === range && <m.span layoutId="value-chart-range" transition={spring} className="absolute inset-0 rounded-full bg-surface-3" aria-hidden="true" />}
-            <span className="relative">{c.ranges[r]}</span>
-          </button>
-        ))}
+      <div className="mt-4 hidden items-center justify-between gap-3 sm:flex">
+        {/* The calendar always covers all recorded months, so the range pills only belong to the chart. */}
+        {view === "chart" ? (
+          <div role="radiogroup" aria-label={c.label} className="inline-flex rounded-full border border-line p-1">
+            {RANGES.map((r) => (
+              <button
+                key={r}
+                type="button"
+                role="radio"
+                aria-checked={r === range}
+                onClick={() => { setRange(r); setHover(null); }}
+                className={cx("relative h-8 min-w-11 rounded-full px-3 text-sm font-semibold transition-colors", r === range ? "text-ink" : "text-ink-3 hover:text-ink")}
+              >
+                {r === range && <m.span layoutId="value-chart-range" transition={spring} className="absolute inset-0 rounded-full bg-surface-3" aria-hidden="true" />}
+                <span className="relative">{c.ranges[r]}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span />
+        )}
+        <div role="radiogroup" aria-label={c.viewLabel} className="inline-flex rounded-full border border-line p-1">
+          {(["chart", "calendar"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              aria-checked={v === view}
+              onClick={() => { setView(v); setHover(null); }}
+              className={cx("relative h-8 rounded-full px-3.5 text-sm font-semibold transition-colors", v === view ? "text-ink" : "text-ink-3 hover:text-ink")}
+            >
+              {v === view && <m.span layoutId="value-chart-view" transition={spring} className="absolute inset-0 rounded-full bg-surface-3" aria-hidden="true" />}
+              <span className="relative">{c.views[v]}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
