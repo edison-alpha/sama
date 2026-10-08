@@ -10,6 +10,7 @@ import { SettingsSkeleton } from "@/components/skeletons/settings-skeleton";
 import { useSession } from "@/components/wallet/session";
 import { UserAvatar } from "@/components/wallet/user-avatar";
 import { API_MODE, sama } from "@/lib/api";
+import { docsUrl } from "@/lib/site";
 import { resetDemo } from "@/lib/api/mock";
 import type { Settings } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
@@ -95,7 +96,7 @@ export default function SettingsPage() {
         </ListSection>
 
         <ListSection title={st.sections.support}>
-          <ListRow icon={<IconPlay size={22} />} label={d.nav.learn} href="/docs" />
+          <ListRow icon={<IconPlay size={22} />} label={d.nav.learn} href={docsUrl("/docs")} />
           <ListRow icon={<IconCheckCircle size={22} />} label={d.nav.proof} href="/proof" />
           {API_MODE === "mock" && <ListRow icon={<IconAlert size={22} />} label={st.resetDemo} onClick={() => { resetDemo(); window.location.href = "/home"; }} />}
           <ListRow icon={<IconArrowLeft size={22} />} label={d.common.signOut} tone="danger" onClick={() => { signOut(); router.push("/"); }} trailing={<span />} />

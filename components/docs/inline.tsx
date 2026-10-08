@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { resolveHref } from "@/lib/site";
 
 const TOKEN = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g;
 
@@ -22,7 +23,7 @@ function render(part: string, key: number): ReactNode {
     return href!.startsWith("http") ? (
       <a key={key} href={href} target="_blank" rel="noreferrer" className={cls}>{label}</a>
     ) : (
-      <Link key={key} href={href!} className={cls}>{label}</Link>
+      <Link key={key} href={resolveHref(href!)} className={cls}>{label}</Link>
     );
   }
   return part;

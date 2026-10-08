@@ -42,7 +42,7 @@ export const security: DocPage = {
     table(
       [["Risk", "Risiko"], ["Mitigation", "Mitigasi"]],
       [
-        [["The contract is not externally audited", "Kontrak belum diaudit pihak luar"], ["Plans are capped at $500 crossed until an audit; Foundry unit, fuzz and mainnet-fork tests cover custody, replay, tampering and reverts", "Rencana dibatasi $500 yang dicocokkan sampai ada audit; test unit, fuzz, dan fork mainnet Foundry mencakup kustodi, replay, manipulasi, dan revert"]],
+        [["The contract is not externally audited", "Kontrak belum diaudit pihak luar"], ["Plans are capped at $500 matched until an audit; Foundry unit, fuzz and mainnet-fork tests cover custody, replay, tampering and reverts", "Rencana dibatasi $500 yang dicocokkan sampai ada audit; test unit, fuzz, dan fork mainnet Foundry mencakup kustodi, replay, manipulasi, dan revert"]],
         [["An issuer pauses or blocks a token", "Penerbit mem-pause atau memblokir token"], ["Status is read before a plan; a blocked wallet is left out. If it happens mid-round the settlement reverts and nothing moves", "Status dibaca sebelum rencana; wallet yang diblokir dikeluarkan. Bila terjadi di tengah round, settlement dibatalkan dan tidak ada yang berpindah"]],
         [["A price source is wrong or stale", "Sumber harga salah atau basi"], ["Tier A prices are cross-checked on-chain; any asset that fails is left out of the round", "Harga tier A dicek silang on-chain; aset yang gagal dikeluarkan dari round"]],
         [["A participant never approves", "Ada peserta yang tidak menyetujui"], ["The plan expires after 30 minutes; nothing moves", "Rencana kedaluwarsa setelah 30 menit; tidak ada yang berpindah"]],

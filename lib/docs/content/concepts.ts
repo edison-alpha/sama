@@ -155,7 +155,7 @@ export const matching: DocPage = {
     preview("ring", ["Maya, Alex and you close a loop no pair could.", "Maya, Alex, dan kamu menutup putaran yang tidak bisa ditutup pasangan."]),
     h2("method", "Method", "Metode"),
     p(
-      "Members and assets form a flow network: sell capacity on member → asset edges, buy capacity on asset → member edges, and an exact value balance at every member. The largest crossed value is a min-cost circulation, solved with minimum-mean cycle canceling. There is no external solver and no randomness.",
+      "Members and assets form a flow network: sell capacity on member → asset edges, buy capacity on asset → member edges, and an exact value balance at every member. The largest matched value is a min-cost circulation, solved with minimum-mean cycle canceling. There is no external solver and no randomness.",
       "Anggota dan aset membentuk jaringan alir: kapasitas jual di sisi anggota → aset, kapasitas beli di sisi aset → anggota, dan keseimbangan nilai yang persis di setiap anggota. Nilai pencocokan terbesar adalah min-cost circulation, diselesaikan dengan minimum-mean cycle canceling. Tidak ada solver eksternal dan tidak ada unsur acak.",
     ),
     ul(

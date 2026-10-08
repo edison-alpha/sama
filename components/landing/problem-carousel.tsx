@@ -101,14 +101,13 @@ function PoolScene() {
   return (
     <Panel className="ps-float w-full max-w-[310px] p-4">
       <div className="flex items-center gap-2.5">
-        <AssetIcon symbol="NVDAB" size={28} />
+        <AssetIcon symbol="NOKB" size={28} />
         <div className="flex-1">
-          <p className="text-sm font-medium">NVDAB / USDT</p>
-          <p className="text-[11px] text-white/60">Pool depth</p>
+          <p className="text-sm font-medium">NOKB / USDT</p>
+          <p className="text-[11px] text-white/60">A thin pool</p>
         </div>
-        <p className="num text-sm">$18.4K</p>
       </div>
-      <div className="relative mt-4 flex h-24 items-end gap-[3px]">
+      <div className="relative mt-4 flex h-20 items-end gap-[3px]">
         {DEPTH.map((h, i) => (
           <span
             key={i}
@@ -119,8 +118,12 @@ function PoolScene() {
         <span className="ps-sweep absolute bottom-0 top-0 w-0.5 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" />
       </div>
       <div className="mt-4 flex items-center justify-between border-t border-white/15 pt-3 text-sm">
-        <span className="text-white/60">Price impact</span>
-        <span className="ps-impact num font-semibold text-accent">−3.2%</span>
+        <span className="text-white/60">Cost of a $10K swap</span>
+        <span className="ps-impact num font-semibold text-accent">−7.7%</span>
+      </div>
+      <div className="mt-1.5 flex items-center justify-between text-xs text-white/60">
+        <span>In NVDAB's deep pool</span>
+        <span className="num">−0.26%</span>
       </div>
     </Panel>
   );
