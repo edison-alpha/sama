@@ -35,7 +35,7 @@ export type Asset = {
 
 export type Position = { symbol: string; amountTokens: number; valueUsd: number; pct: number; logo?: string; priced?: boolean };
 
-export type Portfolio = { ok: true; totalUsd: number; readAt: string; positions: Position[] } | { ok: false; detail: string };
+export type Portfolio = { ok: true; totalUsd: number; readAt: string; positions: Position[]; complete?: boolean } | { ok: false; detail: string };
 
 export type ResidualStyle = "ECONOMIC" | "CARRY_FORWARD" | "CANCEL";
 
