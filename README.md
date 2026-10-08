@@ -2,14 +2,6 @@
 Find the other side of your rebalance: wallet-to-wallet matching for tokenized stocks on BNB Chain.
 
 
-
-## Contract Address
-`0x7811a30D29d6c2Ca95Aeb4EE9D896cE44Cb72AC8` (`SamaSettlement`, BNB Smart Chain Mainnet, chain 56). Source verified on BscScan and Sourcify (exact match).
-
----
-
-
-
 <img width="1448" height="1086" alt="Group 60" src="https://github.com/user-attachments/assets/7af71cad-39c5-403d-8f3d-26874b21a731" />
 
 
@@ -218,6 +210,11 @@ WBNB is how BNB joins a rebalance: settlement moves tokens only, and the app con
 - **Backend:** Bun + Elysia, Postgres or embedded PGlite (production runs PGlite), viem, Binance Web3 RWA API (HMAC-signed, server-only), CoinGecko on-chain API
 - **Frontend:** Next.js 16, React 19, Privy auth, mobile-first PWA, light/dark mode, ID/EN
 - **AI:** the assistant runs on any OpenAI-compatible model with tool calling (configurable gateway, Groq supported). The target interpreter uses Claude or Groq with structured output and a deterministic resolver.
+
+## Contract Address
+`0x7811a30D29d6c2Ca95Aeb4EE9D896cE44Cb72AC8`
+
+---
 
 ### Team
 **NGDKLabs**
