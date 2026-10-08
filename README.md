@@ -1,8 +1,4 @@
-# SAMA — Hackathon submission (NGDKLabs)
-
-## Project Name
-SAMA
-
+# SAMA 
 Find the other side of your rebalance: wallet-to-wallet matching for tokenized stocks on BNB Chain.
 
 
