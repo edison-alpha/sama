@@ -12,6 +12,7 @@ import { RouteSkeleton } from "@/components/skeletons/route-skeleton";
 import { useSession } from "@/components/wallet/session";
 import { UserAvatar } from "@/components/wallet/user-avatar";
 import { isTestnet } from "@/lib/chain";
+import { docsUrl } from "@/lib/site";
 import { short } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
@@ -88,7 +89,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
           <div className="mt-auto grid gap-1">
-            <Link href="/docs" title={d.nav.learn} className="flex h-9 items-center rounded-lg px-3 text-sm text-ink-3 hover:text-ink collapsed:justify-center collapsed:px-0">
+            <Link href={docsUrl("/docs")} title={d.nav.learn} className="flex h-9 items-center rounded-lg px-3 text-sm text-ink-3 hover:text-ink collapsed:justify-center collapsed:px-0">
               <IconLayers size={20} className="hidden collapsed:block" />
               <span className="whitespace-nowrap collapsed:sr-only">{d.nav.learn}</span>
             </Link>

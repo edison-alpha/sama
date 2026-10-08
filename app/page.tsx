@@ -9,6 +9,7 @@ import { Stats } from "@/components/landing/stats";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { ButtonLink } from "@/components/ui/button";
 import { getDict } from "@/lib/i18n/server";
+import { appUrl, resolveHref } from "@/lib/site";
 
 /**
  * Landing page, built from the Sama landing design: photo hero with glass navigation, supported-asset strip,
@@ -38,12 +39,12 @@ export default async function Landing() {
           <nav className="grid grid-cols-[1fr_auto_1fr] items-center">
             <div className="hidden w-fit items-center rounded-full glass px-2 py-1.5  md:flex">
               {([["/", L.nav.home], ["/circles", L.nav.circles], ["/docs", L.nav.rails], ["/proof", L.nav.proof]] as const).map(([href, label]) => (
-                <Link key={label} href={href} className="rounded-full px-5 py-2 text-base font-medium text-white hover:bg-white/15">{label}</Link>
+                <Link key={label} href={resolveHref(href)} className="rounded-full px-5 py-2 text-base font-medium text-white hover:bg-white/15">{label}</Link>
               ))}
             </div>
             <div className="md:hidden" />
             <Link href="/" aria-label="Sama" className="justify-self-center"><Mark size={46} white /></Link>
-            <ButtonLink href="/start" className="justify-self-end px-8">{L.join}</ButtonLink>
+            <ButtonLink href={appUrl("/start")} className="justify-self-end px-8">{L.join}</ButtonLink>
           </nav>
 
           <div className="mx-auto mt-[11vh] flex max-w-4xl flex-col items-center text-center">
@@ -54,8 +55,8 @@ export default async function Landing() {
             <h1 className="mt-5 whitespace-pre-line text-balance text-[2.6rem] font-semibold leading-[1.04] tracking-[-0.025em] text-white [text-shadow:0_2px_24px_rgb(0_20_60/0.35)] sm:text-6xl lg:text-7xl">{L.title}</h1>
             <p className="mt-5 max-w-md text-pretty text-sm leading-relaxed text-white/80 [text-shadow:0_1px_12px_rgb(0_20_60/0.4)] sm:text-[15px]">{L.lead}</p>
             <div className="mt-9 flex flex-wrap justify-center gap-2.5">
-              <ButtonLink href="/start" variant="glass" size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.secondary}</ButtonLink>
-              <ButtonLink href="/docs" size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.start}</ButtonLink>
+              <ButtonLink href={appUrl("/start")} variant="glass" size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.secondary}</ButtonLink>
+              <ButtonLink href={resolveHref("/docs")} size="lg" className="min-w-36 sm:h-14 sm:min-w-40 sm:text-lg">{L.start}</ButtonLink>
             </div>
           </div>
         </div>

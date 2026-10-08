@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n/dict";
+import { docsUrl } from "@/lib/site";
 import { assets, assistant, circles, leftovers, matching, rounds, settlement, targets } from "./content/concepts";
 import { api, architecture, contract, localSetup, signing } from "./content/developers";
 import { faq, glossary } from "./content/reference";
@@ -17,7 +18,7 @@ export const DOC_GROUPS: DocGroup[] = [
 
 const ALL: Array<{ page: DocPage; group: DocGroup }> = DOC_GROUPS.flatMap((group) => group.pages.map((page) => ({ page, group })));
 
-export const docHref = (slug: string) => (slug ? `/docs/${slug}` : "/docs");
+export const docHref = (slug: string) => docsUrl(slug ? `/docs/${slug}` : "/docs");
 
 export function findDoc(slug: string): { page: DocPage; group: DocGroup; prev: DocPage | null; next: DocPage | null } | null {
   const i = ALL.findIndex((e) => e.page.slug === slug);

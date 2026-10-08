@@ -11,6 +11,7 @@ import { Badge, stateTone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListRow, ListSection } from "@/components/ui/list";
 import { Money } from "@/components/ui/money";
+import { docsUrl } from "@/lib/site";
 import { EmptyState, ErrorNote, PageSkeleton } from "@/components/ui/states";
 import { sama } from "@/lib/api";
 import type { Circle } from "@/lib/api/types";
@@ -132,7 +133,7 @@ export function CircleDetail({ id }: { id: string }) {
         </>
       )}
       <button type="button" onClick={copyLink} className={pill}><IconCopy size={18} />{copied === "link" ? cd.copied : cd.copyLink}</button>
-      <Link href="/docs" className={pill}><IconPlay size={18} />{d.nav.learn}</Link>
+      <Link href={docsUrl("/docs")} className={pill}><IconPlay size={18} />{d.nav.learn}</Link>
     </div>
   );
 

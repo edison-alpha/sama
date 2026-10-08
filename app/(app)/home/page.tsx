@@ -8,6 +8,7 @@ const TOKENS_PER_PAGE = 20;
 import { ActivityRow } from "@/components/activity/activity-row";
 import { NextStepCard } from "@/components/home/next-step-card";
 import { IconAddFill, IconArrowRight, IconGroupFill, IconPlayFill, IconSend, IconSwap, IconTargetFill } from "@/components/icons";
+import { docsUrl } from "@/lib/site";
 import { cx } from "@/utils/cx";
 import { Stagger, rise } from "@/components/motion";
 import { TokenTable, tokenCount } from "@/components/portfolio/token-table";
@@ -80,7 +81,7 @@ export default function HomePage() {
           <ActionTile href="/circles" icon={<IconGroupFill size={22} />}>{a.circles}</ActionTile>
           <ActionTile href="/circles?create=1" icon={<IconAddFill size={22} />}>{a.create}</ActionTile>
           {/* Desktop shows four tiles, so Send takes the place of How it works there; phones keep all five in the scroller. */}
-          <ActionTile href="/docs" icon={<IconPlayFill size={22} />} className="sm:hidden">{a.learn}</ActionTile>
+          <ActionTile href={docsUrl("/docs")} icon={<IconPlayFill size={22} />} className="sm:hidden">{a.learn}</ActionTile>
           <ActionTile href="/portfolio?send=1" icon={<IconSend size={22} />}>{a.send}</ActionTile>
           <span className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
         </div>

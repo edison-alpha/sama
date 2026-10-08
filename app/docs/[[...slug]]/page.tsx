@@ -8,6 +8,7 @@ import { DocsTocInline, DocsTocList, DocsTocRail } from "@/components/docs/toc";
 import { Inline } from "@/components/docs/inline";
 import { docHref, findDoc, tocOf, toMarkdown } from "@/lib/docs";
 import { getDict } from "@/lib/i18n/server";
+import { docsUrl } from "@/lib/site";
 
 type Props = { params: Promise<{ slug?: string[] }> };
 
@@ -32,7 +33,7 @@ export default async function DocPageRoute({ params }: Props) {
     <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_224px] xl:gap-12">
       <article className="mx-auto min-w-0 max-w-[760px] pb-20 pt-8 lg:pt-10 xl:mx-0">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-ink-3">
-          <Link href="/docs" className="hover:text-ink">{d.docs.label}</Link>
+          <Link href={docsUrl("/docs")} className="hover:text-ink">{d.docs.label}</Link>
           <DocIcon name="caretRight" size={14} />
           <span>{group.title[locale]}</span>
           {page.slug && (

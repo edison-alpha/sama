@@ -41,7 +41,7 @@ export const introduction: DocPage = {
         [["Network", "Jaringan"], ["BNB Smart Chain mainnet (56); testnet 97 for development", "BNB Smart Chain mainnet (56); testnet 97 untuk pengembangan"]],
         [["Assets", "Aset"], ["88 bStocks (stocks and ETFs), WBNB for BNB, and USDT as cash", "88 bStocks (saham dan ETF), WBNB untuk BNB, dan USDT sebagai kas"]],
         ["SamaSettlement", "`0x7811a30D29d6c2Ca95Aeb4EE9D896cE44Cb72AC8`"],
-        [["Plan size limit", "Batas nilai plan"], ["$500 crossed per plan while the contract is unaudited", "$500 yang dicocokkan per plan selama kontrak belum diaudit"]],
+        [["Plan size limit", "Batas nilai plan"], ["$500 matched per plan while the contract is unaudited", "$500 yang dicocokkan per plan selama kontrak belum diaudit"]],
         [["Gas sponsorship", "Sponsor gas"], ["Planned. Approvals and settlement need a little BNB today", "Direncanakan. Approval dan settlement saat ini masih butuh sedikit BNB"]],
       ],
     ),
