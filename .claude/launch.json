@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "next-dev",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "--port", "3200"],
+      "port": 3200
+    },
+    {
       "name": "remotion-studio",
       "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
       "runtimeArgs": ["video/node_modules/@remotion/cli/remotion-cli.js", "studio", "video/src/index.ts", "--public-dir", "video/public", "--config", "video/remotion.config.ts", "--env-file", "video/remotion.env", "--no-open", "--port", "3300"],

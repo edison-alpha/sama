@@ -534,7 +534,10 @@ function LeftoversStep({ v, refresh }: Props) {
 
   if (real.length === 0) return <Step v={v} mood={noCross ? "info" : "done"} title={noCross ? d.round.noCrossTitle : d.round.doneTitle} body={v.you.residual.length ? d.round.dustOnly : d.round.nothingLeft} panel={<ButtonLink href={`/circles/${v.circle.id}`} variant="secondary" block>{d.round.backToCircle}</ButtonLink>} />;
 
-  const choices: Choice[] = rec?.canExecute ? ["carry", "swap", "drop"] : ["carry", "drop"];
+  // Swap is always listed so the option never looks missing; when PancakeSwap cannot take it right now it is disabled
+  // and the engine's reason is shown in its place.
+  const choices: Choice[] = ["carry", "swap", "drop"];
+  const swapOff = !rec?.canExecute;
   const confirm = () =>
     act.run(async (say) => {
       if (picked === "swap") await sama.swapResidual(v, signer, say, progressWords(d));
@@ -556,10 +559,11 @@ function LeftoversStep({ v, refresh }: Props) {
             <legend className="sr-only">{d.round.leftoverTitle}</legend>
             {choices.map((key) => {
               const [title, body] = d.round.choices[key];
-              const on = picked === key;
+              const off = key === "swap" && swapOff;
+              const on = picked === key && !off;
               return (
-                <label key={key} className={cx("flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors", on ? "bg-accent-soft/60" : "hover:bg-surface-2", act.pending && "pointer-events-none opacity-60")}>
-                  <input type="radio" name="leftover" value={key} checked={on} onChange={() => setPicked(key)} className="sr-only" />
+                <label key={key} className={cx("flex items-center gap-3 px-4 py-3 transition-colors", off ? "cursor-not-allowed opacity-50" : cx("cursor-pointer", on ? "bg-accent-soft/60" : "hover:bg-surface-2"), act.pending && "pointer-events-none opacity-60")}>
+                  <input type="radio" name="leftover" value={key} checked={on} disabled={off} onChange={() => setPicked(key)} className="sr-only" />
                   <span className={cx("grid size-5 shrink-0 place-items-center rounded-full border-2 transition-colors", on ? "border-accent" : "border-line-strong")} aria-hidden="true">
                     <span className={cx("size-2.5 rounded-full bg-accent transition-transform", on ? "scale-100" : "scale-0")} />
                   </span>
@@ -569,8 +573,8 @@ function LeftoversStep({ v, refresh }: Props) {
                       {key === recommended && <span className="shrink-0 rounded-md bg-accent/15 px-1.5 py-0.5 text-[11px] font-semibold text-accent">{d.round.recommended}</span>}
                     </span>
                     <span className="block text-sm leading-snug text-ink-3">
-                      {body}
-                      {key === "swap" && rec?.costPct != null && <span className="num"> · ≈ {percent(rec.costPct, locale)}</span>}
+                      {off && rec?.reasons[0] ? rec.reasons[0] : body}
+                      {key === "swap" && !off && rec?.costPct != null &&<span className="num"> · ≈ {percent(rec.costPct, locale)}</span>}
                     </span>
                   </span>
                 </label>

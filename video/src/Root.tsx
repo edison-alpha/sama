@@ -2,6 +2,7 @@ import { Composition, Folder } from "remotion";
 import "./fonts";
 import "./real/setup";
 import { SamaPromo } from "./SamaPromo";
+import { DEMO_SECONDS, SamaDemo } from "./demo/SamaDemo";
 import { AppCircle } from "./scenes/AppCircle";
 import { AppHome } from "./scenes/AppHome";
 import { AppPortfolio } from "./scenes/AppPortfolio";
@@ -21,6 +22,7 @@ const len = (seconds: number) => Math.round(seconds * FPS);
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      <Composition id="SamaDemo" component={SamaDemo} durationInFrames={len(DEMO_SECONDS)} fps={FPS} width={1920} height={1080} />
       <Composition id="SamaPromo" component={SamaPromo} durationInFrames={len(PROMO_SECONDS / PLAYBACK_RATE)} fps={60.85} width={1920} height={1080} />
       <Folder name="Scenes">
         <Composition id="Intro" component={Intro} durationInFrames={len(S.intro)} fps={FPS} width={1920} height={1080} />

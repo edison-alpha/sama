@@ -1,0 +1,22 @@
+{
+  "voice": "en-US-AndrewMultilingualNeural",
+  "rate": "-4%",
+  "lines": {
+    "open": "Every rebalance has another side.",
+    "problem": "Somewhere, another holder wants the exact opposite trade. But you never meet. So everyone pays the pool.",
+    "cost": "On thin pools, a ten-thousand-dollar swap costs four point four percent. Sometimes, far more.",
+    "meet": "Meet Sama.",
+    "home": "Sama starts with the wallet you already have. Your tokenized stocks never leave it.",
+    "target": "Set the portfolio you want, once. Sama shows exactly how far you've drifted.",
+    "ai": "Or just say it. The built-in assistant turns one sentence into a target.",
+    "ai2": "Ask which Circle to join, and it finds the ones that fit your portfolio.",
+    "circle": "A Circle is a group of holders who rebalance together, round after round.",
+    "join": "Joining takes one free signature. Nothing moves yet.",
+    "match": "Then Sama finds the trades that cancel out. Pairs, or loops of three or more wallets.",
+    "paired": "Here, eighty-two percent of my rebalance matched. No pool. No slippage.",
+    "settle": "Everyone approves the exact plan. Then one atomic transaction settles every transfer, wallet to wallet.",
+    "leftover": "Whatever didn't match rolls into the next round, or swaps on PancakeSwap, only if it's cheap enough.",
+    "proof": "Live on BNB Chain. Verified, and checked after every round.",
+    "outro": "Sama. Don't swap alone."
+  }
+}
