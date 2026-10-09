@@ -15,13 +15,14 @@ export type NextStep =
   | { kind: "allGood"; circleName: string | null };
 
 const COLLECTING = new Set(["OPEN", "COLLECTING"]);
-const APPROVING = new Set(["PROPOSED", "APPROVING"]);
+const APPROVING = new Set(["PROPOSED", "APPROVING", "READY_TO_SETTLE"]);
 
 export function nextStep(home: Home): NextStep {
   const p = home.pending;
   const join = p.find((r) => COLLECTING.has(r.state) && !r.signed);
   if (join) return { kind: "join", round: join };
-  const approve = p.find((r) => APPROVING.has(r.state) && r.inPlan && !r.approved);
+  // `allowed` is false while the viewer's own token allowance is still missing, even after they signed the plan.
+  const approve = p.find((r) => APPROVING.has(r.state) && r.inPlan && (!r.approved || r.allowed === false));
   if (approve) return { kind: "approve", round: approve };
   const settle = p.find((r) => r.state === "READY_TO_SETTLE" && r.inPlan);
   if (settle) return { kind: "settle", round: settle };
