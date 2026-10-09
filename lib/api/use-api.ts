@@ -33,8 +33,16 @@ export function useApi<T>(load: () => Promise<T>, deps: unknown[], options: { po
 
   useEffect(() => {
     if (!pollMs || stopped) return;
-    const timer = window.setInterval(() => void refresh(), pollMs);
-    return () => window.clearInterval(timer);
+    // A hidden tab does not poll: it would spend RPC quota on a screen nobody is looking at. It catches up when shown again.
+    const tick = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    const timer = window.setInterval(tick, pollMs);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", tick);
+    };
   }, [pollMs, stopped, refresh]);
 
   return { data, error, refresh };
