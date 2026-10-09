@@ -55,8 +55,10 @@ const unavailableSigner: Signer = {
 const chainOf = (w: ConnectedWallet) => Number(w.chainId.split(":")[1]);
 
 function Bridge({ children }: { children: React.ReactNode }) {
-  const { ready, authenticated, user, login, logout } = usePrivy();
+  const { ready, authenticated, user, login, logout, isModalOpen } = usePrivy();
   const { wallets } = useWallets();
+  const modalOpen = useRef(isModalOpen);
+  modalOpen.current = isModalOpen;
   const address = (user?.wallet?.address ?? null) as `0x${string}` | null;
   const wallet = useMemo(() => wallets.find((w) => w.address.toLowerCase() === address?.toLowerCase()) ?? null, [wallets, address]);
 
@@ -87,12 +89,26 @@ function Bridge({ children }: { children: React.ReactNode }) {
     })();
   }, [ready, authenticated, address, bound]);
 
+  // Privy's embedded-wallet modal keeps one request's data at a time. A request sent while the previous prompt is still
+  // closing (approve's signature, then straight into the allowance tx) replaces that data under the closing sign screen,
+  // which then crashes on `signMessage` being undefined. Every wallet request waits for the modal to be fully closed.
+  const waitModalClosed = useCallback(async () => {
+    const deadline = Date.now() + 10_000;
+    while (modalOpen.current && Date.now() < deadline) await new Promise((r) => setTimeout(r, 50));
+    // The close animation outlives the flag.
+    await new Promise((r) => setTimeout(r, 400));
+  }, []);
+
   const ensureWallet = useCallback(async () => {
     if (!wallet) throw new Error("Connect your wallet first.");
-    if (chainOf(wallet) !== SAMA_CHAIN_ID) await wallet.switchChain(SAMA_CHAIN_ID);
+    await waitModalClosed();
+    if (chainOf(wallet) !== SAMA_CHAIN_ID) {
+      await wallet.switchChain(SAMA_CHAIN_ID);
+      await waitModalClosed();
+    }
     const provider = await wallet.getEthereumProvider();
     return createWalletClient({ account: wallet.address as Hex, chain: samaChain, transport: custom(provider) });
-  }, [wallet]);
+  }, [wallet, waitModalClosed]);
 
   const signer = useMemo<Signer>(() => {
     if (!LIVE) return demoSigner;
