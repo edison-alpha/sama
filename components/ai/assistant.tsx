@@ -13,6 +13,7 @@ import type { AssistantAction, ChatMessage, ChatSummary } from "@/lib/api/types"
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
 import { AiAvatar } from "./ai-avatar";
+import { RichText } from "./rich-text";
 import { APPLY_TARGET_EVENT, PENDING_TARGET_KEY } from "./apply-target";
 
 const HIDDEN_KEY = "sama:ai:hidden";
@@ -194,7 +195,7 @@ export function AiAssistant() {
                 <button type="button" onClick={() => setOpen(false)} aria-label={d.common.done} className="grid size-7 place-items-center rounded-full text-ink-3 hover:bg-surface-2 hover:text-ink">×</button>
               </div>
             </div>
-            <ScrollArea className="grid min-h-0 flex-1 content-start gap-3 px-4 pb-4 pt-2">
+            <ScrollArea className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] content-start gap-3 overflow-x-hidden px-4 pb-4 pt-2">
               {view === "history" ? (
                 <HistoryList items={history} activeId={chatId} confirmAll={confirmAll} onOpen={(id) => void openChat(id)} onDelete={(id) => void removeChat(id)} onAskAll={() => setConfirmAll(true)} onDeleteAll={() => void removeAll()} />
               ) : (
@@ -243,13 +244,17 @@ export function Message({ entry, id, done, onRun, onClose }: { entry: Entry; id:
   const { d, fmt } = useI18n();
   const e = d.portfolio.editor;
   if (entry.role === "user") {
-    return <p className="ml-10 w-fit max-w-full justify-self-end whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-accent-soft px-3.5 py-2 text-sm text-ink">{entry.content}</p>;
+    return <p className="ml-10 w-fit max-w-[calc(100%-2.5rem)] justify-self-end whitespace-pre-wrap rounded-2xl [overflow-wrap:anywhere] rounded-br-md bg-accent-soft px-3.5 py-2 text-sm text-ink">{entry.content}</p>;
   }
   return (
     <div className="flex items-start gap-2.5">
       <AiAvatar size={28} className="mt-0.5" />
-      <div className="grid min-w-0 flex-1 gap-2.5">
-        <p className={cx("whitespace-pre-wrap break-words text-sm leading-relaxed", entry.error ? "text-danger" : "text-ink-2")}>{entry.content}</p>
+      <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] gap-2.5">
+        {entry.error ? (
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-danger [overflow-wrap:anywhere]">{entry.content}</p>
+        ) : (
+          <RichText text={entry.content} className="text-ink-2" />
+        )}
         {entry.blocks?.map((b, i) =>
           b.type === "prices" ? (
             <div key={i} className="grid gap-2 rounded-2xl bg-surface-2/70 p-3">

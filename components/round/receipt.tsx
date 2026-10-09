@@ -5,7 +5,7 @@ import { IconCheck, IconShare, IconX } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import type { RoundView } from "@/lib/api/types";
-import { blockUrl } from "@/lib/chain";
+import { addressUrl, blockUrl, txUrl } from "@/lib/chain";
 import { short, tokens } from "@/lib/format";
 import type { Dict } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
@@ -95,14 +95,19 @@ export function VerifierChecks({ v }: { v: RoundView }) {
           <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-surface-3" aria-hidden="true">
             <span className="block h-full rounded-full bg-ok" style={{ width: `${(passed / Math.max(1, ver.checks.length)) * 100}%` }} />
           </span>
-          <ul className="mt-3 grid grid-cols-1 divide-y divide-line">
+          {v.round.settlementTx && (
+            <p className="mt-3 flex items-center justify-between gap-3 text-xs text-ink-3">
+              <span>{d.receipt.settlement}</span>
+              <TxLink hash={v.round.settlementTx} />
+            </p>
+          )}
+          <ul className="mt-2 grid grid-cols-1 divide-y divide-line">
             {ver.checks.map((c) => (
-              <li key={c.name} className="flex gap-3 py-2.5" title={c.detail}>
+              <li key={c.name} className="flex gap-2.5 py-2">
                 <span className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded-full ${c.status === "PASS" ? "bg-ok text-white" : c.status === "FAIL" ? "bg-danger text-white" : "bg-warn-soft text-warn"}`}>{c.status === "PASS" ? <IconCheck size={10} /> : <IconX size={10} />}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-ink">{checkLabel(c, d)}</span>
-                  {/* Hashes and nonces have no spaces to break on; without this they push the panel past its column. */}
-                  <span className="block text-xs leading-snug text-ink-3 [overflow-wrap:anywhere]">{c.detail}</span>
+                  <span className="block text-sm font-medium leading-snug text-ink">{checkLabel(c, d)}</span>
+                  <CheckDetail text={c.detail} pass={c.status === "PASS"} tx={v.round.settlementTx} matches={d.receipt.matches} />
                 </span>
               </li>
             ))}
@@ -116,6 +121,42 @@ export function VerifierChecks({ v }: { v: RoundView }) {
       )}
     </section>
   );
+}
+
+// Hashes, addresses and nonces: too long to read and without spaces to wrap on.
+const LONG = /0x[0-9a-fA-F]{40,}|\b\d{16,}\b/g;
+
+/**
+ * A check's detail without the raw codes: the full text is only on hover. A passing "expected X, saw X" comparison
+ * reads "nonce · matches"; other hashes and nonces are hidden on a pass and shortened on a failure (where they help);
+ * addresses and the settlement tx stay as short explorer links.
+ */
+function CheckDetail({ text, pass, tx, matches }: { text: string; pass: boolean; tx?: string | null; matches: string }) {
+  const values = text.match(LONG) ?? [];
+  if (pass && values.length === 2 && values[0].toLowerCase() === values[1].toLowerCase()) {
+    const label = text.slice(0, text.indexOf(values[0])).replace(/^expected\s+/i, "").trim();
+    return (
+      <span title={text} className="mt-0.5 block text-xs leading-snug text-ink-3">
+        {label} <span className="text-ok">· {matches}</span>
+      </span>
+    );
+  }
+  const parts = text.split(LONG);
+  return (
+    <span title={text} className="mt-0.5 block text-xs leading-snug text-ink-3 [overflow-wrap:anywhere]">
+      {parts.map((p, i) => (
+        <span key={i}>{p}{i < values.length && <Value v={values[i]} tx={tx} pass={pass} />}</span>
+      ))}
+    </span>
+  );
+}
+
+function Value({ v, tx, pass }: { v: string; tx?: string | null; pass: boolean }) {
+  const link = "num text-accent hover:underline";
+  if (/^0x[0-9a-fA-F]{40}$/.test(v)) return <a href={addressUrl(v)} target="_blank" rel="noreferrer" className={link}>{short(v, 6, 4)}</a>;
+  if (tx && v.toLowerCase() === tx.toLowerCase()) return <a href={txUrl(v)} target="_blank" rel="noreferrer" className={link}>{short(v, 8, 6)}</a>;
+  if (pass) return <>…</>;
+  return <span className="num text-ink-2">{v.startsWith("0x") ? short(v, 8, 6) : `${v.slice(0, 6)}…${v.slice(-6)}`}</span>;
 }
 
 function Fact({ k, v }: { k: React.ReactNode; v: React.ReactNode }) {

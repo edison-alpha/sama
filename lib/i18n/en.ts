@@ -460,6 +460,7 @@ export const en = {
     checks: "Independent checks",
     providers: "Sent through {executor}; checked through {verifier}.",
     independent: "Different providers, so the check is independent.",
+    matches: "matches",
     shareNote: "Only members of this Circle can open a shared receipt.",
     notVerified: "Check still running.",
     noSettlement: "There was no settlement, so there's nothing to check.",

@@ -459,6 +459,7 @@ export const id: Dict = {
     checks: "Cek independen",
     providers: "Dikirim lewat {executor}; dicek lewat {verifier}.",
     independent: "Penyedia berbeda, jadi ceknya independen.",
+    matches: "cocok",
     shareNote: "Struk yang dibagikan hanya bisa dibuka anggota Circle ini.",
     notVerified: "Belum diverifikasi.",
     noSettlement: "Tidak ada settlement, jadi tidak ada yang perlu diverifikasi.",
