@@ -63,7 +63,7 @@ export function ReceiptPage({ roundId }: { roundId: string }) {
         <span className="shrink-0 font-medium text-ink">{d.receipt.title}</span>
       </m.nav>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:items-start lg:gap-10">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-10">
         <div className="grid min-w-0 gap-8">
           <m.section variants={rise} className="rounded-[28px] border border-line bg-surface px-6 py-8 text-center">
             <span className={verified ? "mx-auto grid size-16 place-items-center rounded-full bg-ok text-white" : "mx-auto grid size-16 place-items-center rounded-full bg-surface-2 text-ink-2"} aria-hidden="true">
@@ -118,7 +118,7 @@ export function ReceiptPage({ roundId }: { roundId: string }) {
           </m.div>
         </div>
 
-        <m.aside variants={rise} className="lg:sticky lg:top-6">
+        <m.aside variants={rise} className="min-w-0 lg:sticky lg:top-6">
           <VerifierChecks v={v} />
         </m.aside>
       </div>

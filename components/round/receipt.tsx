@@ -99,9 +99,10 @@ export function VerifierChecks({ v }: { v: RoundView }) {
             {ver.checks.map((c) => (
               <li key={c.name} className="flex gap-3 py-2.5" title={c.detail}>
                 <span className={`mt-0.5 grid size-4 shrink-0 place-items-center rounded-full ${c.status === "PASS" ? "bg-ok text-white" : c.status === "FAIL" ? "bg-danger text-white" : "bg-warn-soft text-warn"}`}>{c.status === "PASS" ? <IconCheck size={10} /> : <IconX size={10} />}</span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block text-sm font-medium text-ink">{checkLabel(c, d)}</span>
-                  <span className="block text-xs leading-snug text-ink-3">{c.detail}</span>
+                  {/* Hashes and nonces have no spaces to break on; without this they push the panel past its column. */}
+                  <span className="block text-xs leading-snug text-ink-3 [overflow-wrap:anywhere]">{c.detail}</span>
                 </span>
               </li>
             ))}

@@ -114,7 +114,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-col">
         <TopBar />
-        <main className={cx("mx-auto w-full max-w-6xl flex-1 px-4 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:pb-12 md:pt-6", noTabBar ? "pb-6" : "pb-36")}>
+        <main className={cx("mx-auto w-full max-w-6xl flex-1 px-4 pt-[max(16px,env(safe-area-inset-top))] sm:px-6 md:pb-32 md:pt-6", noTabBar ? "pb-6" : "pb-36")}>
           {ready && session && session.onboardingDone ? (
             // Keyed by route so each screen plays its entrance; cards and tiles inside stagger in (see `rise`).
             <m.div key={pathname} initial="hidden" animate="show" variants={page}>{children}</m.div>
