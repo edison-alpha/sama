@@ -180,6 +180,8 @@ export type PendingRound = {
   freezesAt: number;
   signed: boolean;
   approved: boolean;
+  /** False while the viewer's own token allowance is still missing, even after they signed the plan. */
+  allowed?: boolean;
   inPlan: boolean;
   residualUndecidedUsd: number;
 };

@@ -43,7 +43,9 @@ export function journey(v: RoundView): { current: StepKey; status: Record<StepKe
     return v.you.decision ? at("receipt") : at("leftovers");
   }
 
-  if (APPROVING.has(s)) return at(v.you.approved ? "settle" : "approve");
+  // Signing the plan is not enough: the token allowance is a separate transaction. Until it is sent the viewer stays on
+  // Approve, otherwise they would be offered "Submit settlement" while their own allowance is what blocks it.
+  if (APPROVING.has(s)) return at(v.you.approved && v.you.allowances.every((a) => a.sufficient) ? "settle" : "approve");
   if (SETTLING.has(s)) return at("settle");
   if (s === "SETTLEMENT_REVERTED" || s === "VERIFICATION_FAILED") return at("settle", "failed");
 
