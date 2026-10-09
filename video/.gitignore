@@ -5,3 +5,7 @@ dist
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# Screen-recording browser profile (holds the Privy session) and raw captures
+.rec-profile/
+recordings/
