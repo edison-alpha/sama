@@ -30,7 +30,7 @@ import { useI18n } from "@/lib/i18n/provider";
  */
 export default function HomePage() {
   const { d, fmt, locale } = useI18n();
-  const { data: h, error, refresh } = useApi(() => sama.home(), [], { pollMs: 4_000 });
+  const { data: h, error, refresh } = useApi(() => sama.home(), [], { pollMs: 15_000 });
   const { data: assets } = useApi(() => sama.assets(), []);
   // Home shows 20 tokens; "Show more" adds 20 at a time, only while there are more to show.
   const [tokenLimit, setTokenLimit] = useState(TOKENS_PER_PAGE);
