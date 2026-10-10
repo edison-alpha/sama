@@ -55,8 +55,20 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
 
   const asset = held.find((x) => x.asset.symbol === symbol)?.asset;
   const balance = held.find((x) => x.asset.symbol === symbol)?.position.amountTokens ?? 0;
+  const decimals = asset?.decimals ?? 18;
   const typed = Number(amount) || 0;
   const candidate = isAddress(query.trim(), { strict: false }) ? query.trim() : "";
+
+  // Comparing floats (balance vs. typed amount) can reject a dust-sized or exact-Max balance by a rounding hair,
+  // the same way MetaMask avoids it: compare raw on-chain units instead, both rounded the same way.
+  const toRaw = (n: number): bigint => {
+    if (!Number.isFinite(n) || n <= 0) return 0n;
+    try {
+      return parseUnits(n.toFixed(decimals), decimals);
+    } catch {
+      return 0n;
+    }
+  };
 
   const pickRecipient = (address: string) => {
     setTo(address);
@@ -67,7 +79,6 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
   // Keypad: digits and one decimal point, never more decimals than the token has, no stray leading zeros.
   const press = (key: string) => {
     setError(null);
-    const decimals = asset?.decimals ?? 18;
     setAmount((a) => {
       if (key === "back") return a.slice(0, -1);
       if (key === ".") return a.includes(".") ? a : `${a || "0"}.`;
@@ -82,11 +93,12 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
 
   // Max fills the whole balance, cut to the token's decimals and without trailing zeros.
   const fillMax = () => {
-    const decimals = asset?.decimals ?? 18;
     setAmount(maxBalance.toFixed(Math.min(decimals, 18)).replace(/\.?0+$/, "") || "0");
   };
 
-  const canSend = !!asset && typed > 0 && typed <= maxBalance && !!to;
+  const balanceRaw = toRaw(maxBalance);
+  const typedRaw = toRaw(typed);
+  const canSend = !!asset && typedRaw > 0n && typedRaw <= balanceRaw && !!to;
 
   const submit = async () => {
     setError(null);
@@ -99,7 +111,7 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
       return setError(s.badAmount);
     }
     if (raw <= 0n) return setError(s.badAmount);
-    if (typed > maxBalance) return setError(s.notEnough);
+    if (raw > balanceRaw) return setError(s.notEnough);
     setBusy(true);
     try {
       const hash = await (asset.address
@@ -115,7 +127,7 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
     }
   };
 
-  const ctaLabel = !asset || typed <= 0 ? s.enterAmount : typed > maxBalance ? fmt(s.notEnoughSymbol, { symbol }) : fmt(s.sendSymbol, { symbol });
+  const ctaLabel = !asset || typedRaw <= 0n ? s.enterAmount : typedRaw > balanceRaw ? fmt(s.notEnoughSymbol, { symbol }) : fmt(s.sendSymbol, { symbol });
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
 
   return (
