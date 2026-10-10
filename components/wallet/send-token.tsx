@@ -16,20 +16,33 @@ import { useI18n } from "@/lib/i18n/provider";
 
 type Step = "recipient" | "amount";
 
+/** Native BNB kept back on Max, so the wallet can still pay for this transaction. */
+const GAS_RESERVE = 0.003;
+
+/** What Send needs from a token: the real ERC-20 `Asset`, or native BNB which has no contract address. */
+type SendableAsset = Pick<Asset, "symbol" | "name" | "decimals" | "priceUsd"> & { address: `0x${string}` | null };
+
 /**
  * Send a token from the connected wallet to any address. Two steps, like a wallet app: pick the recipient, then type
  * the amount on the keypad. A bottom sheet on phones, a centred dialog on desktop. The wallet signs a plain ERC-20
- * transfer, so Sama never holds the funds; afterwards the server scans the chain so it shows in Activity straight away.
+ * transfer (or, for native BNB, a plain value transfer), so Sama never holds the funds; afterwards the server scans
+ * the chain so it shows in Activity straight away.
  */
 export function SendTokenModal({ assets, positions, onClose, onSent }: { assets: Asset[]; positions: Position[]; onClose: () => void; onSent: () => void }) {
   const { d, fmt, locale } = useI18n();
   const s = d.send;
   const { signer } = useSession();
-  // Only tokens the wallet actually holds can be sent, so the list is built from balances.
+  // Only tokens the wallet actually holds can be sent, so the list is built from balances. Native BNB has no entry
+  // in the ERC-20 allowlist, so it's turned into a pseudo-asset straight from its position.
   const held = positions
     .filter((p) => p.amountTokens > 0)
-    .map((p) => ({ position: p, asset: assets.find((a) => a.symbol === p.symbol) }))
-    .filter((x): x is { position: Position; asset: Asset } => !!x.asset);
+    .map((p) => ({
+      position: p,
+      asset: (p.symbol === "BNB"
+        ? { symbol: "BNB", name: "BNB", decimals: 18, priceUsd: p.amountTokens > 0 ? p.valueUsd / p.amountTokens : 0, address: null }
+        : assets.find((a) => a.symbol === p.symbol)) as SendableAsset | undefined,
+    }))
+    .filter((x): x is { position: Position; asset: SendableAsset } => !!x.asset);
 
   const [step, setStep] = useState<Step>("recipient");
   const [query, setQuery] = useState("");
@@ -64,13 +77,16 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
     });
   };
 
+  // Native BNB on Max leaves a little behind to pay for this transaction's own gas.
+  const maxBalance = symbol === "BNB" ? Math.max(0, balance - GAS_RESERVE) : balance;
+
   // Max fills the whole balance, cut to the token's decimals and without trailing zeros.
   const fillMax = () => {
     const decimals = asset?.decimals ?? 18;
-    setAmount(balance.toFixed(Math.min(decimals, 18)).replace(/\.?0+$/, "") || "0");
+    setAmount(maxBalance.toFixed(Math.min(decimals, 18)).replace(/\.?0+$/, "") || "0");
   };
 
-  const canSend = !!asset && typed > 0 && typed <= balance && !!to;
+  const canSend = !!asset && typed > 0 && typed <= maxBalance && !!to;
 
   const submit = async () => {
     setError(null);
@@ -83,11 +99,12 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
       return setError(s.badAmount);
     }
     if (raw <= 0n) return setError(s.badAmount);
-    if (typed > balance) return setError(s.notEnough);
+    if (typed > maxBalance) return setError(s.notEnough);
     setBusy(true);
     try {
-      const data = encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [to as `0x${string}`, raw] });
-      const hash = await signer.send({ to: asset.address, data });
+      const hash = await (asset.address
+        ? signer.send({ to: asset.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [to as `0x${string}`, raw] }) })
+        : signer.send({ to: to as `0x${string}`, data: "0x", value: raw }));
       setSentHash(hash);
       await sama.syncTransfers();
       onSent();
@@ -98,7 +115,7 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
     }
   };
 
-  const ctaLabel = !asset || typed <= 0 ? s.enterAmount : typed > balance ? fmt(s.notEnoughSymbol, { symbol }) : fmt(s.sendSymbol, { symbol });
+  const ctaLabel = !asset || typed <= 0 ? s.enterAmount : typed > maxBalance ? fmt(s.notEnoughSymbol, { symbol }) : fmt(s.sendSymbol, { symbol });
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
 
   return (
