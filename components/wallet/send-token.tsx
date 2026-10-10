@@ -16,8 +16,10 @@ import { useI18n } from "@/lib/i18n/provider";
 
 type Step = "recipient" | "amount";
 
-/** Native BNB kept back on Max, so the wallet can still pay for this transaction. */
-const GAS_RESERVE = 0.003;
+// Native BNB kept back on Max, so the wallet can still pay for this transaction's own gas. A plain transfer is a
+// simple 21000-gas call (unlike the contract calls elsewhere in the app), so this stays small enough that a wallet
+// holding only a little BNB can still send most of it.
+const GAS_RESERVE = 0.0005;
 
 /** What Send needs from a token: the real ERC-20 `Asset`, or native BNB which has no contract address. */
 type SendableAsset = Pick<Asset, "symbol" | "name" | "decimals" | "priceUsd"> & { address: `0x${string}` | null };
