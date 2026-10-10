@@ -8,7 +8,9 @@ export function usd(value: number, locale: Locale = "en", digits = 2): string {
 }
 
 export function tokens(value: number, locale: Locale = "en"): string {
-  const digits = value >= 1000 ? 2 : value >= 1 ? 4 : 6;
+  const abs = Math.abs(value);
+  // Dust amounts (e.g. a few wei of BNB) need more than 6 decimals to show as anything but "0", like a wallet app.
+  const digits = abs >= 1000 ? 2 : abs >= 1 ? 4 : abs === 0 ? 2 : Math.min(12, Math.max(6, -Math.floor(Math.log10(abs)) + 3));
   return new Intl.NumberFormat(tag(locale), { maximumFractionDigits: digits }).format(value);
 }
 
