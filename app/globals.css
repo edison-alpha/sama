@@ -387,29 +387,29 @@ html::-webkit-scrollbar {
 }
 
 /* ---------- Onboarding (components/onboarding.tsx) ---------- */
-/* Each step slides in; the hero orbit turns slowly, its logos counter-rotate so they stay upright. */
+/* Each step slides in; the hero's market line draws itself left to right, its fill fades in, the glass cards pop. */
 .ob-step { animation: ob-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 @keyframes ob-in {
   from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
   to { opacity: 1; transform: none; filter: none; }
 }
-.ob-orbit { animation: ps-spin 48s linear infinite; }
-.ob-orbit-rev { animation: ps-spin 64s linear infinite reverse; }
-.ob-upright { animation: ps-spin 48s linear infinite reverse; }
-.ob-orbit-rev .ob-upright { animation: ps-spin 64s linear infinite; }
+.ob-draw { stroke-dasharray: 1; animation: ob-draw 1.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+@keyframes ob-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.ob-fade { animation: ob-fade 1.2s ease 0.5s both; }
+@keyframes ob-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .ob-pop { animation: ob-pop 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
 @keyframes ob-pop {
-  from { opacity: 0; transform: scale(0.4); }
+  from { opacity: 0; transform: scale(0.85) translateY(8px); }
   to { opacity: 1; transform: none; }
 }
-/* Welcome step: a slow still breathe instead of orbiting icons, since there's no portfolio data to show yet. */
-.ob-breathe { animation: ob-breathe 3.6s ease-in-out infinite; }
-@keyframes ob-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.06); opacity: 0.9; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .ob-step, .ob-orbit, .ob-orbit-rev, .ob-upright, .ob-pop, .ob-breathe { animation: none !important; }
+  .ob-step, .ob-draw, .ob-fade, .ob-pop { animation: none !important; }
 }
 
 /* ---------- Flow steps (components/landing/flow-steps.tsx) ---------- */
