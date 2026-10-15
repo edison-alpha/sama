@@ -128,6 +128,18 @@ function Bridge({ children }: { children: React.ReactNode }) {
     };
   }, [ensureWallet]);
 
+  // Privy can report `authenticated` a moment before `user.wallet` is filled in (on reload, or while the embedded wallet
+  // is being created). Treating that gap as "signed out" sent returning users to /start, so hold `ready` back until the
+  // address arrives — with a cap, so a login that never yields a wallet still lands on /start instead of a blank screen.
+  const waitingWallet = ready && authenticated && address === null;
+  const [walletTimedOut, setWalletTimedOut] = useState(false);
+  useEffect(() => {
+    setWalletTimedOut(false);
+    if (!waitingWallet) return;
+    const t = setTimeout(() => setWalletTimedOut(true), 8_000);
+    return () => clearTimeout(t);
+  }, [waitingWallet]);
+
   const signedIn = ready && authenticated && address !== null;
   const session = !signedIn ? null : LIVE
     ? (bound?.toLowerCase() === address.toLowerCase() && boundOnboardingDone !== null ? { address: bound, demo: false, onboardingDone: boundOnboardingDone } : null)
@@ -137,11 +149,11 @@ function Bridge({ children }: { children: React.ReactNode }) {
     () => ({
       session,
       // Live mode waits for the token exchange so a reload doesn't bounce a signed-in user back to /start.
-      ready: ready && !(LIVE && signedIn && !session && !error),
+      ready: ready && !(waitingWallet && !walletTimedOut) && !(LIVE && signedIn && !session && !error),
       signIn: (method?: SignInMethod) => login(method ? { loginMethods: [method] } : undefined),
       signOut: () => {
         if (LIVE) void fetch(`${BASE}/api/session`, { method: "DELETE", credentials: "include" });
-        clearOnboardingCache(address);
+        clearOnboardingCache();
         setBound(null);
         setBoundOnboardingDone(null);
         inflight.current = null;
@@ -155,7 +167,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
       error,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [session?.address, session?.demo, session?.onboardingDone, ready, signedIn, login, logout, signer, wallet, ensureWallet, error, address],
+    [session?.address, session?.demo, session?.onboardingDone, ready, waitingWallet, walletTimedOut, signedIn, login, logout, signer, wallet, ensureWallet, error, address],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

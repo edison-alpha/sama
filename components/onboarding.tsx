@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AssetIcon } from "@/components/asset-icon";
 import { Mark } from "@/components/brand";
-import { IconArrowLeft, IconArrowRight, IconCheck, IconCheckCircle, IconTarget } from "@/components/icons";
+import { IconArrowLeft, IconArrowRight, IconCheck, IconCheckCircle, IconSpinner, IconTarget } from "@/components/icons";
 import { colorFor } from "@/components/portfolio/allocation-donut";
 import { LocaleButton, ThemeButton } from "@/components/shell/preferences";
 import { Button } from "@/components/ui/button";
@@ -96,6 +96,22 @@ export function Onboarding() {
     () => [...new Set([...positions.map((p) => p.symbol), ...Object.values(PRESETS).flatMap((w) => Object.keys(w))])],
     [positions],
   );
+
+  // Check before showing anything: until the session is known, or while a user who already finished onboarding is being
+  // sent on to `next`, show a neutral splash instead of flashing the login step at a returning user.
+  if (!canSignIn || session?.onboardingDone) {
+    return (
+      <div className="grid min-h-dvh place-items-center bg-bg text-ink" role="status" aria-live="polite">
+        <div className="ob-step grid justify-items-center gap-4">
+          <Mark size={40} />
+          <span className="flex items-center gap-2 text-sm text-ink-3">
+            <IconSpinner size={16} />
+            {s.checking}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-bg text-ink">
@@ -391,10 +407,6 @@ function LogoStack({ symbols, size = 22 }: { symbols: string[]; size?: number })
 }
 
 /**
- * Step 3 hero: the same card as step 1, now describing the chosen mix — its name and logos on top, the biggest
- * weights on the left, the full donut on the right. Re-keyed per preset so the cards pop again on every change.
- */
-/**
  * The mix as a card in the hero's own idiom: the largest holding up top (logo, symbol, weight), then one segmented
  * bar for the whole mix — a pill per asset, sized by weight, with small gaps between them.
  */
@@ -418,6 +430,11 @@ function MixCard({ parts, order, locale, label, largestLabel }: { parts: Array<{
   );
 }
 
+/**
+ * Step 3 hero: the same card as step 1, now describing the chosen mix — its name and logos on top, the biggest
+ * weights on the left, the largest holding and a bar of the whole mix on the right. Re-keyed per preset so the cards
+ * pop again on every change.
+ */
 function TargetHero({ preset, order, locale, label, assetsLabel, largestLabel, customLabel, customBody }: { preset: PresetKey | null; order: string[]; locale: Locale; label: string; assetsLabel: string; largestLabel: string; customLabel: string; customBody: string }) {
   if (!preset) {
     return (

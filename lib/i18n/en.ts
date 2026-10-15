@@ -111,6 +111,7 @@ export const en = {
     signInTitle: "Find the other side of your rebalance",
     signInBody: "Get a wallet with your email or connect your own. Sama never holds your tokens.",
     login: "Log In",
+    checking: "Checking your session…",
     email: "Continue with email",
     wallet: "Use my own wallet",
     portfolioTitle: "Here's what we found",

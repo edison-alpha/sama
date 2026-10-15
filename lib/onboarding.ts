@@ -22,9 +22,12 @@ export function markOnboardingDone(address: string) {
   }
 }
 
-export function clearOnboardingCache(address: string | null | undefined) {
+/**
+ * On sign-out, forget only the half-finished step. The "done" flag is a fact about the address, not the session: wiping
+ * it made every returning demo user redo onboarding after logging out and back in.
+ */
+export function clearOnboardingCache() {
   try {
-    if (address) window.localStorage.removeItem(key(address));
     window.sessionStorage.removeItem(ONBOARDING_STEP_KEY);
   } catch {
     // Private mode or blocked storage.

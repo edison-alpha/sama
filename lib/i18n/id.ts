@@ -110,6 +110,7 @@ export const id: Dict = {
     signInTitle: "Temukan pasangan rebalance-mu",
     signInBody: "Dapat wallet lewat email atau hubungkan wallet-mu sendiri. Sama tidak pernah memegang tokenmu.",
     login: "Masuk",
+    checking: "Memeriksa sesi…",
     email: "Lanjut dengan email",
     wallet: "Hubungkan wallet",
     portfolioTitle: "Ini yang kami temukan",
