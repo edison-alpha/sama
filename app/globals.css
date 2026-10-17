@@ -513,6 +513,7 @@ html::-webkit-scrollbar {
 }
 .docs-theme .bg-accent { background-color: #a93626; color: white; }
 .docs-theme .board-selected { background: #a93626; color: white; }
+.docs-selected { background: #a93626; color: #fff; }
 .docs-theme [data-docs-heading], #docs-content { scroll-margin-top: 8.5rem; }
 .docs-theme [data-docs-heading] { outline-offset: 6px; }
 .docs-theme pre { overflow-wrap: normal; }

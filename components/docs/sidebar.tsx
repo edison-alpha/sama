@@ -12,7 +12,7 @@ import { cx } from "@/utils/cx";
 function NavList({ groups, onPick }: { groups: NavGroup[]; onPick?: () => void }) {
   const pathname = usePathname();
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-7">
       {groups.map((g) => (
         <div key={g.title}>
           <p className="px-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">{g.title}</p>
@@ -26,7 +26,7 @@ function NavList({ groups, onPick }: { groups: NavGroup[]; onPick?: () => void }
                     href={p.href}
                     onClick={onPick}
                     aria-current={on ? "page" : undefined}
-                    className={cx("relative flex h-8 items-center rounded-lg px-3 text-[14px] transition-colors", on ? "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] font-semibold text-ink shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent)_28%,transparent)]" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink")}
+                    className={cx("relative flex h-9 items-center rounded-full px-3.5 text-[14.5px] transition-colors", on ? "docs-selected font-semibold" :"text-ink-2 hover:bg-surface-2/70 hover:text-ink")}
                   >
                     {p.title}
                   </Link>
