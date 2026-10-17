@@ -21,7 +21,7 @@ function highlight(src: string, lang: string): ReactNode[] {
   let k = 0;
   for (const m of src.matchAll(re)) {
     if (m.index! > last) out.push(src.slice(last, m.index));
-    const cls = m[1] ? "text-white/38 italic" : m[2] ? "text-[#7ee2a8]" : m[3] ? "text-[#ffc178]" : "text-[#8fb4ff]";
+    const cls = m[1] ? "text-white/60 italic" : m[2] ? "text-[#7ee2a8]" : m[3] ? "text-[#ffc178]" : "text-[#8fb4ff]";
     out.push(<span key={k++} className={cls}>{m[0]}</span>);
     last = m.index! + m[0].length;
   }
@@ -32,20 +32,26 @@ function highlight(src: string, lang: string): ReactNode[] {
 export function CopyButton({ text, className }: { text: string; className?: string }) {
   const { d } = useI18n();
   const [done, setDone] = useState(false);
+  const [error, setError] = useState(false);
   return (
     <button
       type="button"
-      aria-label={d.docs.copyCode}
+      aria-label={done ? d.docs.copied : d.docs.copyCode}
       title={d.docs.copyCode}
-      onClick={() => {
-        void navigator.clipboard?.writeText(text).then(() => {
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setError(false);
           setDone(true);
           window.setTimeout(() => setDone(false), 1400);
-        });
+        } catch {
+          setError(true);
+        }
       }}
-      className={cx("grid size-8 place-items-center rounded-full text-white/55 transition-colors hover:bg-white/10 hover:text-white", className)}
+      className={cx("grid size-11 shrink-0 place-items-center rounded-full text-white/70 transition-colors hover:bg-white/10 hover:text-white", className)}
     >
       <DocIcon name={done ? "check" : "copy"} size={16} className={done ? "text-[#7ee2a8]" : undefined} />
+      <span role="status" className="sr-only">{error ? d.docs.copyFailed : done ? d.docs.copied : ""}</span>
     </button>
   );
 }
@@ -60,10 +66,10 @@ export function CodeBlock({ code, lang, title }: { code: string; lang: string; t
           <span className="size-2.5 rounded-full bg-white/15" />
           <span className="size-2.5 rounded-full bg-white/15" />
         </span>
-        <span className="flex-1 truncate font-mono text-xs text-white/50">{title ?? lang}</span>
+        <span className="min-w-0 flex-1 truncate font-mono text-xs text-white/65">{title ?? lang}</span>
         <CopyButton text={code} />
       </div>
-      <pre className="compact-scroll overflow-x-auto px-5 py-4 font-mono text-[13px] leading-6 text-white/80">
+      <pre tabIndex={0} aria-label={title ?? lang} className="compact-scroll overflow-x-auto px-5 py-4 font-mono text-[13px] leading-6 text-white/80">
         <code>{highlight(code, lang)}</code>
       </pre>
     </div>

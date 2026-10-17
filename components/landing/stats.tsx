@@ -42,15 +42,15 @@ export function Stats({ title, stats }: { title: readonly string[]; stats: reado
         <span className="text-ink-3">{title[1]}</span>
       </h2>
 
-      <dl className="mt-20 grid gap-x-24 sm:mt-32 md:grid-cols-2">
+      <dl className="mt-20 grid gap-x-10 sm:mt-32 lg:grid-cols-2 xl:gap-x-24">
         {stats.map(([from, to, unit, body], i) => (
           <div
             key={body}
-            className="ps-card flex flex-col-reverse gap-4 border-b border-ink/10 pb-8 pt-14 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pb-10 sm:pt-24"
+            className="ps-card flex min-w-0 flex-col-reverse gap-4 border-b border-ink/10 pb-8 pt-14 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pb-10 sm:pt-24 lg:flex-col-reverse lg:items-start xl:flex-row xl:items-end"
             style={{ "--i": i + 1 } as CSSProperties}
           >
             <dt className="max-w-xs text-pretty text-base leading-relaxed text-ink-2 sm:text-lg">{body}</dt>
-            <dd className="shrink-0 whitespace-nowrap text-6xl font-light leading-none tracking-[-0.04em] tabular-nums lg:text-[88px]">
+            <dd className="text-[clamp(2.5rem,6vw,5.5rem)] font-light leading-none tracking-[-0.04em] tabular-nums">
               <Counter from={from} to={to} run={played} />
               {unit}
             </dd>

@@ -1,9 +1,9 @@
 "use client";
 
-import { AnimatePresence, m } from "motion/react";
+import { DocsDialog } from "@/components/docs/dialog";
 import { DocIcon } from "@/components/docs/icon";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { SearchEntry } from "@/lib/docs";
 import { fmt } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
@@ -42,12 +42,14 @@ export function DocsSearch({ entries, hotkey = true }: { entries: SearchEntry[];
   const [q, setQ] = useState("");
   const [sel, setSel] = useState(0);
   const input = useRef<HTMLInputElement>(null);
+  const listId = useId();
   const results = useMemo(() => rank(entries, q), [entries, q]);
 
   useEffect(() => {
     if (!hotkey) return;
     const onKey = (e: KeyboardEvent) => {
-      const typing = e.target instanceof HTMLElement && (e.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName));
+      const typing =
+        e.target instanceof HTMLElement && (e.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName));
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || (e.key === "/" && !typing)) {
         e.preventDefault();
         setOpen(true);
@@ -61,15 +63,12 @@ export function DocsSearch({ entries, hotkey = true }: { entries: SearchEntry[];
     if (!open) return;
     setQ("");
     setSel(0);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.setTimeout(() => input.current?.focus(), 0);
-    return () => {
-      document.body.style.overflow = prev;
-    };
   }, [open]);
 
   useEffect(() => setSel(0), [q]);
+  useEffect(() => {
+    if (open) document.getElementById(`${listId}-${sel}`)?.scrollIntoView({ block: "nearest" });
+  }, [open, sel, listId]);
 
   const go = (entry: SearchEntry | undefined) => {
     if (!entry) return;
@@ -82,30 +81,34 @@ export function DocsSearch({ entries, hotkey = true }: { entries: SearchEntry[];
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="glass-panel flex h-10 w-full items-center gap-2.5 rounded-full px-3.5 text-sm text-ink-3 transition-colors hover:text-ink-2 sm:w-64"
+        aria-haspopup="dialog"
+        className="glass-panel flex h-11 w-full items-center gap-2.5 rounded-full px-3.5 text-sm text-ink-3 transition-colors hover:text-ink-2 md:w-56"
       >
         <DocIcon name="search" size={16} />
         <span className="flex-1 text-left">{d.docs.search}</span>
         <kbd className="hidden rounded-full bg-surface-2 px-2 py-0.5 font-mono text-[11px] text-ink-3 sm:inline">⌘K</kbd>
       </button>
-      <AnimatePresence>
-        {open && (
-          <div className="fixed inset-0 z-[70] flex items-start justify-center px-4 pt-[12vh]">
-            <m.div className="absolute inset-0 bg-black/50 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setOpen(false)} aria-hidden="true" />
-            <m.div
-              role="dialog"
-              aria-modal="true"
+      <DocsDialog open={open} onClose={() => setOpen(false)} label={d.docs.search}>
+        <div className="mx-auto flex max-h-[calc(100dvh-2rem)] w-full max-w-xl flex-col overflow-hidden rounded-[22px] border border-line bg-bg shadow-[var(--elev-float)] sm:mt-[8dvh]">
+          <div className="flex min-h-14 shrink-0 items-center gap-3 border-b border-line px-4 text-ink-3">
+            <DocIcon name="search" size={18} />
+            <input
+              ref={input}
+              autoFocus
+              role="combobox"
+              aria-expanded="true"
+              aria-autocomplete="list"
+              aria-controls={listId}
+              aria-activedescendant={results[sel] ? `${listId}-${sel}` : undefined}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={d.docs.searchPlaceholder}
               aria-label={d.docs.search}
-              initial={{ opacity: 0, y: -8, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.98 }}
-              transition={{ duration: 0.16 }}
-              className="relative w-full max-w-xl overflow-hidden rounded-[22px] border border-line bg-[var(--app-bg)] shadow-[var(--elev-float)]"
+              className="h-11 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-3"
               onKeyDown={(e) => {
-                if (e.key === "Escape") setOpen(false);
-                else if (e.key === "ArrowDown") {
+                if (e.key === "ArrowDown") {
                   e.preventDefault();
-                  setSel((s) => Math.min(results.length - 1, s + 1));
+                  setSel((s) => Math.max(0, Math.min(results.length - 1, s + 1)));
                 } else if (e.key === "ArrowUp") {
                   e.preventDefault();
                   setSel((s) => Math.max(0, s - 1));
@@ -114,49 +117,55 @@ export function DocsSearch({ entries, hotkey = true }: { entries: SearchEntry[];
                   go(results[sel]);
                 }
               }}
+            />
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label={d.common.close}
+              className="grid size-11 shrink-0 place-items-center rounded-lg border border-line text-sm"
             >
-              <label className="flex h-14 items-center gap-3 border-b border-line px-4 text-ink-3">
-                <DocIcon name="search" size={18} />
-                <input
-                  ref={input}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={d.docs.searchPlaceholder}
-                  aria-label={d.docs.search}
-                  className="h-full flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
-                />
-                <kbd className="rounded-md border border-line px-1.5 font-mono text-[11px]">Esc</kbd>
-              </label>
-              <ul className="compact-scroll max-h-[50vh] overflow-y-auto p-2" role="listbox">
-                {results.length === 0 && <li className="px-3 py-8 text-center text-sm text-ink-3">{fmt(d.docs.searchEmpty, { q: q.trim() })}</li>}
-                {results.map((r, i) => (
-                  <li key={r.href} role="option" aria-selected={i === sel}>
-                    <button
-                      type="button"
-                      onMouseEnter={() => setSel(i)}
-                      onClick={() => go(r)}
-                      className={cx("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left", i === sel ? "bg-surface-2" : "")}
-                    >
-                      <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-3">{r.section ? <DocIcon name="hash" size={15} /> : <DocIcon name="file" size={15} />}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-ink">{r.section || r.title}</span>
-                        <span className="block truncate text-xs text-ink-3">{r.section ? `${r.group} › ${r.title}` : r.group}</span>
-                      </span>
-                      {i === sel && <DocIcon name="enter" size={15} className="shrink-0 text-ink-3" />}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p className="flex items-center gap-2 border-t border-line px-4 py-2.5 text-[11px] text-ink-3">
-                <kbd className="rounded border border-line px-1 font-mono">↑</kbd>
-                <kbd className="rounded border border-line px-1 font-mono">↓</kbd>
-                <kbd className="rounded border border-line px-1 font-mono">↵</kbd>
-                {d.docs.searchHint}
-              </p>
-            </m.div>
+              ×
+            </button>
           </div>
-        )}
-      </AnimatePresence>
+          {results.length === 0 && (
+            <p role="status" className="px-3 py-8 text-center text-sm text-ink-3">
+              {fmt(d.docs.searchEmpty, { q: q.trim() })}
+            </p>
+          )}
+          <ul id={listId} aria-label={d.docs.search} className="compact-scroll min-h-0 overflow-y-auto p-2" role="listbox">
+            {results.map((r, i) => (
+              <li
+                id={`${listId}-${i}`}
+                key={r.href}
+                role="option"
+                aria-selected={i === sel}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setSel(i)}
+                onClick={() => go(r)}
+                className={cx(
+                  "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left",
+                  i === sel ? "bg-surface-2" : "",
+                )}
+              >
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-3">
+                  {r.section ? <DocIcon name="hash" size={15} /> : <DocIcon name="file" size={15} />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-ink">{r.section || r.title}</span>
+                  <span className="block truncate text-xs text-ink-3">{r.section ? `${r.group} › ${r.title}` : r.group}</span>
+                </span>
+                {i === sel && <DocIcon name="enter" size={15} className="shrink-0 text-ink-3" />}
+              </li>
+            ))}
+          </ul>
+          <p className="flex shrink-0 flex-wrap items-center gap-2 border-t border-line px-4 py-2.5 text-[11px] text-ink-3">
+            <kbd className="rounded border border-line px-1 font-mono">↑</kbd>
+            <kbd className="rounded border border-line px-1 font-mono">↓</kbd>
+            <kbd className="rounded border border-line px-1 font-mono">↵</kbd>
+            {d.docs.searchHint}
+          </p>
+        </div>
+      </DocsDialog>
     </>
   );
 }

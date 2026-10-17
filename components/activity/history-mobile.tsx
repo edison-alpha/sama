@@ -3,6 +3,7 @@
 import { AnimatePresence, m } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { Modal } from "@/components/ui/modal";
 import { AssetIcon } from "@/components/asset-icon";
 import { IconArrowLeft, IconChevronRight, IconExternal } from "@/components/icons";
 import { LocaleButton } from "@/components/shell/preferences";
@@ -158,29 +159,22 @@ function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onCl
   const tx = txOf(a, r);
   const circle = circleOf(a, r);
   const time = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { dateStyle: "medium", timeStyle: "medium" }).format(new Date(a.createdAt));
-
-  // Full-screen sheet: Escape closes it and the page underneath doesn't scroll.
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const dismiss = () => { if (desktop.matches) onClose(); };
+    dismiss();
+    desktop.addEventListener("change", dismiss);
+    return () => desktop.removeEventListener("change", dismiss);
   }, [onClose]);
 
   return (
+    <Modal onClose={onClose} labelledBy="activity-detail-title">
     <m.div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="activity-detail-title"
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", stiffness: 380, damping: 36 }}
-      className="fixed inset-0 z-50 overflow-y-auto bg-[var(--app-bg)] px-4 pb-10 pt-[max(16px,env(safe-area-inset-top))] md:hidden"
+      className="h-full w-full overflow-y-auto bg-[var(--app-bg)] px-4 pb-10 pt-[max(16px,env(safe-area-inset-top))]"
     >
       <header className="grid grid-cols-[44px_1fr_44px] items-center">
         <button type="button" onClick={onClose} aria-label={dd.back} className="grid size-11 place-items-center rounded-full bg-surface-2 text-ink">
@@ -220,6 +214,7 @@ function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onCl
         ) : null}
       </dl>
     </m.div>
+    </Modal>
   );
 }
 

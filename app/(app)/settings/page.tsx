@@ -13,7 +13,8 @@ import { API_MODE, sama } from "@/lib/api";
 import { docsUrl } from "@/lib/site";
 import { resetDemo } from "@/lib/api/mock";
 import type { Settings } from "@/lib/api/types";
-import { useApi } from "@/lib/api/use-api";
+import { useAction, useApi } from "@/lib/api/use-api";
+import { ErrorNote } from "@/components/ui/states";
 import { addressUrl, isTestnet, SAMA_CHAIN_ID } from "@/lib/chain";
 import { short } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/provider";
@@ -26,14 +27,15 @@ export default function SettingsPage() {
   const { session, signOut } = useSession();
   const [theme, setTheme] = useTheme();
   const [copied, setCopied] = useState(false);
-  const { data: s, refresh } = useApi(() => sama.settings(), []);
-  if (!s || !session) return <SettingsSkeleton />;
+  const { data: s, error, refresh } = useApi(() => sama.settings(), []);
+  const act = useAction();
+  if (!s || !session) return error ? <ErrorNote action={<button type="button" className="underline" onClick={() => void refresh()}>{d.common.retry}</button>}>{error}</ErrorNote> : <SettingsSkeleton />;
 
   const st = d.settings;
-  const update = async (patch: Partial<Settings>) => {
+  const update = (patch: Partial<Settings>) => act.run(async () => {
     await sama.saveSettings({ ...s, ...patch });
     await refresh();
-  };
+  });
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(session.address);
@@ -48,6 +50,7 @@ export default function SettingsPage() {
     <Stagger>
       <m.div variants={rise} className="mx-auto max-w-2xl">
         <ScreenHeader title={st.title} />
+        {act.error && <ErrorNote>{act.error}</ErrorNote>}
 
         <div className="flex items-center gap-4 rounded-[24px] px-1 py-2">
           <UserAvatar name={session.address} size={56} />
@@ -78,7 +81,7 @@ export default function SettingsPage() {
               key={k}
               icon={k === "inApp" ? <IconPulse size={22} /> : k === "email" ? <IconMail size={22} /> : <IconShare size={22} />}
               label={st.notify[k]}
-              trailing={<Toggle label={st.notify[k]} checked={s.notify[k]} onChange={(v) => void update({ notify: { ...s.notify, [k]: v } })} />}
+              trailing={<Toggle label={st.notify[k]} checked={s.notify[k]} disabled={act.pending} onChange={(v) => update({ notify: { ...s.notify, [k]: v } })} />}
             />
           ))}
           <li className="px-1 pb-1 pt-1 text-sm text-ink-3">{st.notifyHelp}</li>

@@ -427,6 +427,7 @@ export const en = {
     },
   },
   proof: {
+    unavailable: "Live settlement history is unavailable. Showing the fallback BNB Chain mainnet contract details.",
     lead: "On-chain evidence for reviewers: the settlement contract and every round that settled through it. Participants are never named.",
     contract: "Settlement contract address",
     deployTx: "Deploy transaction",
@@ -534,6 +535,8 @@ export const en = {
     chainId: "Chain ID",
   },
   docs: {
+    skipContent: "Skip to documentation",
+    copyFailed: "Copy failed. Select and copy the text manually.",
     label: "Docs",
     onThisPage: "On this page",
     jumpTo: "Jump to a section",

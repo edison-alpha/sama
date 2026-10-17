@@ -225,6 +225,8 @@ export function ProblemCarousel({ title, lead, items }: { title: string; lead: s
 
       <ul
         ref={track}
+        tabIndex={0}
+        aria-label={title}
         onScroll={onScroll}
         className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mt-12 sm:px-8 lg:px-[max(4rem,calc((100vw-1400px)/2+4rem))] [&::-webkit-scrollbar]:hidden"
       >

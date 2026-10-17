@@ -81,7 +81,7 @@ export default function PortfolioPage() {
             <ErrorNote>{d.portfolio.readError} {portfolio.detail}</ErrorNote>
           ) : (
             <>
-              <div className="mb-6 flex items-end justify-between gap-4">
+              <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="min-w-0">
                 <p className="text-5xl font-semibold tracking-[-0.03em] text-ink">
                   <Money value={portfolio.totalUsd} locale={locale} className="tabular-nums" />
@@ -90,7 +90,7 @@ export default function PortfolioPage() {
                   {fmt(d.home.tokensCount, { n: tokenCount(portfolio.positions, drift) })}
                 </p>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex flex-wrap gap-2">
                   {assets.some((a) => a.symbol === "WBNB") && <Button size="lg" variant="ghost" onClick={() => setWrapping(true)}>{d.wrap.open}</Button>}
                   <Button size="lg" variant="ghost" onClick={() => setReceiving(true)}>{d.send.receive.open}</Button>
                   <Button size="lg" onClick={() => setSending(true)}>{d.send.open}</Button>

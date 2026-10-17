@@ -47,6 +47,8 @@ function goTo(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
   el.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  el.tabIndex = -1;
+  el.focus({ preventScroll: true });
   history.replaceState(null, "", `#${id}`);
 }
 
@@ -76,7 +78,7 @@ export function DocsTocList({ items }: { items: TocItem[] }) {
                   goTo(it.id);
                 }}
                 aria-current={on ? "location" : undefined}
-                className={cx("block py-1.5 text-sm leading-snug transition-colors", it.level === 3 ? "pl-7" : "pl-4", on ? "font-semibold text-ink" : "text-ink-3 hover:text-ink")}
+                className={cx("block min-h-11 py-3 text-sm leading-snug transition-colors", it.level === 3 ? "pl-7" : "pl-4", on ? "font-semibold text-ink" : "text-ink-3 hover:text-ink")}
               >
                 {it.title}
               </a>
@@ -139,9 +141,9 @@ export function DocsTocInline({ items }: { items: TocItem[] }) {
                 onClick={(e) => {
                   e.preventDefault();
                   setOpen(false);
-                  goTo(it.id);
+                  window.requestAnimationFrame(() => goTo(it.id));
                 }}
-                className={cx("block rounded-lg py-2 text-sm text-ink-2 hover:bg-surface-2 hover:text-ink", it.level === 3 ? "pl-7" : "pl-3")}
+                className={cx("block min-h-11 rounded-lg py-3 pr-3 text-sm text-ink-2 hover:bg-surface-2 hover:text-ink", it.level === 3 ? "pl-7" : "pl-3")}
               >
                 {it.title}
               </a>

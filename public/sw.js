@@ -1,9 +1,10 @@
 // Minimal service worker for Sama's PWA shell.
 // Scope: enable installability + a basic offline fallback, without trying to be a
 // full offline-first cache (the app is mostly dynamic/wallet-driven).
-// v3: new app icon; v2 dropped v1 caches that could hold dev-server assets cached under URLs whose content later changed.
-const CACHE = "sama-shell-v3";
+// v4 adds an HTML offline page; older shell caches are removed on activation.
+const CACHE = "sama-shell-v4";
 const SHELL_ASSETS = [
+  "/offline.html",
   "/manifest.webmanifest",
   "/sama-logo.svg",
   "/icons/icon-192.png",
@@ -37,7 +38,7 @@ self.addEventListener("fetch", (event) => {
   // code; fall back to a cached shell only when fully offline.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(() => caches.match(request).then((res) => res || caches.match("/manifest.webmanifest")))
+      fetch(request).catch(async () => (await caches.match("/offline.html")) || new Response("You are offline. Reconnect and reload this page.", { status: 503, headers: { "content-type": "text/plain; charset=utf-8" } }))
     );
     return;
   }

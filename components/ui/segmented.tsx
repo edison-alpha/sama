@@ -20,8 +20,15 @@ export function Segmented<T extends string>({ value, options, onChange, label, c
           onClick={() => onChange(o.value)}
           onKeyDown={(e) => {
             const i = options.findIndex((x) => x.value === value);
-            if (e.key === "ArrowRight" || e.key === "ArrowDown") onChange(options[(i + 1) % options.length]!.value);
-            if (e.key === "ArrowLeft" || e.key === "ArrowUp") onChange(options[(i - 1 + options.length) % options.length]!.value);
+            let next = i;
+            if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (i + 1) % options.length;
+            else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (i - 1 + options.length) % options.length;
+            else if (e.key === "Home") next = 0;
+            else if (e.key === "End") next = options.length - 1;
+            else return;
+            e.preventDefault();
+            onChange(options[next]!.value);
+            e.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus();
           }}
           className={cx("relative min-h-9 rounded-full px-3 text-sm font-medium transition-colors", o.value === value ? "text-ink" : "text-ink-3 hover:text-ink")}
         >

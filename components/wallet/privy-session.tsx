@@ -160,6 +160,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
         void logout();
       },
       signer,
+      walletPromptOpen: isModalOpen,
       wrongNetwork: LIVE && wallet !== null && chainOf(wallet) !== SAMA_CHAIN_ID,
       switchNetwork: async () => {
         await ensureWallet();
@@ -167,7 +168,7 @@ function Bridge({ children }: { children: React.ReactNode }) {
       error,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [session?.address, session?.demo, session?.onboardingDone, ready, waitingWallet, walletTimedOut, signedIn, login, logout, signer, wallet, ensureWallet, error, address],
+    [session?.address, session?.demo, session?.onboardingDone, ready, waitingWallet, walletTimedOut, signedIn, login, logout, signer, wallet, ensureWallet, error, address, isModalOpen],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

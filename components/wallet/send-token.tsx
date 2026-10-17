@@ -6,6 +6,7 @@ import { useSession } from "@/components/wallet/session";
 import { AssetIcon } from "@/components/asset-icon";
 import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { UserAvatar } from "@/components/wallet/user-avatar";
 import { ErrorNote } from "@/components/ui/states";
 import { sama } from "@/lib/api";
@@ -33,7 +34,7 @@ type SendableAsset = Pick<Asset, "symbol" | "name" | "decimals" | "priceUsd"> & 
 export function SendTokenModal({ assets, positions, onClose, onSent }: { assets: Asset[]; positions: Position[]; onClose: () => void; onSent: () => void }) {
   const { d, fmt, locale } = useI18n();
   const s = d.send;
-  const { signer } = useSession();
+  const { signer, walletPromptOpen } = useSession();
   // Only tokens the wallet actually holds can be sent, so the list is built from balances. Native BNB has no entry
   // in the ERC-20 allowlist, so it's turned into a pseudo-asset straight from its position.
   const held = positions
@@ -133,7 +134,7 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 md:items-center md:p-4" role="dialog" aria-modal="true" aria-label={s.title}>
+    <Modal suspended={walletPromptOpen} onClose={onClose} label={s.title}>
       <div className="flex h-[100dvh] w-full flex-col bg-[var(--app-bg)] pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] md:h-auto md:max-h-[86dvh] md:max-w-md md:rounded-[28px] md:border md:border-line md:pb-0 md:pt-0 md:shadow-[var(--elev-float)]">
         {/* Grab handle on phones, as in native sheets. */}
         <span className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-surface-3 md:hidden" aria-hidden="true" />
@@ -277,7 +278,7 @@ export function SendTokenModal({ assets, positions, onClose, onSent }: { assets:
           )}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

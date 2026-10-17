@@ -121,8 +121,12 @@ export function TargetEditor({ assets, portfolio, target, onSaved }: { assets: A
   // Debounced server check: never one request per keystroke.
   useEffect(() => {
     setSaved(false);
-    const id = window.setTimeout(() => void sama.previewTarget({ weights, costCapBps, residualStyle }).then(setPreview, () => setPreview(null)), 400);
-    return () => window.clearTimeout(id);
+    let current = true;
+    const id = window.setTimeout(() => void sama.previewTarget({ weights, costCapBps, residualStyle }).then(
+      (next) => { if (current) setPreview(next); },
+      () => { if (current) setPreview(null); },
+    ), 400);
+    return () => { current = false; window.clearTimeout(id); };
   }, [weights, costCapBps, residualStyle]);
 
   const setWeight = (symbol: string, value: number) => {

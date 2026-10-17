@@ -20,6 +20,7 @@ export function RichText({ text, className }: { text: string; className?: string
     content,
     contentType: "markdown",
     editable: false,
+    editorProps: { attributes: { role: "document" } },
     immediatelyRender: false,
   });
 

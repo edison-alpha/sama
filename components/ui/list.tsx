@@ -100,13 +100,14 @@ export function SelectRow<T extends string>({ icon, label, value, options, onCha
 }
 
 /** On/off switch in the accent colour with a check in the knob when on. */
-export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+export function Toggle({ checked, onChange, label, disabled = false }: { checked: boolean; onChange: (v: boolean) => void; label: string; disabled?: boolean }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       aria-label={label}
+      disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cx("relative h-8 w-[52px] shrink-0 rounded-full transition-colors", checked ? "bg-accent" : "bg-surface-3")}
     >

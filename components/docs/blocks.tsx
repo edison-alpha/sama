@@ -31,9 +31,9 @@ function Heading({ level, id, children }: { level: 2 | 3; id: string; children: 
   const Tag = level === 2 ? "h2" : "h3";
   return (
     <Tag id={id} data-docs-heading className={cx("group scroll-mt-24 text-ink", level === 2 ? "mt-16 text-[1.7rem] font-medium leading-tight tracking-[-0.025em] first:mt-0" : "mt-10 text-lg font-semibold tracking-tight")}>
-      <a href={`#${id}`} className="inline-flex items-center">
+      <a href={`#${id}`} className="inline-flex max-w-full items-center">
         {children}
-        <DocIcon name="hash" size={level === 2 ? 18 : 15} className="ml-2 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100" />
+        <DocIcon name="hash" size={level === 2 ? 18 : 15} className="ml-2 shrink-0 text-ink-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100" />
       </a>
     </Tag>
   );
@@ -92,7 +92,7 @@ function DocBlock({ b, locale }: { b: Block; locale: Locale }) {
       return <div className="mt-6"><CodeBlock code={b.code} lang={b.lang} title={b.title} /></div>;
     case "table":
       return (
-        <div className="glass-panel compact-scroll mt-6 overflow-x-auto rounded-[20px]">
+        <div role="region" aria-label={b.head.map((h) => h[locale]).join(", ")} tabIndex={0} className="glass-panel compact-scroll mt-6 overflow-x-auto rounded-[20px]">
           <table className="w-full min-w-[520px] border-collapse text-left text-sm">
             <thead>
               <tr>
@@ -149,7 +149,7 @@ function DocBlock({ b, locale }: { b: Block; locale: Locale }) {
                 </div>
                 <div>
                   <p className="text-xl font-medium tracking-[-0.02em] text-[#f4f4f2]">{c.title[locale]}</p>
-                  <p className="mt-1 text-pretty text-sm leading-relaxed text-[#858585]">{c.text[locale]}</p>
+                  <p className="mt-1 text-pretty text-sm leading-relaxed text-[#a6a6a6]">{c.text[locale]}</p>
                 </div>
               </div>
             </Link>
