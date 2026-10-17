@@ -29,6 +29,7 @@ export default async function Landing() {
 
   return (
     <div className="bg-bg text-ink">
+      <main>
       {/* ---------- Hero ---------- */}
       {/* Full-viewport hero: a looping video fills the rounded frame edge to edge, poster/fallback is the stills photo. */}
       <section className="relative mx-2 mt-2 overflow-hidden rounded-[var(--radius-panel)] bg-sky sm:mx-3.5 sm:mt-3.5">
@@ -90,6 +91,7 @@ export default async function Landing() {
       {/* ---------- Stats ---------- */}
       <Stats title={L.statsTitle} stats={L.stats as unknown as Array<[number, number, string, string]>} />
 
+      </main>
       <SiteFooter d={d} />
     </div>
   );

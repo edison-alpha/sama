@@ -23,12 +23,12 @@
   --pill: #ffffff;
   --ink: #0d0d0f;
   --ink-2: #4a4b50;
-  --ink-3: #85868c;
+  --ink-3: #63646b;
   --line: #ececeb;
   --line-strong: #d6d6d4;
 
-  --accent: #e97863;
-  --accent-strong: #d9604a;
+  --accent: #b43d2b;
+  --accent-strong: #9c3020;
   --accent-soft: #fdece8;
   --on-accent: #ffffff;
 
@@ -40,17 +40,17 @@
 
   --match: #2563d9;
   --match-soft: #e6effd;
-  --rest: #8a8173;
+  --rest: #6b6256;
   --rest-soft: #f1eee8;
-  --ok: #23955a;
+  --ok: #176c40;
   --ok-soft: #e2f5ea;
-  --warn: #c27400;
+  --warn: #865000;
   --warn-soft: #fff1db;
-  --danger: #d63a4a;
+  --danger: #b92335;
   --danger-soft: #fde8ea;
 
   --night: #0a0a0b;
-  --focus: #e97863;
+  --focus: #9c3020;
   --shadow: 0 1px 2px rgb(13 13 15 / 0.04), 0 8px 24px rgb(13 13 15 / 0.06);
   /* Glass surfaces (BoardUI floating-panel recipe on Sama colours). */
   --glass-bg: rgb(255 255 255 / 0.62);
@@ -80,7 +80,10 @@
     --pill: #2f2f35;
     --ink: #f4f4f2;
     --ink-2: #b8b8b4;
-    --ink-3: #84847f;
+    --ink-3: #aaa9a4;
+    --accent: #f39782;
+    --accent-strong: #ffb3a1;
+    --focus: #f39782;
     --line: #26262b;
     --line-strong: #37373d;
     --accent-soft: #3a1d17;
@@ -121,7 +124,10 @@
     --pill: #2f2f35;
   --ink: #f4f4f2;
   --ink-2: #b8b8b4;
-  --ink-3: #84847f;
+  --ink-3: #aaa9a4;
+  --accent: #f39782;
+  --accent-strong: #ffb3a1;
+  --focus: #f39782;
   --line: #26262b;
   --line-strong: #37373d;
   --accent-soft: #3a1d17;

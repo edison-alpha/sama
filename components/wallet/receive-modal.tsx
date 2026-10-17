@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Modal } from "@/components/ui/modal";
 import { useSession } from "@/components/wallet/session";
 import { UserAvatar } from "@/components/wallet/user-avatar";
 import { IconCheck, IconCopy } from "@/components/icons";
@@ -26,8 +27,8 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 md:items-center md:p-4" role="dialog" aria-modal="true" aria-label={r.title}>
-      <div className="flex w-full flex-col rounded-t-[28px] border border-line bg-[var(--app-bg)] pb-[env(safe-area-inset-bottom)] shadow-[var(--elev-float)] md:max-w-md md:rounded-[28px] md:pb-0">
+    <Modal onClose={onClose} label={r.title}>
+      <div className="flex max-h-full w-full flex-col overflow-y-auto rounded-t-[28px] border border-line bg-[var(--app-bg)] pb-[env(safe-area-inset-bottom)] shadow-[var(--elev-float)] md:max-w-md md:rounded-[28px] md:pb-0">
         <span className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-surface-3 md:hidden" aria-hidden="true" />
 
         <header className="grid shrink-0 grid-cols-[40px_1fr_40px] items-center px-4 pt-3 md:px-5 md:pt-5">
@@ -38,14 +39,14 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
           </button>
         </header>
 
-        <div className="grid gap-5 px-5 pb-5 pt-4">
+        <div className="grid min-w-0 grid-cols-1 gap-5 px-5 pb-5 pt-4">
           <p className="text-center text-sm text-ink-2">{r.body}</p>
 
           <div className="flex items-center gap-3 rounded-[20px] border border-line p-4">
             <UserAvatar name={address} size={44} />
             <div className="min-w-0 flex-1">
               <p className="num truncate font-semibold text-ink">{short(address)}</p>
-              <p className="num truncate text-xs text-ink-3">{address}</p>
+              <p className="num break-all text-xs text-ink-3">{address}</p>
             </div>
           </div>
 
@@ -60,6 +61,6 @@ export function ReceiveModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

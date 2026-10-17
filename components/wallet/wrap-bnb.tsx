@@ -4,6 +4,7 @@ import { useState } from "react";
 import { encodeFunctionData, parseAbi, parseUnits } from "viem";
 import { AssetIcon } from "@/components/asset-icon";
 import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 import { ErrorNote } from "@/components/ui/states";
 import { useSession } from "@/components/wallet/session";
 import { sama } from "@/lib/api";
@@ -24,7 +25,7 @@ const GAS_RESERVE = 0.003;
 export function WrapBnbModal({ assets, positions, onClose, onDone }: { assets: Asset[]; positions: Position[]; onClose: () => void; onDone: () => void }) {
   const { d, fmt, locale } = useI18n();
   const w = d.wrap;
-  const { signer } = useSession();
+  const { signer, walletPromptOpen } = useSession();
   const wbnb = assets.find((a) => a.symbol === "WBNB");
   const [wrap, setWrap] = useState(true);
   const [amount, setAmount] = useState("");
@@ -67,8 +68,8 @@ export function WrapBnbModal({ assets, positions, onClose, onDone }: { assets: A
   const label = typed <= 0 ? w.enterAmount : typed > max ? fmt(w.notEnough, { symbol: from }) : fmt(w.cta, { from, to });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 md:items-center md:p-4" role="dialog" aria-modal="true" aria-label={w.title}>
-      <div className="w-full rounded-t-[28px] border border-line bg-[var(--app-bg)] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[var(--elev-float)] md:max-w-md md:rounded-[28px]">
+    <Modal suspended={walletPromptOpen} onClose={onClose} label={w.title}>
+      <div className="max-h-full w-full overflow-y-auto rounded-t-[28px] border border-line bg-[var(--app-bg)] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[var(--elev-float)] md:max-w-md md:rounded-[28px]">
         <header className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold tracking-tight text-ink">{w.title}</h2>
           <button type="button" onClick={onClose} aria-label={d.send.dismiss} className="grid size-10 place-items-center rounded-full text-ink-2 hover:bg-surface-2 hover:text-ink">
@@ -135,6 +136,6 @@ export function WrapBnbModal({ assets, positions, onClose, onDone }: { assets: A
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 }

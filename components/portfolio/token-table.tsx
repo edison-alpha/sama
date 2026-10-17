@@ -71,11 +71,11 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
   return (
     <>
     {/* Phones: a plain token list like a wallet app, no table header. */}
-    <ul className="grid sm:hidden">
+    <ul className="grid min-w-0 grid-cols-1 sm:hidden">
       {list.map((r) => {
         const action = todo(r);
         return (
-          <li key={r.symbol} className={cx("py-3", r.amount === 0 && "opacity-60")}>
+          <li key={r.symbol} className="py-3">
             <Link href={marketHref(r.symbol)} className="flex items-center gap-3">
             <RowIcon row={r} size={44} />
             <span className="min-w-0 flex-1">
@@ -108,7 +108,7 @@ export function TokenTable({ positions, totalUsd, drift, assets, compact = false
           const gap = r.target === null ? 0 : r.target - r.pct;
           const tradeUsd = Math.abs(gap / 100) * totalUsd;
           return (
-            <tr key={r.symbol} className={cx("[&>td]:border-b [&>td]:border-line last:[&>td]:border-0", r.amount === 0 && "opacity-60")}>
+            <tr key={r.symbol} className="[&>td]:border-b [&>td]:border-line last:[&>td]:border-0">
               <td className="w-full max-w-0 px-3 py-4 sm:px-4">
                 <span className="flex min-w-0 items-center gap-3">
                   <RowIcon row={r} size={36} />

@@ -12,15 +12,24 @@ export function useApi<T>(load: () => Promise<T>, deps: unknown[], options: { po
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const loadRef = useRef(load);
+  const request = useRef(0);
+  const fetching = useRef(false);
   loadRef.current = load;
   const { pollMs, stopWhen } = options;
 
   const refresh = useCallback(async () => {
+    const id = ++request.current;
+    fetching.current = true;
     try {
-      setData(await loadRef.current());
+      const next = await loadRef.current();
+      if (id !== request.current) return;
+      setData(next);
       setError(null);
     } catch (e) {
+      if (id !== request.current) return;
       setError((e as Error).message);
+    } finally {
+      if (id === request.current) fetching.current = false;
     }
   }, []);
 
@@ -28,6 +37,7 @@ export function useApi<T>(load: () => Promise<T>, deps: unknown[], options: { po
 
   useEffect(() => {
     void refresh();
+    return () => { request.current += 1; fetching.current = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
@@ -35,7 +45,7 @@ export function useApi<T>(load: () => Promise<T>, deps: unknown[], options: { po
     if (!pollMs || stopped) return;
     // A hidden tab does not poll: it would spend RPC quota on a screen nobody is looking at. It catches up when shown again.
     const tick = () => {
-      if (document.visibilityState === "visible") void refresh();
+      if (document.visibilityState === "visible" && !fetching.current) void refresh();
     };
     const timer = window.setInterval(tick, pollMs);
     document.addEventListener("visibilitychange", tick);

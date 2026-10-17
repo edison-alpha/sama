@@ -2,7 +2,8 @@
 
 import { AnimatePresence, m } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Modal } from "@/components/ui/modal";
 import { AssetIcon } from "@/components/asset-icon";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { IconArrowLeft, IconCheck, IconX } from "@/components/icons";
@@ -37,18 +38,6 @@ function Sheet({ onClose }: { onClose: () => void }) {
   const last = n.steps.length - 1;
   const canNext = [form.name.trim().length >= 3, form.assetSymbols.length >= 2, form.minParticipants >= 2, true][step];
 
-  // Escape closes; the page underneath doesn't scroll while the sheet is up.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [onClose]);
-
   const create = () =>
     act.run(async () => {
       const { id } = await sama.createCircle(form);
@@ -56,12 +45,8 @@ function Sheet({ onClose }: { onClose: () => void }) {
     });
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center md:items-center md:p-6">
-      <m.div className="absolute inset-0 bg-black/60 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} aria-hidden="true" />
+    <Modal onClose={onClose} labelledBy="create-circle-title">
       <m.div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="create-circle-title"
         initial={{ y: "100%", opacity: 0.6 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
@@ -162,7 +147,7 @@ function Sheet({ onClose }: { onClose: () => void }) {
           )}
         </footer>
       </m.div>
-    </div>
+    </Modal>
   );
 }
 

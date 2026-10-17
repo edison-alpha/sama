@@ -379,12 +379,13 @@ html::-webkit-scrollbar {
   border: 1px solid var(--glass-edge);
   box-shadow: inset 0 1px 0 var(--glass-hi), var(--elev-float);
 }
-/* BoardUI "Sidebar selected": accent gradient, 1px accent ring, inner top highlight. */
+/* Selected navigation keeps white labels legible over a solid coral fill. */
 .board-selected {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, white) 0%, var(--accent-strong) 100%);
+  background: #a93626;
   box-shadow: 0 0 0 1px var(--accent-strong), inset 0 1px 0 rgb(255 255 255 / 0.25);
   color: #fff;
 }
+.bg-accent.text-white { color: var(--on-accent); }
 
 /* ---------- Onboarding (components/onboarding.tsx) ---------- */
 /* Each step slides in; the hero's market line draws itself left to right, its fill fades in, the glass cards pop. */
@@ -469,6 +470,28 @@ html::-webkit-scrollbar {
 .heat-4 { background: var(--accent-strong); }
 
 
+.app-modal {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.app-modal[open] { display: flex; align-items: flex-end; justify-content: center; }
+.app-modal::backdrop { background: rgb(0 0 0 / 0.6); }
+.app-modal > * { min-width: 0; }
+@media (min-width: 768px) {
+  .app-modal { padding: 1.5rem; }
+  .app-modal[open] { align-items: center; }
+}
+
 /* ---------- Docs (app/docs) ---------- */
 .docs-theme {
   --ink-3: #63646b;
@@ -508,6 +531,7 @@ html::-webkit-scrollbar {
   background: transparent;
   color: var(--ink);
 }
+.docs-dialog[open] { display: block; }
 .docs-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
 @media (min-width: 768px) {
   .docs-theme [data-docs-heading], #docs-content { scroll-margin-top: 6rem; }

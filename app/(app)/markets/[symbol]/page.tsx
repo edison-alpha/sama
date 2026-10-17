@@ -40,9 +40,10 @@ export default function MarketPage() {
   const pool = stats?.poolAddress ?? null;
   // The result carries the pool it belongs to: before the pool is known the first load resolves to [], and without the tag
   // that empty list would flash as "no chart" in the render between "stats arrived" and "history requested".
-  const { data: loaded, error: historyError } = useApi(async () => ({ pool, points: pool ? await sama.marketHistory(asset!.address, range) : [] }), [pool, asset?.address, range]);
+  const { data: loaded, error: historyError } = useApi(async () => ({ pool, range, points: pool ? await sama.marketHistory(asset!.address, range) : [] }), [pool, asset?.address, range]);
   // A new range keeps the previous line on screen until its own data lands, so switching windows never blanks the plot.
   const history = loaded && loaded.pool === pool ? loaded.points : null;
+  const shownRange = history && loaded ? loaded.range : range;
 
   if (!assets) return assetsError ? <ErrorNote>{assetsError}</ErrorNote> : <PageSkeleton />;
   if (!asset) return <EmptyState title={t.unknown} action={<Link href="/portfolio" className="text-sm font-medium text-ink underline">{t.back}</Link>} />;
@@ -91,7 +92,7 @@ export default function MarketPage() {
                 <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" className={up ? "" : "rotate-180"}><path d="M5 1.5 9 8.5H1Z" fill="currentColor" /></svg>
                 <span className="tabular-nums">{percent(Math.abs(changePct), locale, 2)}</span>
               </span>
-              <span className="text-ink-3">{c.period[range]}</span>
+              <span className="text-ink-3">{c.period[shownRange]}</span>
             </>
           ) : (
             <span className="text-ink-3">&nbsp;</span>
@@ -106,11 +107,12 @@ export default function MarketPage() {
           ) : !pool ? (
             <EmptyState title={t.noPool} />
           ) : points.length > 1 ? (
-            <Plot points={points} up={up} hover={hover} onHover={setHover} range={range} label={`${asset.symbol}, ${c.period[range]}`} />
+            <Plot points={points} up={up} hover={hover} onHover={setHover} range={shownRange} label={`${asset.symbol}, ${c.period[shownRange]}`} />
           ) : (
             <EmptyState title={c.empty} />
           )}
         </div>
+        {pool && loaded?.range !== range && !historyError && <p role="status" className="mt-2 text-sm text-ink-3">{d.common.loading}</p>}
 
         <div role="radiogroup" aria-label={asset.symbol} className="mt-4 inline-flex rounded-full border border-line p-1">
           {RANGES.map((r) => (

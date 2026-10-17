@@ -14,6 +14,7 @@ export type SessionState = {
   signIn: (method?: SignInMethod) => void;
   signOut: () => void;
   signer: ApiSigner;
+  walletPromptOpen?: boolean;
   wrongNetwork: boolean;
   switchNetwork: () => Promise<void>;
   error: string | null;

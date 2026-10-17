@@ -1,22 +1,11 @@
 import { PublicPage } from "@/components/landing/public-page";
-import type { Proof } from "@/lib/api/types";
-import { addressUrl, txUrl } from "@/lib/chain";
+import { proofExplorer, readProof } from "@/lib/proof";
+import { siteUrl } from "@/lib/site";
 import { fmt } from "@/lib/i18n/dict";
 import { getDict } from "@/lib/i18n/server";
 
 /** The deployed SamaSettlement on BSC mainnet; mirrors sama-packages/shared/src/deployments/56.json. */
 const DEPLOYED = { address: "0x7811a30D29d6c2Ca95Aeb4EE9D896cE44Cb72AC8", deployTx: "0x84b1481cbc44d190ef5908e8ba9e3d6abd681b101a4af7bd26bb45e9522e7d0d", deployBlock: 125735191 } as const;
-
-/** Live evidence from sama-backend, refreshed every 30 s. In mock mode, or when the API is unreachable, only the contract shows. */
-async function loadProof(): Promise<Proof | null> {
-  if (process.env.NEXT_PUBLIC_SAMA_API_MODE !== "live") return null;
-  try {
-    const r = await fetch(`${process.env.NEXT_PUBLIC_SAMA_API_URL ?? ""}/api/proof`, { next: { revalidate: 30 } });
-    return r.ok ? ((await r.json()) as Proof) : null;
-  } catch {
-    return null;
-  }
-}
 
 const short = (h: string) => `${h.slice(0, 10)}…${h.slice(-6)}`;
 
@@ -27,7 +16,15 @@ const short = (h: string) => `${h.slice(0, 10)}…${h.slice(-6)}`;
 export default async function ProofPage() {
   const { d, locale } = await getDict();
   const p = d.proof;
-  const proof = await loadProof();
+  const result = await readProof({
+    live: process.env.NEXT_PUBLIC_SAMA_API_MODE === "live",
+    backend: process.env.SAMA_API_URL || process.env.NEXT_PUBLIC_SAMA_API_URL,
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined),
+  });
+  const proof = result.state === "ready" ? result.proof : null;
+  const explorer = proofExplorer(proof?.chainId ?? 56);
+  const addressUrl = (address: string) => `${explorer}/address/${address}`;
+  const txUrl = (hash: string) => `${explorer}/tx/${hash}`;
   const contract = proof?.settlement ?? { ...DEPLOYED, verifiedSource: false };
   const money = new Intl.NumberFormat(locale === "id" ? "id-ID" : "en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
   const when = new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -36,9 +33,11 @@ export default async function ProofPage() {
     <PublicPage d={d}>
       <h1 className="text-4xl font-semibold tracking-[-0.04em]">{d.nav.proof}</h1>
       <p className="mt-3 text-lg text-ink-2">{p.lead}</p>
+      {result.state === "unavailable" && <p role="status" className="mt-6 rounded-xl border border-line bg-surface-2 p-4 text-sm text-ink-2">{p.unavailable} <a href={siteUrl("/proof")} className="font-semibold underline underline-offset-4">{d.common.retry}</a></p>}
 
       <section className="mt-10 rounded-[24px] border border-line bg-surface p-6">
         <p className="text-sm font-medium text-ink-3">{p.contract}</p>
+        <p className="mt-1 text-sm text-ink-2">{(proof?.chainId ?? 56) === 56 ? d.network.label : d.network.testnet}</p>
         <a href={addressUrl(contract.address)} target="_blank" rel="noreferrer" className="num mt-1 block break-all text-lg font-semibold text-accent hover:underline">{contract.address}</a>
         <dl className="mt-4 grid gap-2 text-sm">
           {contract.deployTx && (

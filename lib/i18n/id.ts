@@ -426,6 +426,7 @@ export const id: Dict = {
     },
   },
   proof: {
+    unavailable: "Riwayat settlement live belum tersedia. Detail di bawah memakai kontrak cadangan BNB Chain mainnet.",
     lead: "Bukti onchain untuk reviewer: kontrak settlement dan setiap round yang settle lewat kontrak itu. Peserta tidak pernah disebut namanya.",
     contract: "Kontrak settlement",
     deployTx: "Transaksi deploy",
