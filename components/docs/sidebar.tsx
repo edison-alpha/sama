@@ -12,7 +12,7 @@ import { cx } from "@/utils/cx";
 function NavList({ groups, onPick }: { groups: NavGroup[]; onPick?: () => void }) {
   const pathname = usePathname();
   return (
-    <div className="grid gap-7">
+    <div className="grid gap-6">
       {groups.map((g) => (
         <div key={g.title}>
           <p className="px-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">{g.title}</p>
@@ -26,7 +26,7 @@ function NavList({ groups, onPick }: { groups: NavGroup[]; onPick?: () => void }
                     href={p.href}
                     onClick={onPick}
                     aria-current={on ? "page" : undefined}
-                    className={cx("relative flex min-h-11 items-center rounded-2xl px-3.5 py-2 text-[14.5px] transition-colors", on ? "board-selected font-semibold" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink")}
+                    className={cx("relative flex h-8 items-center rounded-lg px-3 text-[14px] transition-colors", on ? "bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] font-semibold text-ink shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent)_28%,transparent)]" : "text-ink-2 hover:bg-surface-2/70 hover:text-ink")}
                   >
                     {p.title}
                   </Link>
@@ -43,7 +43,7 @@ function NavList({ groups, onPick }: { groups: NavGroup[]; onPick?: () => void }
 /** Left column on desktop: every docs page by group, the current one marked. */
 export function DocsSidebar({ groups }: { groups: NavGroup[] }) {
   return (
-    <nav aria-label="Docs" className="compact-scroll sticky top-20 hidden h-[calc(100dvh-5rem)] overflow-y-auto pb-10 pr-3 pt-6 lg:block">
+    <nav aria-label="Docs" className="compact-scroll sticky top-20 hidden h-[calc(100dvh-5rem)] overflow-y-auto pb-10 pl-1 pr-3 pt-6 lg:block">
       <NavList groups={groups} />
     </nav>
   );

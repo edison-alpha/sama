@@ -1,10 +1,30 @@
+# dependencies
 node_modules
+
+# build output
 .next
 .open-next
 .wrangler
-.env
-.env.local
 *.tsbuildinfo
 test-results/
 playwright-report/
 
+# env
+.env
+.env.local
+.env*.local
+
+# editor / OS / local tooling
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Remotion promo video lives outside this repo
+video/
