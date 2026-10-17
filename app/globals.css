@@ -470,6 +470,48 @@ html::-webkit-scrollbar {
 
 
 /* ---------- Docs (app/docs) ---------- */
+.docs-theme {
+  --ink-3: #63646b;
+  --accent: #b43d2b;
+  --focus: #b43d2b;
+  overflow-wrap: anywhere;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .docs-theme {
+    --ink-3: #aaa9a4;
+    --accent: #f39782;
+    --focus: #f39782;
+  }
+}
+:root[data-theme="dark"] .docs-theme {
+  --ink-3: #aaa9a4;
+  --accent: #f39782;
+  --focus: #f39782;
+}
+.docs-theme .bg-accent { background-color: #a93626; color: white; }
+.docs-theme .board-selected { background: #a93626; color: white; }
+.docs-theme [data-docs-heading], #docs-content { scroll-margin-top: 8.5rem; }
+.docs-theme [data-docs-heading] { outline-offset: 6px; }
+.docs-theme pre { overflow-wrap: normal; }
+.docs-theme button { min-height: 44px; }
+.docs-theme button:has(> svg:only-child) { min-width: 44px; }
+.docs-dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.docs-dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+@media (min-width: 768px) {
+  .docs-theme [data-docs-heading], #docs-content { scroll-margin-top: 6rem; }
+}
 /* Cinematic link cards: the scene eases in on hover, like the landing bento. */
 .docs-card .ps-scene { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .docs-card:hover .ps-scene { transform: scale(0.985); }

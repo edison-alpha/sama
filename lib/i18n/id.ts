@@ -533,6 +533,8 @@ export const id: Dict = {
     resetDemo: "Reset data demo",
   },
   docs: {
+    skipContent: "Langsung ke dokumentasi",
+    copyFailed: "Gagal menyalin. Pilih dan salin teks secara manual.",
     label: "Docs",
     onThisPage: "Di halaman ini",
     jumpTo: "Lompat ke bagian",

@@ -48,12 +48,12 @@ export function PreviewCard({ demo, caption, code }: { demo: DemoKey; caption?: 
   return (
     <figure className="my-9">
       {code && (
-        <div className="glass-panel mb-3 inline-flex rounded-full p-1" role="tablist">
-          <button type="button" role="tab" aria-selected={tab === "preview"} onClick={() => setTab("preview")} className={tabCls(tab === "preview")}>
+        <div className="glass-panel mb-3 inline-flex rounded-full p-1" role="group" aria-label={`${d.docs.preview} / ${d.docs.code}`}>
+          <button type="button" aria-pressed={tab === "preview"} onClick={() => setTab("preview")} className={tabCls(tab === "preview")}>
             <DocIcon name="eye" size={16} />
             {d.docs.preview}
           </button>
-          <button type="button" role="tab" aria-selected={tab === "code"} onClick={() => setTab("code")} className={tabCls(tab === "code")}>
+          <button type="button" aria-pressed={tab === "code"} onClick={() => setTab("code")} className={tabCls(tab === "code")}>
             <DocIcon name="code" size={16} />
             {d.docs.code}
           </button>

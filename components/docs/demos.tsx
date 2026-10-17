@@ -111,19 +111,19 @@ function RingDemo() {
   const label = (n: string) => (n === "You" ? tr("You", "Kamu") : n);
   return (
     <div className="flex w-full flex-col items-center gap-6">
-      <div className="glass glass-frost inline-flex rounded-full p-1 text-xs font-semibold" role="radiogroup" aria-label="Matcher">
+      <div className="glass glass-frost inline-flex rounded-full p-1 text-xs font-semibold" role="group" aria-label="Matcher">
         {([
           [false, tr("Pairs only", "Hanya pasangan")],
           [true, tr("Whole round", "Seluruh round")],
         ] as const).map(([v, text]) => (
-          <button key={String(v)} type="button" role="radio" aria-checked={whole === v} onClick={() => setWhole(v)} className={cx("rounded-full px-3.5 py-1.5 transition-colors", whole === v ? "bg-white text-black" : "text-white/70 hover:text-white")}>
+          <button key={String(v)} type="button" aria-pressed={whole === v} onClick={() => setWhole(v)} className={cx("rounded-full px-3.5 py-1.5 transition-colors", whole === v ? "bg-white text-black" : "text-white/70 hover:text-white")}>
             {text}
           </button>
         ))}
       </div>
 
-      <div className="relative aspect-[1.15] w-full max-w-[400px]">
-        <svg viewBox="0 0 100 87" className="absolute inset-0 size-full overflow-visible" aria-hidden="true">
+      <div className="relative aspect-[1.15] min-h-[260px] w-full max-w-[400px]">
+        <svg viewBox="0 0 100 87" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden="true">
           {RING.map((a, i) => {
             const b = RING[(i + 1) % RING.length]!;
             return (
@@ -145,12 +145,12 @@ function RingDemo() {
         </svg>
 
         {RING.map((a) => (
-          <div key={a.name} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${a.x}%`, top: `${(a.y / 87) * 100}%` }}>
+          <div key={a.name} className="absolute w-max -translate-x-1/2 -translate-y-1/2" style={{ left: `${a.x}%`, top: `${(a.y / 87) * 100}%` }}>
             <div className="flex flex-col items-center gap-2">
               <span className="rounded-full p-1 ring-1 ring-white/25 backdrop-blur-md">
                 <UserAvatar name={seed(a.name)} size={44} />
               </span>
-              <Panel className="flex items-center gap-1.5 rounded-full py-1 pl-2.5 pr-2 text-xs font-medium">
+              <Panel className="flex items-center gap-1.5 whitespace-nowrap rounded-full py-1 pl-2.5 pr-2 text-xs font-medium">
                 {label(a.name)}
                 <span className="flex items-center gap-0.5 text-white/60">
                   <AssetIcon symbol={a.give} size={16} />
@@ -162,7 +162,7 @@ function RingDemo() {
           </div>
         ))}
 
-        <div className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute left-1/2 top-[58%] w-max max-w-[90%] -translate-x-1/2 -translate-y-1/2 text-center">
           <AnimatePresence mode="wait" initial={false}>
             <m.div key={String(whole)} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.92 }} transition={{ duration: 0.18 }}>
               <Panel className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium">
@@ -420,12 +420,12 @@ function LeftoverDemo() {
         </span>
         <input type="range" min={50} max={300} step={10} value={cap} onChange={(e) => setCap(Number(e.target.value))} className="accent-[var(--accent)]" aria-label={tr("Your cost cap", "Batas biayamu")} />
       </Panel>
-      <ul className="mt-2.5 grid gap-2" role="radiogroup" aria-label={tr("Leftover choice", "Pilihan sisa")}>
+      <ul className="mt-2.5 grid gap-2" aria-label={tr("Leftover choice", "Pilihan sisa")}>
         {choices.map((c) => {
           const on = (picked ?? recommended) === c.key;
           return (
             <li key={c.key}>
-              <button type="button" role="radio" aria-checked={on} onClick={() => setPicked(c.key)} className={cx("glass glass-frost flex w-full items-center gap-3 rounded-[18px] px-3.5 py-3 text-left transition-shadow", on && "shadow-[0_0_0_1.5px_var(--accent)]")}>
+              <button type="button" aria-pressed={on} onClick={() => setPicked(c.key)} className={cx("glass glass-frost flex w-full items-center gap-3 rounded-[18px] px-3.5 py-3 text-left transition-shadow", on && "shadow-[0_0_0_1.5px_var(--accent)]")}>
                 <span className={cx("grid size-9 shrink-0 place-items-center rounded-full", on ? "bg-accent text-white" : "bg-white/10 text-white/80")}><Icon icon={c.icon} width={18} height={18} aria-hidden="true" /></span>
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
@@ -490,13 +490,17 @@ type Phase = 0 | 1 | 2 | 3 | 4;
 function AssistantDemo() {
   const tr = useT();
   const reduce = useReducedMotion();
-  const [phase, setPhase] = useState<Phase>(reduce ? 3 : 0);
+  const [phase, setPhase] = useState<Phase>(0);
   const [run, setRun] = useState(0);
   const [done, setDone] = useState<Record<string, boolean>>({});
 
   // 0 reading → 1 answer → 2 reading → 3 proposal; 4 is reached only by pressing the proposal's button.
   useEffect(() => {
-    if (reduce || phase >= 3) return;
+    if (reduce) {
+      setPhase((current) => current < 3 ? 3 : current);
+      return;
+    }
+    if (phase >= 3) return;
     const t = window.setTimeout(() => setPhase((p) => (p + 1) as Phase), phase === 1 ? 3600 : 1700);
     return () => window.clearTimeout(t);
   }, [phase, run, reduce]);

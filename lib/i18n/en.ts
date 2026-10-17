@@ -534,6 +534,8 @@ export const en = {
     chainId: "Chain ID",
   },
   docs: {
+    skipContent: "Skip to documentation",
+    copyFailed: "Copy failed. Select and copy the text manually.",
     label: "Docs",
     onThisPage: "On this page",
     jumpTo: "Jump to a section",
