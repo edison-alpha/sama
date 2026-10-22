@@ -56,6 +56,15 @@ export function CircleDetail({ id }: { id: string }) {
     return () => { live = false; };
   }, [circleId, needsCode]);
 
+  // A visitor who came through an invite link sees its code already in the field, not an empty one to fill in. Kept
+  // if they already typed something.
+  const needsInvite = !!c && !c.role && c.visibility !== "PUBLIC";
+  useEffect(() => {
+    if (!circleId || !needsInvite) return;
+    const code = pendingInvite(circleId, new URLSearchParams(window.location.search).get("invite"));
+    if (code) setTypedCode((typed) => typed || code);
+  }, [circleId, needsInvite]);
+
   if (!c) return error ? <ErrorNote>{error}</ErrorNote> : <PageSkeleton />;
 
   const cd = d.circles.detail;
@@ -68,7 +77,7 @@ export function CircleDetail({ id }: { id: string }) {
   // Invite-only circles need the code from the invite link (kept in the URL or, across sign-in, in session storage).
   const join = () =>
     act.run(async () => {
-      const code = typedCode.trim() || pendingInvite(c.id, new URLSearchParams(window.location.search).get("invite"));
+      const code = inviteCodeOf(typedCode) || pendingInvite(c.id, new URLSearchParams(window.location.search).get("invite"));
       if (c.visibility !== "PUBLIC" && !code) throw new Error(d.invite.needed);
       await sama.joinCircle(c.id, code);
       forgetInvite(c.id);
@@ -288,6 +297,13 @@ export function CircleDetail({ id }: { id: string }) {
 const pill = "inline-flex h-11 items-center gap-2 rounded-full border border-line px-4 text-sm font-semibold text-ink transition-colors hover:bg-surface-2";
 
 /** Up to three asset logos overlapping, as the Circle's "token icon". */
+/** The code from what was typed: the code itself, or a whole pasted invite link (…/invite/<code>). */
+function inviteCodeOf(typed: string): string {
+  const s = typed.trim();
+  const m = /\/invite\/([^/?#\s]+)/.exec(s);
+  return m ? decodeURIComponent(m[1]!) : s;
+}
+
 function AssetStack({ symbols }: { symbols: string[] }) {
   return (
     <>
