@@ -490,6 +490,7 @@ export const en = {
     allTypes: "All types",
     mine: { title: "My history", sub: "Recent activity from your wallet.", items: "{n} items" },
     loadingMore: "Loading more…",
+    status: { confirmed: "Confirmed", failed: "Failed" },
     detail: { title: "Detail", label: "My activity", status: "Status", network: "Network", reference: "Reference", time: "Time", viewTx: "View transaction details", viewRound: "View round", open: "Open", done: "Done", back: "Back", from: "From", to: "To", you: "You", token: "Token" },
     range: { all: "All time", week: "Last 7 days", month: "Last 30 days" },
     search: "Search activity",

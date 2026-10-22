@@ -489,6 +489,7 @@ export const id: Dict = {
     allTypes: "Semua jenis",
     mine: { title: "Riwayatku", sub: "Aktivitas terbaru dari wallet-mu.", items: "{n} item" },
     loadingMore: "Memuat lagi…",
+    status: { confirmed: "Terkonfirmasi", failed: "Gagal" },
     detail: { title: "Detail", label: "Aktivitasku", status: "Status", network: "Jaringan", reference: "Referensi", time: "Waktu", viewTx: "Lihat detail transaksi", viewRound: "Lihat round", open: "Buka", done: "Selesai", back: "Kembali", from: "Dari", to: "Ke", you: "Anda", token: "Token" },
     range: { all: "Semua waktu", week: "7 hari terakhir", month: "30 hari terakhir" },
     search: "Cari aktivitas",
