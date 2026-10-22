@@ -4,7 +4,7 @@ import { m } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { circleOf, flow, iconOf, loadActivityPage, txOf, type ActivityData, type Amount, type Filter, type Range } from "@/components/activity/history-data";
+import { circleOf, flow, iconOf, knownAddress, loadActivityPage, lookalikes, txOf, type ActivityData, type Amount, type Filter, type Range } from "@/components/activity/history-data";
 import { MobileHistory } from "@/components/activity/history-mobile";
 import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
 import { IconArrowRight, IconCalendar, IconExternal } from "@/components/icons";
@@ -78,13 +78,14 @@ export default function ActivityPage() {
     if (!q) return true;
     const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
     const f = flow(a, r);
-    const hay = [activityLine(a, d), types[a.kind] ?? "", r?.circle.name ?? "", ...f.out.map((x) => x.symbol), ...f.in.map((x) => x.symbol)].join(" ").toLowerCase();
+    const hay = [activityLine(a, d, locale), String(a.detail.counterparty ?? ""), String(a.detail.tx ?? ""), types[a.kind] ?? "", r?.circle.name ?? "", ...f.out.map((x) => x.symbol), ...f.in.map((x) => x.symbol)].join(" ").toLowerCase();
     return hay.includes(q);
   });
 
   const tag = locale === "id" ? "id-ID" : "en-US";
   const day = new Intl.DateTimeFormat(tag, { day: "numeric", month: "short" });
   const full = new Intl.DateTimeFormat(tag, { dateStyle: "medium", timeStyle: "short" });
+  const alike = lookalikes(data.list);
   const th = "bg-surface-2 px-4 py-3.5 text-left text-sm font-medium text-ink-3 first:rounded-l-2xl last:rounded-r-2xl";
 
   return (
@@ -127,7 +128,10 @@ export default function ActivityPage() {
               </thead>
               <tbody>
                 {rows.map((a) => {
-                  const { Icon, tone } = iconOf(a.kind);
+                  const { Icon, tone } = iconOf(a);
+                  const counterparty = String(a.detail.counterparty ?? "");
+                  const named = a.kind.startsWith("TRANSFER_") ? knownAddress(counterparty, data, ad.addr) : null;
+                  const warn = alike.has(counterparty.toLowerCase());
                   const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
                   const f = flow(a, r);
                   const at = new Date(a.createdAt);
@@ -154,10 +158,10 @@ export default function ActivityPage() {
                           a.kind.startsWith("TRANSFER_") ? (
                             <span className="flex items-center gap-2.5 text-sm text-ink-2">
                               {String(a.detail.logo ?? "").startsWith("https://") ? <img src={String(a.detail.logo)} width={24} height={24} alt="" className="shrink-0 rounded-full" loading="lazy" /> : <AssetIcon symbol={String(a.detail.symbol ?? "")} size={24} />}
-                              {activityLine(a, d)}
+                              {activityLine(a, d, locale)}
                             </span>
                           ) : (
-                            <span className="text-sm text-ink-2">{activityLine(a, d)}</span>
+                            <span className="text-sm text-ink-2">{activityLine(a, d, locale)}</span>
                           )
                         )}
                       </td>
@@ -165,10 +169,13 @@ export default function ActivityPage() {
                         {a.kind.startsWith("TRANSFER_") ? (
                           <>
                             <span className="block text-xs text-ink-3">{a.kind === "TRANSFER_IN" ? ad.addr.from : ad.addr.to}</span>
-                            <a href={addressUrl(String(a.detail.counterparty))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline">
-                              {short(String(a.detail.counterparty))}
+                            {/* The full address is in the tooltip; a shortened one alone is what address poisoning relies on. */}
+                            <a href={addressUrl(counterparty)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} title={counterparty} className={cx("tabular-nums inline-flex items-center gap-1 text-sm font-semibold hover:underline", warn ? "text-danger" : "text-ink")}>
+                              {named ?? short(counterparty, 10, 8)}
                               <IconExternal size={14} className="text-ink-3" />
                             </a>
+                            {named && <span className="tabular-nums block text-xs text-ink-3">{short(counterparty, 10, 8)}</span>}
+                            {warn && <span className="block max-w-56 text-xs text-danger">{ad.addr.lookalike}</span>}
                             <a href={txUrl(String(a.detail.tx))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums block text-xs text-ink-3 hover:underline">
                               {ad.addr.tx} {short(String(a.detail.tx))}
                             </a>

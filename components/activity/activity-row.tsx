@@ -11,8 +11,8 @@ import { cx } from "@/utils/cx";
 
 /** One activity line with its kind's icon; rows that belong to a round open it. Shared by Home and Activity. */
 export function ActivityRow({ a, time }: { a: Activity; time: string }) {
-  const { d } = useI18n();
-  const { Icon, tone } = iconOf(a.kind);
+  const { d, locale } = useI18n();
+  const { Icon, tone } = iconOf(a);
   const body = (
     <>
       <IconChip className={tone}>
@@ -20,7 +20,7 @@ export function ActivityRow({ a, time }: { a: Activity; time: string }) {
         {String(a.detail.logo ?? "").startsWith("https://") ? <img src={String(a.detail.logo)} alt="" width={18} height={18} className="rounded-full" loading="lazy" /> : <Icon size={18} />}
       </IconChip>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-ink">{activityLine(a, d)}</span>
+        <span className="block truncate text-sm font-medium text-ink">{activityLine(a, d, locale)}</span>
         <span className="block text-xs text-ink-3">{d.activity.filters[activityGroup(a.kind)]}</span>
       </span>
       <span className="num shrink-0 text-xs text-ink-3">{time}</span>

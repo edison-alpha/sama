@@ -2,7 +2,7 @@ import { IconCircles, IconLayers, IconLeftovers, IconReceive, IconRoundArrows, I
 import { sama } from "@/lib/api";
 import type { ActivityQuery } from "@/lib/api/contract";
 import type { Activity, RoundView } from "@/lib/api/types";
-import { activityGroup } from "@/lib/activity";
+import { activityGroup, activityKey } from "@/lib/activity";
 import { EXPLORER } from "@/lib/chain";
 
 export type Group = "rounds" | "circles" | "targets" | "leftovers" | "transfers";
@@ -29,13 +29,22 @@ export const KIND_ICON: Partial<Record<string, { Icon: typeof IconSent; tone: st
   ROUND_MATCHED: { Icon: IconRoundArrows, tone: "text-match" },
   ROUND_NO_CROSS: { Icon: IconX, tone: "text-ink-3" },
   RESIDUAL_DECIDED: { Icon: IconLeftovers, tone: "text-rest" },
+  RESIDUAL_SWAPPED: { Icon: IconLeftovers, tone: "text-rest" },
+  // Outcomes where something went wrong get a red cross, so they never read like a success at a glance.
+  ROUND_FAILED: { Icon: IconX, tone: "text-danger" },
+  SETTLED_UNVERIFIED: { Icon: IconX, tone: "text-danger" },
+  RESIDUAL_FAILED: { Icon: IconX, tone: "text-danger" },
+  RESIDUAL_SHORT: { Icon: IconX, tone: "text-danger" },
 };
 
-/** The icon and tint for one activity row: its kind's icon when it has one, otherwise its group's. */
-export function iconOf(kind: string): { Icon: typeof IconSent; tone: string; fill: string } {
-  const group = GROUP[activityGroup(kind)];
-  const own = KIND_ICON[kind];
-  return own ? { ...group, ...own } : group;
+const BAD = new Set(["ROUND_FAILED", "SETTLED_UNVERIFIED", "RESIDUAL_FAILED", "RESIDUAL_SHORT"]);
+
+/** The icon and tint for one activity row, chosen by its outcome (`activityKey`), not only its kind. */
+export function iconOf(a: Activity): { Icon: typeof IconSent; tone: string; fill: string } {
+  const k = activityKey(a);
+  const group = GROUP[activityGroup(a.kind)];
+  const own = KIND_ICON[k];
+  return own ? { ...group, ...own, ...(BAD.has(k) ? { fill: "bg-danger" } : {}) } : group;
 }
 
 /**
@@ -53,8 +62,21 @@ export async function loadActivityPage(query: ActivityQuery, prev: ActivityData 
   return { list, rounds, nextCursor: page.nextCursor };
 }
 
-/** What left and what arrived for this row: settled legs once there is a plan, the signed intent before that. */
+/**
+ * What left and what arrived for this row. A leftover swap shows the amounts the chain moved; a settlement shows its
+ * legs only once the verifier passed, since an unverified settlement's plan is not proof anything moved.
+ */
 export function flow(a: Activity, r: RoundView | undefined): { out: Amount[]; in: Amount[] } {
+  const k = activityKey(a);
+  if (k === "SETTLED_UNVERIFIED" || k === "RESIDUAL_FAILED") return { out: [], in: [] };
+  if (a.kind === "RESIDUAL_DECIDED" && typeof a.detail.soldSymbol === "string") {
+    const price = (symbol: string) => r?.round.prices.find((p) => p.symbol === symbol)?.priceUsd ?? 0;
+    const moved = (symbol: unknown, amount: unknown): Amount[] => {
+      const n = Number(amount);
+      return typeof symbol === "string" && n > 0 ? [{ symbol, amountTokens: n, valueUsd: n * price(symbol) }] : [];
+    };
+    return { out: moved(a.detail.soldSymbol, a.detail.soldAmount), in: moved(a.detail.boughtSymbol, a.detail.boughtAmount) };
+  }
   if (!r) return { out: [], in: [] };
   if (a.kind === "RESIDUAL_DECIDED") return { out: r.you.residual.filter((x) => x.side === "SELL"), in: r.you.residual.filter((x) => x.side === "BUY") };
   if (r.you.legs.length && a.kind !== "INTENT_SIGNED") {
@@ -100,6 +122,31 @@ export function partiesOf(a: Activity, r: RoundView | undefined, you: string): {
   const leg = r?.you.legs[0];
   if (!leg) return { from: null, to: null };
   return leg.direction === "SEND" ? { from: self, to: other(leg.counterparty) } : { from: other(leg.counterparty), to: self };
+}
+
+const PANCAKE_ROUTER = "0x13f4ea83d0bd40e75c8222255bc855a974568dd4";
+
+/** A name for a contract the app itself talks to (the round's settlement contract, PancakeSwap's router), else null. */
+export function knownAddress(address: string, data: ActivityData, names: { settlement: string; router: string }): string | null {
+  const a = address.toLowerCase();
+  if (a === PANCAKE_ROUTER) return names.router;
+  for (const r of data.rounds.values()) if (r.round.settlementContract.toLowerCase() === a) return names.settlement;
+  return null;
+}
+
+/**
+ * Counterparties that look like another one in the list: same first and last four hex digits, different address.
+ * That is how address poisoning hides a lookalike in a shortened `0x6f4b…9c89`, so these rows get a warning.
+ */
+export function lookalikes(list: Activity[]): Set<string> {
+  const byShape = new Map<string, Set<string>>();
+  for (const a of list) {
+    const c = typeof a.detail.counterparty === "string" ? a.detail.counterparty.toLowerCase() : "";
+    if (!/^0x[0-9a-f]{40}$/.test(c)) continue;
+    const shape = `${c.slice(2, 6)}…${c.slice(-4)}`;
+    byShape.set(shape, (byShape.get(shape) ?? new Set()).add(c));
+  }
+  return new Set([...byShape.values()].filter((s) => s.size > 1).flatMap((s) => [...s]));
 }
 
 /** The Circle a row belongs to, from its round or from the activity's own detail. */
