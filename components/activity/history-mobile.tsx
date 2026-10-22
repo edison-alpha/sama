@@ -15,7 +15,7 @@ import { short, tokens } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
-import { circleOf, flow, iconOf, partiesOf, transferOf, txOf, type ActivityData, type Amount, type Filter, type Party, type Range, type Transfer } from "./history-data";
+import { circleOf, flow, iconOf, knownAddress, lookalikes, partiesOf, transferOf, txOf, type ActivityData, type Amount, type Filter, type Party, type Range, type Transfer } from "./history-data";
 
 /**
  * Activity on phones, styled as a wallet app's history: a centred title, two compact filters, then one rounded card of
@@ -85,7 +85,7 @@ export function MobileHistory({ data, rows, filter, onFilter, range, onRange }: 
           <ul className="mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/60">
             {rows.map((a) => {
               const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
-              const { Icon, fill } = iconOf(a.kind);
+              const { Icon, fill } = iconOf(a);
               const f = flow(a, r);
               const tr = transferOf(a);
               const shown = shownAmount(f, tr, locale);
@@ -95,7 +95,7 @@ export function MobileHistory({ data, rows, filter, onFilter, range, onRange }: 
                   <button type="button" onClick={() => setOpen(a)} className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-surface-3/60">
                     <TokenDisc symbol={shown?.symbol ?? null} logo={tr?.logo ?? null} size={44} fill={fill} Icon={Icon} />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold text-ink">{activityLine(a, d)}</span>
+                      <span className="block truncate font-semibold text-ink">{activityLine(a, d, locale)}</span>
                       <span className="block truncate text-sm text-ink-3">{sub}</span>
                     </span>
                     <span className="shrink-0 text-right">
@@ -111,7 +111,7 @@ export function MobileHistory({ data, rows, filter, onFilter, range, onRange }: 
         )}
       </section>
 
-      <AnimatePresence>{open && <Detail a={open} r={open.roundId ? data.rounds.get(open.roundId) : undefined} onClose={() => setOpen(null)} />}</AnimatePresence>
+      <AnimatePresence>{open && <Detail a={open} r={open.roundId ? data.rounds.get(open.roundId) : undefined} data={data} onClose={() => setOpen(null)} />}</AnimatePresence>
     </div>
   );
 }
@@ -141,17 +141,29 @@ function TokenDisc({ symbol, logo, size, fill, Icon }: { symbol: string | null; 
   );
 }
 
-/** A counterparty in the detail: its address opens the explorer, anything else is plain text. */
-function PartyLink({ party }: { party: Party }) {
+/**
+ * A counterparty in the detail: a known contract by name, else the full address (wrapped), never only a shortened one,
+ * since a lookalike shares its first and last characters. A lookalike gets a warning under it.
+ */
+function PartyLink({ party, data }: { party: Party; data: ActivityData }) {
+  const { d } = useI18n();
   if (!party.href) return <>{party.label}</>;
-  return <a href={party.href} target="_blank" rel="noreferrer" className="tabular-nums text-accent">{short(party.label)}</a>;
+  const named = knownAddress(party.label, data, d.activity.addr);
+  const warn = lookalikes(data.list).has(party.label.toLowerCase());
+  return (
+    <span className="block">
+      <a href={party.href} target="_blank" rel="noreferrer" className={cx("tabular-nums block break-all", warn ? "text-danger" : "text-accent")}>{named ?? party.label}</a>
+      {named && <span className="tabular-nums block break-all text-xs font-normal text-ink-3">{party.label}</span>}
+      {warn && <span className="block text-xs font-normal text-danger">{d.activity.addr.lookalike}</span>}
+    </span>
+  );
 }
 
-function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onClose: () => void }) {
+function Detail({ a, r, data, onClose }: { a: Activity; r: RoundView | undefined; data: ActivityData; onClose: () => void }) {
   const { d, locale } = useI18n();
   const ad = d.activity;
   const dd = ad.detail;
-  const { Icon, fill } = iconOf(a.kind);
+  const { Icon, fill } = iconOf(a);
   const f = flow(a, r);
   const tr = transferOf(a);
   const shown = shownAmount(f, tr, locale);
@@ -187,7 +199,7 @@ function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onCl
       <div className="mt-6 rounded-[28px] bg-surface-2/70 px-5 py-7 text-center">
         <span className="mx-auto block w-fit"><TokenDisc symbol={shown?.symbol ?? null} logo={tr?.logo ?? null} size={64} fill={fill} Icon={Icon} /></span>
         <p className="mt-4 text-sm text-ink-3">{dd.label}</p>
-        <p id="activity-detail-title" className="mt-1 text-2xl font-bold tracking-tight text-ink">{activityLine(a, d)}</p>
+        <p id="activity-detail-title" className="mt-1 text-2xl font-bold tracking-tight text-ink">{activityLine(a, d, locale)}</p>
         <p className="mt-1 text-sm text-ink-3">{[(ad.types as Record<string, string>)[a.kind], circle].filter(Boolean).join(" · ")}</p>
         {shown && <p className="tabular-nums mt-5 text-3xl font-bold tracking-tight text-ink">{shown.text}</p>}
         {f.out[0] && f.in[0] && <p className="tabular-nums mt-1 text-sm text-ink-3">−{tokens(f.out[0].amountTokens, locale)} {f.out[0].symbol}</p>}
@@ -196,8 +208,8 @@ function Detail({ a, r, onClose }: { a: Activity; r: RoundView | undefined; onCl
       <dl className="mt-4 divide-y divide-line overflow-hidden rounded-[24px] bg-surface-2/70 text-sm">
         <Row label={dd.status}>{r ? d.states[r.round.state] : dd.done}</Row>
         <Row label={dd.network}>{isTestnet ? d.network.testnet : d.network.label}</Row>
-        {parties.from && <Row label={dd.from}><PartyLink party={parties.from} /></Row>}
-        {parties.to && <Row label={dd.to}><PartyLink party={parties.to} /></Row>}
+        {parties.from && <Row label={dd.from}><PartyLink party={parties.from} data={data} /></Row>}
+        {parties.to && <Row label={dd.to}><PartyLink party={parties.to} data={data} /></Row>}
         {tr?.token && <Row label={dd.token}><a href={`${EXPLORER}/token/${tr.token}`} target="_blank" rel="noreferrer" className="tabular-nums text-accent">{short(tr.token)}</a></Row>}
         <Row label={dd.reference}><span className="tabular-nums">{tx ? short(tx) : a.roundId ?? "—"}</span></Row>
         <Row label={dd.time}>{time}</Row>
