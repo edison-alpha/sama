@@ -2,28 +2,27 @@
 
 import { m } from "motion/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { circleOf, flow, iconOf, knownAddress, loadActivityPage, lookalikes, txOf, type ActivityData, type Amount, type Filter, type Range } from "@/components/activity/history-data";
+import { circleOf, flow, iconOf, isFailed, loadActivityPage, transferOf, txOf, type ActivityData, type Amount, type Filter, type Range } from "@/components/activity/history-data";
 import { MobileHistory } from "@/components/activity/history-mobile";
 import { Dropdown, DropdownChevron } from "@/components/ui/dropdown";
-import { IconArrowRight, IconCalendar, IconExternal } from "@/components/icons";
+import { IconCalendar, IconChevronRight } from "@/components/icons";
 import { Stagger, rise } from "@/components/motion";
 import { WalletHeader } from "@/components/portfolio/wallet-header";
 import { ActivitySkeleton } from "@/components/skeletons/activity-skeleton";
 import { EmptyState, ErrorNote } from "@/components/ui/states";
 import { activityLine } from "@/lib/activity";
-import { EXPLORER, addressUrl, txUrl } from "@/lib/chain";
+import type { Activity } from "@/lib/api/types";
+import { txUrl } from "@/lib/chain";
 import { AssetIcon } from "@/components/asset-icon";
-import { short, tokens, usd } from "@/lib/format";
+import { tokens, usd } from "@/lib/format";
 import type { Locale } from "@/lib/i18n/dict";
 import { useI18n } from "@/lib/i18n/provider";
 import { cx } from "@/utils/cx";
 
-/** Activity laid out like a DEX history table on desktop (time · type · amount · address), and as a wallet-app history list on phones. */
+/** Activity as a wallet-style history (MetaMask-like, grouped by date) on desktop, and as a wallet-app list on phones. */
 export default function ActivityPage() {
   const { d, locale } = useI18n();
-  const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
   const [range, setRange] = useState<Range>("all");
   const [query, setQuery] = useState("");
@@ -83,10 +82,8 @@ export default function ActivityPage() {
   });
 
   const tag = locale === "id" ? "id-ID" : "en-US";
-  const day = new Intl.DateTimeFormat(tag, { day: "numeric", month: "short" });
+  const day = new Intl.DateTimeFormat(tag, { day: "numeric", month: "short", year: "numeric" });
   const full = new Intl.DateTimeFormat(tag, { dateStyle: "medium", timeStyle: "short" });
-  const alike = lookalikes(data.list);
-  const th = "bg-surface-2 px-4 py-3.5 text-left text-sm font-medium text-ink-3 first:rounded-l-2xl last:rounded-r-2xl";
 
   return (
     <Stagger>
@@ -116,97 +113,64 @@ export default function ActivityPage() {
         {rows.length === 0 ? (
           <EmptyState title={ad.empty} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] border-separate border-spacing-0">
-              <thead>
-                <tr>
-                  <th scope="col" className={cx(th, "w-28")}>{ad.table.time}</th>
-                  <th scope="col" className={cx(th, "w-44")}>{ad.table.type}</th>
-                  <th scope="col" className={th}>{ad.table.amount}</th>
-                  <th scope="col" className={cx(th, "w-56")}>{ad.table.address}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((a) => {
-                  const { Icon, tone } = iconOf(a);
-                  const counterparty = String(a.detail.counterparty ?? "");
-                  const named = a.kind.startsWith("TRANSFER_") ? knownAddress(counterparty, data, ad.addr) : null;
-                  const warn = alike.has(counterparty.toLowerCase());
+          // Like MetaMask: rows grouped under their date, each one icon · what happened · status, amount on the right.
+          // Addresses live on the explorer page a row opens, not in the list.
+          byDay(rows, day).map(([label, items]) => (
+            <div key={label} className="mb-6 last:mb-0">
+              <h3 className="mb-2 px-1 text-sm font-semibold text-ink-3">{label}</h3>
+              <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line">
+                {items.map((a) => {
                   const r = a.roundId ? data.rounds.get(a.roundId) : undefined;
+                  const { Icon, tone, fill } = iconOf(a);
                   const f = flow(a, r);
-                  const at = new Date(a.createdAt);
+                  const tr = transferOf(a);
                   const tx = txOf(a, r);
                   const circle = circleOf(a, r);
-                  const open = a.roundId ? () => router.push(`/rounds/${a.roundId}`) : undefined;
-                  return (
-                    <tr key={a.id} onClick={open} className={cx("[&>td]:border-b [&>td]:border-line last:[&>td]:border-0", open && "cursor-pointer transition-colors hover:bg-surface-2/60")}>
-                      <td className="px-4 py-4 text-sm font-medium text-ink-2" title={full.format(at)}>{day.format(at)}</td>
-                      <td className="px-4 py-4">
-                        <span className="flex items-center gap-2.5 text-sm font-semibold text-ink">
-                          <Icon size={18} className={tone} />
-                          {types[a.kind] ?? a.kind}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        {f.out.length || f.in.length ? (
-                          <span className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4">
-                            <TokenAmounts items={f.out} locale={locale} />
-                            {f.out.length > 0 && f.in.length > 0 ? <IconArrowRight size={18} className="text-ink-3" /> : <span />}
-                            <TokenAmounts items={f.in} locale={locale} />
+                  const failed = isFailed(a);
+                  const title = tr ? `${types[a.kind] ?? a.kind} ${tr.symbol}` : activityLine(a, d, locale);
+                  const lead = tr ? { text: `${tr.sign}${tokens(tr.amount, locale)} ${tr.symbol}`, usd: null } : amountOf(f, locale);
+                  const body = (
+                    <>
+                      <span className="relative shrink-0">
+                        {tr?.logo ? <img src={tr.logo} alt="" width={40} height={40} className="rounded-full object-cover" loading="lazy" />
+                          : tr ? <AssetIcon symbol={tr.symbol} size={40} />
+                          : <span className={cx("grid size-10 place-items-center rounded-full text-white", fill)}><Icon size={18} bold /></span>}
+                        {tr && (
+                          <span className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border-2 border-[var(--app-bg)] bg-surface-2">
+                            <Icon size={11} className={tone} />
                           </span>
-                        ) : (
-                          a.kind.startsWith("TRANSFER_") ? (
-                            <span className="flex items-center gap-2.5 text-sm text-ink-2">
-                              {String(a.detail.logo ?? "").startsWith("https://") ? <img src={String(a.detail.logo)} width={24} height={24} alt="" className="shrink-0 rounded-full" loading="lazy" /> : <AssetIcon symbol={String(a.detail.symbol ?? "")} size={24} />}
-                              {activityLine(a, d, locale)}
-                            </span>
-                          ) : (
-                            <span className="text-sm text-ink-2">{activityLine(a, d, locale)}</span>
-                          )
                         )}
-                      </td>
-                      <td className="px-4 py-4">
-                        {a.kind.startsWith("TRANSFER_") ? (
-                          <>
-                            <span className="block text-xs text-ink-3">{a.kind === "TRANSFER_IN" ? ad.addr.from : ad.addr.to}</span>
-                            {/* The full address is in the tooltip; a shortened one alone is what address poisoning relies on. */}
-                            <a href={addressUrl(counterparty)} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} title={counterparty} className={cx("tabular-nums inline-flex items-center gap-1 text-sm font-semibold hover:underline", warn ? "text-danger" : "text-ink")}>
-                              {named ?? short(counterparty, 10, 8)}
-                              <IconExternal size={14} className="text-ink-3" />
-                            </a>
-                            {named && <span className="tabular-nums block text-xs text-ink-3">{short(counterparty, 10, 8)}</span>}
-                            {warn && <span className="block max-w-56 text-xs text-danger">{ad.addr.lookalike}</span>}
-                            <a href={txUrl(String(a.detail.tx))} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums block text-xs text-ink-3 hover:underline">
-                              {ad.addr.tx} {short(String(a.detail.tx))}
-                            </a>
-                          </>
-                        ) : tx ? (
-                          <>
-                            <span className="block text-xs text-ink-3">{ad.addr.tx}</span>
-                            <a href={`${EXPLORER}/tx/${tx}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="tabular-nums inline-flex items-center gap-1 text-sm font-semibold text-ink hover:underline">
-                              {short(tx)}
-                              <IconExternal size={14} className="text-ink-3" />
-                            </a>
-                          </>
-                        ) : circle ? (
-                          <>
-                            <span className="block text-xs text-ink-3">{ad.addr.circle}</span>
-                            {a.roundId ? (
-                              <Link href={`/rounds/${a.roundId}`} onClick={(e) => e.stopPropagation()} className="block truncate text-sm font-semibold text-ink hover:underline">{circle}</Link>
-                            ) : (
-                              <span className="block truncate text-sm font-semibold text-ink">{circle}</span>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-sm text-ink-3">—</span>
-                        )}
-                      </td>
-                    </tr>
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold text-ink">{title}</span>
+                        <span className="block truncate text-sm">
+                          {failed ? <span className="text-danger">{ad.status.failed}</span>
+                            : tx ? <span className="text-ok">{ad.status.confirmed}</span>
+                            : <span className="text-ink-3">{[types[a.kind], circle].filter(Boolean).join(" · ")}</span>}
+                          {tx && circle && <span className="text-ink-3"> · {circle}</span>}
+                        </span>
+                      </span>
+                      {lead && (
+                        <span className="shrink-0 text-right">
+                          <span className={cx("tabular-nums block font-semibold", failed ? "text-ink-3 line-through" : "text-ink")}>{lead.text}</span>
+                          {lead.usd && <span className="tabular-nums block text-sm text-ink-3">{lead.usd}</span>}
+                        </span>
+                      )}
+                      <IconChevronRight size={16} className="shrink-0 text-ink-3" />
+                    </>
+                  );
+                  const row = "flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-surface-2/60";
+                  return (
+                    <li key={a.id} title={full.format(new Date(a.createdAt))}>
+                      {a.roundId ? <Link href={`/rounds/${a.roundId}`} className={row}>{body}</Link>
+                        : tx ? <a href={txUrl(tx)} target="_blank" rel="noreferrer" className={row}>{body}</a>
+                        : <div className={row}>{body}</div>}
+                    </li>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
+              </ul>
+            </div>
+          ))
         )}
       </m.section>
       </div>
@@ -219,22 +183,22 @@ export default function ActivityPage() {
 
 }
 
-/** First token with its USD value under it; extra tokens in the same direction collapse into "+N". */
-function TokenAmounts({ items, locale }: { items: Amount[]; locale: Locale }) {
-  const first = items[0];
-  if (!first) return <span />;
-  return (
-    <span className="flex min-w-0 items-center gap-3">
-      <AssetIcon symbol={first.symbol} size={36} />
-      <span className="min-w-0">
-        <span className="tabular-nums block truncate text-sm font-semibold text-ink">
-          {tokens(first.amountTokens, locale)} {first.symbol}
-          {items.length > 1 && <span className="ml-1.5 text-ink-3">+{items.length - 1}</span>}
-        </span>
-        <span className="tabular-nums block text-sm text-ink-3">{usd(first.valueUsd, locale)}</span>
-      </span>
-    </span>
-  );
+/** Rows split under their date label, newest first (the list already arrives in that order). */
+function byDay(rows: Activity[], day: Intl.DateTimeFormat): Array<[string, Activity[]]> {
+  const groups = new Map<string, Activity[]>();
+  for (const a of rows) {
+    const label = day.format(new Date(a.createdAt));
+    groups.set(label, [...(groups.get(label) ?? []), a]);
+  }
+  return [...groups];
+}
+
+/** The amount a row leads with, as a wallet shows it: what arrived (+), else what left (−), with its USD value. */
+function amountOf(f: { out: Amount[]; in: Amount[] }, locale: Locale): { text: string; usd: string | null } | null {
+  const [sign, x] = f.in[0] ? ["+", f.in[0]] : f.out[0] ? ["−", f.out[0]] : [null, null];
+  if (!x) return null;
+  const more = (sign === "+" ? f.in : f.out).length - 1;
+  return { text: `${sign}${tokens(x.amountTokens, locale)} ${x.symbol}${more > 0 ? ` +${more}` : ""}`, usd: x.valueUsd ? usd(x.valueUsd, locale) : null };
 }
 
 /** A filter that looks like a pill button but is a native select, so keyboard and screen readers just work. */

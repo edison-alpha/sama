@@ -152,9 +152,9 @@ function PartyLink({ party, data }: { party: Party; data: ActivityData }) {
   const warn = lookalikes(data.list).has(party.label.toLowerCase());
   return (
     <span className="block">
-      <a href={party.href} target="_blank" rel="noreferrer" className={cx("tabular-nums block break-all", warn ? "text-danger" : "text-accent")}>{named ?? party.label}</a>
+      <a href={party.href} target="_blank" rel="noreferrer" className="tabular-nums block break-all text-accent">{named ?? party.label}</a>
       {named && <span className="tabular-nums block break-all text-xs font-normal text-ink-3">{party.label}</span>}
-      {warn && <span className="block text-xs font-normal text-danger">{d.activity.addr.lookalike}</span>}
+      {warn && <span className="block text-xs font-normal text-warn">{d.activity.addr.lookalike}</span>}
     </span>
   );
 }

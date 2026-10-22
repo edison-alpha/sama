@@ -1,3 +1,4 @@
+import { getAddress, isAddress } from "viem";
 import { IconCircles, IconLayers, IconLeftovers, IconReceive, IconRoundArrows, IconSent, IconSigned, IconSwap, IconTarget, IconX } from "@/components/icons";
 import { sama } from "@/lib/api";
 import type { ActivityQuery } from "@/lib/api/contract";
@@ -47,6 +48,11 @@ export function iconOf(a: Activity): { Icon: typeof IconSent; tone: string; fill
   return own ? { ...group, ...own, ...(BAD.has(k) ? { fill: "bg-danger" } : {}) } : group;
 }
 
+/** True when the row's outcome went wrong (a failed round, an unverified settlement, a reverted or short swap). */
+export function isFailed(a: Activity): boolean {
+  return BAD.has(activityKey(a));
+}
+
 /**
  * Loads the next page of activity and appends it to `prev`, plus the rounds the new rows point at, so rows can show the
  * real tokens moved and the settlement transaction. Rounds already loaded are not fetched again.
@@ -58,8 +64,16 @@ export async function loadActivityPage(query: ActivityQuery, prev: ActivityData 
   const views = await Promise.allSettled(ids.map((id) => sama.round(id)));
   views.forEach((v, i) => v.status === "fulfilled" && rounds.set(ids[i]!, v.value));
   const seen = new Set(prev?.list.map((a) => a.id) ?? []);
-  const list = [...(prev?.list ?? []), ...page.items.filter((a) => !seen.has(a.id))];
+  const list = [...(prev?.list ?? []), ...page.items.filter((a) => !seen.has(a.id) && !isPoison(a))];
   return { list, rounds, nextCursor: page.nextCursor };
+}
+
+/**
+ * A zero-value token transfer. Anyone can log one "from" any wallet (transferFrom of 0 needs no allowance), which is how
+ * address poisoning plants a lookalike in the history. Like MetaMask, these never show; the backend drops them too.
+ */
+export function isPoison(a: Activity): boolean {
+  return (a.kind === "TRANSFER_IN" || a.kind === "TRANSFER_OUT") && Number(a.detail.amount) === 0;
 }
 
 /**
@@ -114,7 +128,8 @@ export type Party = { label: string; href: string | null };
 /** Who sent and who received for a row, with `you` for the viewer. Empty when the row names no counterparty. */
 export function partiesOf(a: Activity, r: RoundView | undefined, you: string): { from: Party | null; to: Party | null } {
   const self: Party = { label: you, href: null };
-  const other = (s: string): Party => ({ label: s, href: /^0x[0-9a-fA-F]{40}$/.test(s) ? `${EXPLORER}/address/${s}` : null });
+  // Addresses read in EIP-55 checksum casing, as wallets and the explorer show them.
+  const other = (s: string): Party => (isAddress(s, { strict: false }) ? { label: getAddress(s), href: `${EXPLORER}/address/${s}` } : { label: s, href: null });
   if (a.kind === "TRANSFER_IN" || a.kind === "TRANSFER_OUT") {
     if (typeof a.detail.counterparty !== "string") return { from: null, to: null };
     return a.kind === "TRANSFER_IN" ? { from: other(a.detail.counterparty), to: self } : { from: self, to: other(a.detail.counterparty) };
